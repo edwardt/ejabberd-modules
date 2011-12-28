@@ -4,7 +4,7 @@
 
 	Author: Badlop
 	Homepage: http://www.ejabberd.im/mod_admin_extra
-	Requirements: ejabberd trunk SVN 1635 or newer
+	Requirements: ejabberd 2.1.10 newer
 
 	This module DOES NOT WORK with any ejabberd 2.0.x or older.
 	If you have some ejabberd 2.0.x, you can still use mod_ctlextra.

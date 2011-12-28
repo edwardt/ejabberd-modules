@@ -119,8 +119,8 @@ commands() ->
 	" FN		- Full Name\n"
 	" NICKNAME	- Nickname\n"
 	" BDAY		- Birthday\n"
-	" TITLE		- Work: Position\n",
-    " ROLE		- Work: Role",
+	" TITLE		- Work: Position\n"
+	" ROLE		- Work: Role",
 
     Vcard2FieldsString = "Some vcard field names and subnames in get/set_vcard2 are:\n"
 	" N FAMILY	- Family name\n"
@@ -868,7 +868,7 @@ dirty_get_sessions_list2() ->
 %% Make string more print-friendly
 stringize(String) ->
     %% Replace newline characters with other code
-    element(2, regexp:gsub(String, "\n", "\\n")).
+    ejabberd_regexp:greplace(String, "\n", "\\n").
 
 set_presence(User, Host, Resource, Type, Show, Status, Priority) ->
     Pid = ejabberd_sm:get_session_pid(User, Host, Resource),
@@ -1270,9 +1270,9 @@ private_set2(Username, Host, Xml) ->
 %%%
 
 srg_create(Group, Host, Name, Description, Display) ->
-    {ok, DisplayList} = case Display of
-	[] -> {ok, []};
-	_ -> regexp:split(Display, "\\\\n")
+    DisplayList = case Display of
+	[] -> [];
+	_ -> ejabberd_regexp:split(Display, "\\\\n")
     end,
     Opts = [{name, Name},
 	    {displayed_groups, DisplayList},
@@ -1543,18 +1543,18 @@ decide_rip_jid({UName, UServer}, Match_list) ->
 
 %% Copied from ejabberd-2.0.0/src/acl.erl
 is_regexp_match(String, RegExp) ->
-    case regexp:first_match(String, RegExp) of
+    case ejabberd_regexp:run(String, RegExp) of
 	nomatch ->
 	    false;
-	{match, _, _} ->
+	match ->
 	    true;
 	{error, ErrDesc} ->
 	    io:format(
 	      "Wrong regexp ~p in ACL: ~p",
-	      [RegExp, lists:flatten(regexp:format_error(ErrDesc))]),
+	      [RegExp, ErrDesc]),
 	    false
     end.
 is_glob_match(String, [$! | Glob]) ->
-    not is_regexp_match(String, regexp:sh_to_awk(Glob));
+    not is_regexp_match(String, ejabberd_regexp:sh_to_awk(Glob));
 is_glob_match(String, Glob) ->
-    is_regexp_match(String, regexp:sh_to_awk(Glob)).
+    is_regexp_match(String, ejabberd_regexp:sh_to_awk(Glob)).
