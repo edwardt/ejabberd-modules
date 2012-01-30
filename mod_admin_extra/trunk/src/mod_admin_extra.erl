@@ -354,7 +354,7 @@ commands() ->
 			result = {res, rescode}},
 
      #ejabberd_commands{name = add_rosteritem, tags = [roster],
-			desc = "Add an item to a user's roster",
+			desc = "Add an item to a user's roster (supports ODBC)",
 			module = ?MODULE, function = add_rosteritem,
 			args = [{localuser, string}, {localserver, string},
 				{user, string}, {server, string},
@@ -1061,21 +1061,18 @@ add_rosteritem(LocalUser, LocalServer, User, Server, Nick, Group, Subs) ->
 add_rosteritem(LU, LS, User, Server, Nick, Group, Subscription, Xattrs) ->
     subscribe(LU, LS, User, Server, Nick, Group, Subscription, Xattrs).
 
-subscribe(LU, LS, User, Server, Nick, Group, Subscription, Xattrs) ->
-    mnesia:transaction(
-      fun() ->
-	      mnesia:write({roster,
-			    {LU,LS,{User,Server,[]}}, % uj
-			    {LU,LS},                  % user
-			    {User,Server,[]},      % jid
-			    Nick,                  % name: "Mom", []
-			    Subscription,  % subscription: none, to=you see him, from=he sees you, both
-			    none,          % ask: out=send request, in=somebody requests you, none
-			    [Group],       % groups: ["Family"]
-			    Xattrs,        % xattrs: [{"category","conference"}]
-			    []             % xs: []
-			   })
-      end).
+subscribe(LU, LS, User, Server, Nick, Group, Subscription, _Xattrs) ->
+    SubscriptionS = case is_atom(Subscription) of
+	true -> atom_to_list(Subscription);
+	false -> Subscription
+    end,
+    ItemEl = build_roster_item(User, Server, {add, Nick, SubscriptionS, Group}),
+    {ok, M} = loaded_module(LS,[mod_roster_odbc,mod_roster]),
+    M:set_items(
+	LU, LS,
+	{xmlelement,"query",
+            [{"xmlns","jabber:iq:roster"}],
+            [ItemEl]}).
 
 delete_rosteritem(LocalUser, LocalServer, User, Server) ->
     case unsubscribe(LocalUser, LocalServer, User, Server) of
@@ -1092,6 +1089,14 @@ unsubscribe(LU, LS, User, Server) ->
               mnesia:delete({roster, {LU, LS, {User, Server, []}}})
       end).
 
+loaded_module(Domain,Options) ->
+    LoadedModules = gen_mod:loaded_modules(Domain),
+    case lists:filter(fun(Module) ->
+                              lists:member(Module, LoadedModules)
+                      end, Options) of
+        [M|_] -> {ok, M};
+        [] -> {error,not_found}
+    end.
 
 %% -----------------------------
 %% Get Roster
