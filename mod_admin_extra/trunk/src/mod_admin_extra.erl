@@ -365,7 +365,7 @@ commands() ->
      %%{"", "example: add-roster peter localhost mike server.com MiKe Employees both"},
      %%{"", "will add mike@server.com to peter@localhost roster"},
      #ejabberd_commands{name = delete_rosteritem, tags = [roster],
-			desc = "Delete an item from a user's roster",
+			desc = "Delete an item from a user's roster (supports ODBC)",
 			module = ?MODULE, function = delete_rosteritem,
 			args = [{localuser, string}, {localserver, string},
 				{user, string}, {server, string}],
@@ -1084,10 +1084,13 @@ delete_rosteritem(LocalUser, LocalServer, User, Server) ->
     end.
 
 unsubscribe(LU, LS, User, Server) ->
-    mnesia:transaction(
-      fun() ->
-              mnesia:delete({roster, {LU, LS, {User, Server, []}}})
-      end).
+    ItemEl = build_roster_item(User, Server, remove),
+    {ok, M} = loaded_module(LS,[mod_roster_odbc,mod_roster]),
+    M:set_items(
+	LU, LS,
+	{xmlelement,"query",
+            [{"xmlns","jabber:iq:roster"}],
+            [ItemEl]}).
 
 loaded_module(Domain,Options) ->
     LoadedModules = gen_mod:loaded_modules(Domain),
