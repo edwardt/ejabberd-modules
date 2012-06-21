@@ -426,9 +426,9 @@ get_query_response(LogFun, RecvPid, Version, Options) ->
 		    {error, #mysql_result{error=binary_to_list(Message)}};
 		_ ->
 		    %% Tabular data received
-		    case get_fields(LogFun, RecvPid, [], Version) of
+                    ResultType = get_option(result_type, Options, ?DEFAULT_RESULT_TYPE),
+		    case get_fields(LogFun, RecvPid, [], Version, ResultType) of
 			{ok, Fields} ->
-			    ResultType = get_option(result_type, Options, ?DEFAULT_RESULT_TYPE),
 			    case get_rows(Fieldcount, LogFun, RecvPid, ResultType, []) of
 				{ok, Rows} ->
 				    {data, #mysql_result{fieldinfo=Fields, rows=Rows}};
@@ -455,7 +455,7 @@ get_query_response(LogFun, RecvPid, Version, Options) ->
 %%           Reason    = term()
 %%--------------------------------------------------------------------
 %% Support for MySQL 4.0.x:
-get_fields(LogFun, RecvPid, Res, ?MYSQL_4_0) ->
+get_fields(LogFun, RecvPid, Res, ?MYSQL_4_0, ResultType) ->
     case do_recv(LogFun, RecvPid, undefined) of
 	{ok, Packet, _Num} ->
 	    case Packet of
@@ -471,20 +471,25 @@ get_fields(LogFun, RecvPid, Res, ?MYSQL_4_0) ->
 		    <<Length:LengthL/little>> = LengthB,
 		    {Type, Rest4} = get_with_length(Rest3),
 		    {_Flags, _Rest5} = get_with_length(Rest4),
-		    This = {binary_to_list(Table),
-			    binary_to_list(Field),
-			    Length,
-			    %% TODO: Check on MySQL 4.0 if types are specified
-			    %%       using the same 4.1 formalism and could
-			    %%       be expanded to atoms:
-			    binary_to_list(Type)},
-		    get_fields(LogFun, RecvPid, [This | Res], ?MYSQL_4_0)
+                    if ResultType == list ->
+                            This = {binary_to_list(Table),
+                                    binary_to_list(Field),
+                                    Length,
+                                    %% TODO: Check on MySQL 4.0 if types are specified
+                                    %%       using the same 4.1 formalism and could
+                                    %%       be expanded to atoms:
+                                    binary_to_list(Type)};
+                       ResultType == binary ->
+                            This = {Table, Field, Length, Type}
+                    end,
+		    get_fields(LogFun, RecvPid, [This | Res],
+                               ?MYSQL_4_0, ResultType)
 	    end;
 	{error, Reason} ->
 	    {error, Reason}
     end;
 %% Support for MySQL 4.1.x and 5.x:
-get_fields(LogFun, RecvPid, Res, ?MYSQL_4_1) ->
+get_fields(LogFun, RecvPid, Res, ?MYSQL_4_1, ResultType) ->
     case do_recv(LogFun, RecvPid, undefined) of
 	{ok, Packet, _Num} ->
 	    case Packet of
@@ -506,12 +511,17 @@ get_fields(LogFun, RecvPid, Res, ?MYSQL_4_1) ->
 		     Length:32/little, Type:8/little,
 		     _Flags:16/little, _Decimals:8/little,
 		     _Rest7/binary>> = Rest6,
-
-		    This = {binary_to_list(Table),
-			    binary_to_list(Field),
-			    Length,
-			    get_field_datatype(Type)},
-		    get_fields(LogFun, RecvPid, [This | Res], ?MYSQL_4_1)
+                    if ResultType == list ->
+                            This = {binary_to_list(Table),
+                                    binary_to_list(Field),
+                                    Length,
+                                    get_field_datatype(Type)};
+                       ResultType == binary ->
+                            This = {Table, Field, Length,
+                                    get_field_datatype(Type)}
+                    end,
+		    get_fields(LogFun, RecvPid, [This | Res],
+                               ?MYSQL_4_1, ResultType)
 	    end;
 	{error, Reason} ->
 	    {error, Reason}
