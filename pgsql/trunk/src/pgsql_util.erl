@@ -21,6 +21,7 @@
 -export([oids/2, coldescs/3, datacoldescs/3]).
 -export([decode_row/3, decode_descs/2]).
 -export([errordesc/2]).
+-export([to_integer/1, to_atom/1]).
 
 -export([zip/2]).
 
