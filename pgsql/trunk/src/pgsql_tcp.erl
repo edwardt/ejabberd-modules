@@ -7,7 +7,7 @@
 
 -behaviour(gen_server).
 
--export([start/2, start_link/2]).
+-export([start/3, start_link/3]).
 
 %% gen_server callbacks
 -export([init/1,
@@ -17,17 +17,18 @@
 	 handle_info/2,
 	 terminate/2]).
 
--record(state, {socket, protopid, buffer}).
+-record(state, {socket, protopid, buffer, as_binary}).
 
-start(Sock, ProtoPid) ->
-    gen_server:start(?MODULE, [Sock, ProtoPid], []).
+start(Sock, ProtoPid, AsBin) ->
+    gen_server:start(?MODULE, [Sock, ProtoPid, AsBin], []).
 
-start_link(Sock, ProtoPid) ->
-    gen_server:start_link(?MODULE, [Sock, ProtoPid], []).
+start_link(Sock, ProtoPid, AsBin) ->
+    gen_server:start_link(?MODULE, [Sock, ProtoPid, AsBin], []).
 
-init([Sock, ProtoPid]) ->
+init([Sock, ProtoPid, AsBin]) ->
     inet:setopts(Sock, [{active, once}]),
-    {ok, #state{socket = Sock, protopid = ProtoPid, buffer = <<>>}}.
+    {ok, #state{socket = Sock, protopid = ProtoPid,
+                buffer = <<>>, as_binary = AsBin}}.
 
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -42,8 +43,9 @@ code_change(_OldVsn, State, _Extra) ->
 handle_info({tcp, Sock, Bin},
 	    #state{socket = Sock,
 		   protopid = ProtoPid,
+                   as_binary = AsBin,
 		   buffer = Buffer} = State) ->
-    {ok, Rest} = process_buffer(ProtoPid, <<Buffer/binary, Bin/binary>>),
+    {ok, Rest} = process_buffer(ProtoPid, AsBin, <<Buffer/binary, Bin/binary>>),
     inet:setopts(Sock, [{active, once}]),
     {noreply, State#state{buffer = Rest}};
 handle_info({tcp_closed, Sock},
@@ -69,17 +71,18 @@ terminate(_Reason, _State) ->
 %% Given a binary that begins with a proper message header the binary
 %% will be processed for each full message it contains, and it will
 %% return any trailing incomplete messages.
-process_buffer(ProtoPid, Bin = <<Code:8/integer, Size:4/integer-unit:8, Rest/binary>>) ->
+process_buffer(ProtoPid, AsBin,
+               Bin = <<Code:8/integer, Size:4/integer-unit:8, Rest/binary>>) ->
     Payload = Size - 4,
     if
 	size(Rest) >= Payload ->
 	    <<Packet:Payload/binary, Rest1/binary>> = Rest,
-	    {ok, Message} = pgsql_proto:decode_packet(Code, Packet),
+	    {ok, Message} = pgsql_proto:decode_packet(Code, Packet, AsBin),
 	    ProtoPid ! {pgsql, Message},
-	    process_buffer(ProtoPid, Rest1);
+	    process_buffer(ProtoPid, AsBin, Rest1);
 	true ->
 	    {ok, Bin}
     end;
-process_buffer(_ProtoPid, Bin) when is_binary(Bin) ->
+process_buffer(_ProtoPid, _AsBin, Bin) when is_binary(Bin) ->
     {ok, Bin}.
 

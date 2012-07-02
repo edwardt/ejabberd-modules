@@ -15,12 +15,12 @@
 -export([recv_msg/2, recv_msg/1, recv_byte/2, recv_byte/1]).
 
 %% Protocol packing
--export([string/1, make_pair/2, split_pair/1]).
--export([split_pair_rec/1]).
--export([count_string/1, to_string/1]).
--export([oids/2, coldescs/2, datacoldescs/3]).
--export([decode_row/2, decode_descs/2]).
--export([errordesc/1]).
+-export([string/1, make_pair/2, split_pair/2]).
+-export([split_pair_rec/2]).
+-export([count_string/1, to_string/2]).
+-export([oids/2, coldescs/3, datacoldescs/3]).
+-export([decode_row/3, decode_descs/2]).
+-export([errordesc/2]).
 
 -export([zip/2]).
 
@@ -35,8 +35,10 @@ option(Opts, Key, Default) ->
     case proplists:get_value(Key, Opts, Default) of
 	Default ->
 	    Default;
-	Value ->
-	    Value
+	Value when is_binary(Value) ->
+	    binary_to_list(Value);
+        Value ->
+            Value
     end.
 
 
@@ -100,28 +102,33 @@ make_pair(Key, Value) when is_binary(Key), is_binary(Value) ->
     <<Key/binary, 0/integer, 
      Value/binary, 0/integer>>.
 
-split_pair(Bin) when is_binary(Bin) ->
-    split_pair(binary_to_list(Bin));
-split_pair(Str)  ->
-    split_pair_rec(Str, norec).
+split_pair(Bin, AsBin) when is_binary(Bin) ->
+    split_pair(binary_to_list(Bin), AsBin);
+split_pair(Str, AsBin)  ->
+    split_pair_rec(Str, norec, AsBin).
 
-split_pair_rec(Bin) when is_binary(Bin) ->
-    split_pair_rec(binary_to_list(Bin));
-split_pair_rec(Arg)  ->
-    split_pair_rec(Arg,[]).
+split_pair_rec(Bin, AsBin) when is_binary(Bin) ->
+    split_pair_rec(binary_to_list(Bin), AsBin);
+split_pair_rec(Arg, AsBin)  ->
+    split_pair_rec(Arg,[], AsBin).
 
-split_pair_rec([], Acc) ->
+split_pair_rec([], Acc, _AsBin) ->
     lists:reverse(Acc);
-split_pair_rec([0], Acc) ->
+split_pair_rec([0], Acc, _AsBin) ->
     lists:reverse(Acc);
-split_pair_rec(S, Acc) ->
+split_pair_rec(S, Acc, AsBin) ->
     Fun = fun(C) -> C /= 0 end,
-    {Key, [0|S1]} = lists:splitwith(Fun, S),
-    {Value, [0|Tail]} = lists:splitwith(Fun, S1),
+    {K, [0|S1]} = lists:splitwith(Fun, S),
+    {V, [0|Tail]} = lists:splitwith(Fun, S1),
+    {Key, Value} = if AsBin ->
+                           {list_to_binary(K), list_to_binary(V)};
+                      true ->
+                           {K, V}
+                   end,
     case Acc of 
         norec -> {Key, Value};
         _ ->
-            split_pair_rec(Tail, [{Key, Value}| Acc])
+            split_pair_rec(Tail, [{Key, Value}| Acc], AsBin)
     end.
 
 
@@ -135,20 +142,24 @@ count_string(<<0/integer, Rest/binary>>, N) ->
 count_string(<<_C/integer, Rest/binary>>, N) ->
     count_string(Rest, N+1).
 
-to_string(Bin) when is_binary(Bin) ->    
+to_string(Bin, AsBin) when is_binary(Bin) ->    
     {Count, _} = count_string(Bin, 0),
     <<String:Count/binary, _/binary>> = Bin,
-    {binary_to_list(String), Count}.
+    if AsBin ->
+            {String, Count};
+       true ->
+            {binary_to_list(String), Count}
+    end.
 
 oids(<<>>, Oids) ->
     lists:reverse(Oids);
 oids(<<Oid:32/integer, Rest/binary>>, Oids) ->
     oids(Rest, [Oid|Oids]).
     
-coldescs(<<>>, Descs) ->
+coldescs(<<>>, Descs, _AsBin) ->
     lists:reverse(Descs);
-coldescs(Bin, Descs) ->
-    {Name, Count} = to_string(Bin),
+coldescs(Bin, Descs, AsBin) ->
+    {Name, Count} = to_string(Bin, AsBin),
     <<_:Count/binary, 0/integer,
      TableOID:32/integer,
      ColumnNumber:16/integer,
@@ -164,7 +175,7 @@ coldescs(Bin, Descs) ->
     Desc = {Name, Format, ColumnNumber, 
 	    TypeId, TypeSize, TypeMod, 
 	    TableOID},
-    coldescs(Rest, [Desc|Descs]).
+    coldescs(Rest, [Desc|Descs], AsBin).
 
 datacoldescs(N, <<16#ffffffff:32, Rest/binary>>, Descs) when N >= 0 ->
     datacoldescs(N-1, Rest, [null|Descs]);
@@ -184,35 +195,39 @@ decode_descs(OidMap, [Col|ColTail], Descs) ->
     OidName = dict:fetch(Oid, OidMap),
     decode_descs(OidMap, ColTail, [{Name, Format, ColNumber, OidName, [], [], []}|Descs]).
 
-decode_row(Types, Values) ->
-    decode_row(Types, Values, []).
-decode_row([], [], Out) ->
+decode_row(Types, Values, AsBin) ->
+    decode_row(Types, Values, [], AsBin).
+decode_row([], [], Out, _AsBin) ->
     {ok, lists:reverse(Out)};
-decode_row([Type|TypeTail], [Value|ValueTail], Out0) ->
-    Out1 = decode_col(Type, Value),
-    decode_row(TypeTail, ValueTail, [Out1|Out0]).
+decode_row([Type|TypeTail], [Value|ValueTail], Out0, AsBin) ->
+    Out1 = decode_col(Type, Value, AsBin),
+    decode_row(TypeTail, ValueTail, [Out1|Out0], AsBin).
 
-decode_col({_, text, _, _, _, _, _}, Value) ->
-    binary_to_list(Value);
-decode_col({_Name, _Format, _ColNumber, varchar, _Size, _Modifier, _TableOID}, Value) ->
-    binary_to_list(Value);
-decode_col({_Name, _Format, _ColNumber, int4, _Size, _Modifier, _TableOID}, Value) ->
+decode_col({_, text, _, _, _, _, _}, Value, AsBin) ->
+    if AsBin -> Value;
+       true -> binary_to_list(Value)
+    end;
+decode_col({_Name, _Format, _ColNumber, varchar, _Size, _Modifier, _TableOID}, Value, AsBin) ->
+    if AsBin -> Value;
+       true -> binary_to_list(Value)
+    end;
+decode_col({_Name, _Format, _ColNumber, int4, _Size, _Modifier, _TableOID}, Value, _AsBin) ->
     <<Int4:32/integer>> = Value,
     Int4;
-decode_col({_Name, _Format, _ColNumber, Oid, _Size, _Modifier, _TableOID}, Value) ->
+decode_col({_Name, _Format, _ColNumber, Oid, _Size, _Modifier, _TableOID}, Value, _AsBin) ->
     {Oid, Value}.
 
-errordesc(Bin) ->
-    errordesc(Bin, []).
+errordesc(Bin, AsBin) ->
+    errordesc(Bin, [], AsBin).
 
-errordesc(<<0/integer, _Rest/binary>>, Lines) ->
+errordesc(<<0/integer, _Rest/binary>>, Lines, _AsBin) ->
     lists:reverse(Lines);
-errordesc(<<Code/integer, Rest/binary>>, Lines) ->
-    {String, Count} = to_string(Rest),
+errordesc(<<Code/integer, Rest/binary>>, Lines, AsBin) ->
+    {String, Count} = to_string(Rest, AsBin),
     <<_:Count/binary, 0, Rest1/binary>> = Rest,
     Msg = case Code of 
 	      $S ->
-		  {severity, list_to_atom(String)};
+		  {severity, to_atom(String)};
 	      $C ->
 		  {code, String};
 	      $M ->
@@ -222,15 +237,15 @@ errordesc(<<Code/integer, Rest/binary>>, Lines) ->
 	      $H ->
 		  {hint, String};
 	      $P ->
-		  {position, list_to_integer(String)};
+		  {position, to_integer(String)};
 	      $p ->
-		  {internal_position, list_to_integer(String)};
+		  {internal_position, to_integer(String)};
 	      $W ->
 		  {where, String};
 	      $F ->
 		  {file, String};
 	      $L ->
-		  {line, list_to_integer(String)};
+		  {line, to_integer(String)};
 	      $R ->
 		  {routine, String};
 	      Unknown ->
@@ -266,6 +281,16 @@ pass_md5(User, Password, Salt) ->
     Encrypt = hex(md5([Digest, Salt])),
     Pass = ["md5", Encrypt, 0],
     list_to_binary(Pass).
+
+to_integer(B) when is_binary(B) ->
+    to_integer(binary_to_list(B));
+to_integer(S) ->
+    list_to_integer(S).
+
+to_atom(B) when is_binary(B) ->
+    to_atom(binary_to_list(B));
+to_atom(S) ->
+    list_to_atom(S).
 
 hex(B) when is_binary(B) ->
     hexlist(binary_to_list(B), []).

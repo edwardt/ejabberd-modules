@@ -50,7 +50,7 @@
 	 terminate/2]).
 
 %% For protocol unwrapping, pgsql_tcp for example.
--export([decode_packet/2]).
+-export([decode_packet/3]).
 -export([encode_message/2]).
 -export([encode/2]).
 
@@ -58,11 +58,12 @@
 -import(pgsql_util, [socket/1]).
 -import(pgsql_util, [send/2, send_int/2, send_msg/3]).
 -import(pgsql_util, [recv_msg/2, recv_msg/1, recv_byte/2, recv_byte/1]).
--import(pgsql_util, [string/1, make_pair/2, split_pair/1]).
--import(pgsql_util, [count_string/1, to_string/1]).
--import(pgsql_util, [coldescs/2, datacoldescs/3]).
+-import(pgsql_util, [string/1, make_pair/2, split_pair/2]).
+-import(pgsql_util, [count_string/1, to_string/2]).
+-import(pgsql_util, [coldescs/3, datacoldescs/3]).
+-import(pgsql_util, [to_integer/1, to_atom/1]).
 
--record(state, {options, driver, params, socket, oidmap}).
+-record(state, {options, driver, params, socket, oidmap, as_binary}).
 
 start(Options) ->
     gen_server:start(?MODULE, [self(), Options], []).
@@ -76,11 +77,13 @@ init([DriverPid, Options]) ->
     %% port.
     Host = option(Options, host, "localhost"),
     Port = option(Options, port, 5432),
+    AsBinary = option(Options, as_binary, false),
 
     case socket({tcp, Host, Port}) of
 	{ok, Sock} ->
 	    connect(#state{options = Options,
 			   driver = DriverPid,
+                           as_binary = AsBinary,
 			   socket = Sock});
 	Error ->
 	    Reason = {init, Error},
@@ -113,8 +116,9 @@ connect(StateData) ->
 authenticate(StateData) ->
     %% Await authentication request from backend.
     Sock = StateData#state.socket,
+    AsBin = StateData#state.as_binary,
     {ok, Code, Packet} = recv_msg(Sock, 5000),
-    {ok, Value} = decode_packet(Code, Packet),
+    {ok, Value} = decode_packet(Code, Packet, AsBin),
     case Value of
 	%% Error response
 	{error_message, Message} ->
@@ -152,8 +156,9 @@ authenticate(StateData) ->
 setup(StateData, Params) ->
     %% Receive startup messages until ReadyForQuery
     Sock = StateData#state.socket,
+    AsBin = StateData#state.as_binary,
     {ok, Code, Package} = recv_msg(Sock, 5000),
-    {ok, Pair} = decode_packet(Code, Package),
+    {ok, Pair} = decode_packet(Code, Package, AsBin),
     case Pair of
 	%% BackendKeyData, necessary for issuing cancel requests
 	{backend_key_data, {Pid, Secret}} ->
@@ -186,17 +191,18 @@ connected(StateData, Sock) ->
     %% Protocol unwrapping process. Factored out to make future
     %% SSL and unix domain support easier. Store process under
     %% 'socket' in the process dictionary.
-    {ok, Unwrapper} = pgsql_tcp:start_link(Sock, self()),
+    AsBin = StateData#state.as_binary,
+    {ok, Unwrapper} = pgsql_tcp:start_link(Sock, self(), AsBin),
     ok = gen_tcp:controlling_process(Sock, Unwrapper),
 
     %% Lookup oid to type names and store them in a dictionary under
     %% 'oidmap' in the process dictionary.
     Packet = encode_message(squery, "SELECT oid, typname FROM pg_type"),
     ok = send(Sock, Packet),
-    {ok, [{"SELECT" ++ _, _ColDesc, Rows}]} = process_squery([]),
+    {ok, [{_, _ColDesc, Rows}]} = process_squery([], AsBin),
     Rows1 = lists:map(fun ([CodeS, NameS]) ->
-			      Code = list_to_integer(CodeS),
-			      Name = list_to_atom(NameS),
+			      Code = to_integer(CodeS),
+			      Name = to_atom(NameS),
 			      {Code, Name}
 		      end,
 		      Rows),
@@ -216,14 +222,15 @@ handle_call(terminate, _From, State) ->
 %% Simple query
 handle_call({squery, Query}, _From, State) ->
     Sock = State#state.socket,
+    AsBin = State#state.as_binary,
     Packet = encode_message(squery, Query),
     ok = send(Sock, Packet),
-    {ok, Result} = process_squery([]),
+    {ok, Result} = process_squery([], AsBin),
     case lists:keymember(error, 1, Result) of
 	true ->
 	    RBPacket = encode_message(squery, "ROLLBACK"),
 	    ok = send(Sock, RBPacket),
-	    {ok, _RBResult} = process_squery([]);
+	    {ok, _RBResult} = process_squery([], AsBin);
 	_ ->
 	    ok
     end,
@@ -349,32 +356,34 @@ deliver(State, Message) ->
 
 %% In the process_squery state we collect responses until the backend is
 %% done processing.
-process_squery(Log) ->
+process_squery(Log, AsBin) ->
     receive
 	{pgsql, {row_description, Cols}} ->
-	    {ok, Command, Rows} = process_squery_cols([]),
-	    process_squery([{Command, Cols, Rows}|Log]);
+	    {ok, Command, Rows} = process_squery_cols([], AsBin),
+	    process_squery([{Command, Cols, Rows}|Log], AsBin);
 	{pgsql, {command_complete, Command}} ->
-	    process_squery([Command|Log]);
+	    process_squery([Command|Log], AsBin);
 	{pgsql, {ready_for_query, _Status}} ->
 	    {ok, lists:reverse(Log)};
 	{pgsql, {error_message, Error}} ->
-	    process_squery([{error, Error}|Log]);
+	    process_squery([{error, Error}|Log], AsBin);
 	{pgsql, _Any} ->
-	    process_squery(Log)
+	    process_squery(Log, AsBin)
     end.
-process_squery_cols(Log) ->
+process_squery_cols(Log, AsBin) ->
     receive
 	{pgsql, {data_row, Row}} ->
 	    process_squery_cols(
 	      [lists:map(
 		 fun(null) ->
 			 null;
+                    (R) when AsBin == true ->
+                         R;
 		    (R) ->
 			 binary_to_list(R)
-		 end, Row) | Log]);
+		 end, Row) | Log], AsBin);
 	{pgsql, {command_complete, Command}} ->
-	    {ok, Command, lists:reverse(Log)}
+            {ok, Command, lists:reverse(Log)}
     end.
 
 process_equery(State, Log) ->
@@ -454,7 +463,12 @@ process_execute(State, Sock) ->
 
 process_execute_nodata() ->
     receive
-	{pgsql, {command_complete, Command}} ->
+	{pgsql, {command_complete, Cmd}} ->
+            Command = if is_binary(Cmd) ->
+                              binary_to_list(Cmd);
+                         true ->
+                              Cmd
+                      end,
 	    case Command of
 		"INSERT "++Rest ->
 		    {ok, [{integer, _, _Table},
@@ -476,7 +490,7 @@ process_execute_nodata() ->
 process_execute_resultset(Sock, Types, Log) ->
     receive
 	{pgsql, {command_complete, Command}} ->
-	    {ok, list_to_atom(Command), lists:reverse(Log)};
+	    {ok, to_atom(Command), lists:reverse(Log)};
 	{pgsql, {data_row, Row}} ->
 	    {ok, DecodedRow} = pgsql_util:decode_row(Types, Row),
 	    process_execute_resultset(Sock, Types, [DecodedRow|Log]);
@@ -489,17 +503,17 @@ process_execute_resultset(Sock, Types, Log) ->
 
 %% With a message type Code and the payload Packet apropriate
 %% decoding procedure can proceed.
-decode_packet(Code, Packet) ->
+decode_packet(Code, Packet, AsBin) ->
     Ret = fun(CodeName, Values) -> {ok, {CodeName, Values}} end,
     case Code of
 	?PG_ERROR_MESSAGE ->
-	    Message = pgsql_util:errordesc(Packet),
+	    Message = pgsql_util:errordesc(Packet, AsBin),
 	    Ret(error_message, Message);
 	?PG_EMPTY_RESPONSE ->
 	    Ret(empty_response, []);
 	?PG_ROW_DESCRIPTION ->
 	    <<_Columns:16/integer, ColDescs/binary>> = Packet,
-	    Descs = coldescs(ColDescs, []),
+	    Descs = coldescs(ColDescs, [], AsBin),
 	    Ret(row_description, Descs);
 	?PG_READY_FOR_QUERY ->
 	    <<State:8/integer>> = Packet,
@@ -512,7 +526,7 @@ decode_packet(Code, Packet) ->
 		    Ret(ready_for_query, failed_transaction)
 	    end;
 	?PG_COMMAND_COMPLETE ->
-	    {Task, _} = to_string(Packet),
+	    {Task, _} = to_string(Packet, AsBin),
 	    Ret(command_complete, Task);
 	?PG_DATA_ROW ->
 	    <<NumberCol:16/integer, RowData/binary>> = Packet,
@@ -522,7 +536,7 @@ decode_packet(Code, Packet) ->
 	    <<Pid:32/integer, Secret:32/integer>> = Packet,
 	    Ret(backend_key_data, {Pid, Secret});
 	?PG_PARAMETER_STATUS ->
-	    {Key, Value} = split_pair(Packet),
+	    {Key, Value} = split_pair(Packet, AsBin),
 	    Ret(parameter_status, {Key, Value});
 	?PG_NOTICE_RESPONSE ->
 	    Ret(notice_response, []);
