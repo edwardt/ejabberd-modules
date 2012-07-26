@@ -1,5 +1,6 @@
 #!/bin/bash
 
+git reset --hard HEAD
 git pull
 git svn fetch
 git svn repack -d
