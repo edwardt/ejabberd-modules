@@ -1,22 +1,27 @@
-
 %%%----------------------------------------------------------------------
-%%% File    : mod_openid.erl
-%%% Author  : Olivier Goffart <ogoffart@kde.org>
-%%% Purpose : Open id provider using XEP-0070
-%%% Created : 24 Dec 2007 Olivier Goffart
+%%%
+%%% @author : Edward Tsang <>
+%%% @doc OAuth2 client to internal OAuth2 server
+%%% Created : 20 Mar 2013
 %%%----------------------------------------------------------------------
-%%% Copyright (c) 2007-2008 Olivier Goffart
+%%%
+%%%
+%%% Copyright (c)
+%%%
+%%%
 %%%----------------------------------------------------------------------
 
 
-%% WARNING: secret/1 and new_assoc/2 MUST be implemented correctly for security issue
-
--module(mod_openid).
--author('ogoffart@kde.org').
+-module(mod_sparkauth).
+-author('etsang@spark.net').
 
 %% External exports
 -export([process/2]).
 
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-include_lib("kernel/include/file.hrl").
+-endif.
 
 -include("ejabberd.hrl").
 -include("jlib.hrl").
@@ -248,4 +253,10 @@ get_auth(Auth) ->
 	_ ->
 	    unauthorized
     end.
+
+%%%%%% EUNIT %%%%%%%%%%%%%%%%%%
+-ifdef(TEST).
+
+
+-endif.
 
