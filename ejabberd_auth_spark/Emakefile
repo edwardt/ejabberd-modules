@@ -1,6 +1,6 @@
 {'src/ejabberd_auth_spark',	
   [
-   debug_info, strict_record_tests, netload
+   debug_info, strict_record_tests, netload,
    {outdir, "ebin"},
    {i,"../ejabberd-dev/trunk/include"}
   ]
