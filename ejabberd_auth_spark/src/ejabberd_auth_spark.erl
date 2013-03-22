@@ -201,10 +201,12 @@ get_spark_authservice_endpoint(Host) ->
 -spec get_password_string(_Password::string())-> string().
 get_password_string(_Password)->
     "******".
-%% @private
 
 %%%%%% EUNIT %%%%%%%%%%%%%%%%%%
 -ifdef(TEST).
+
+get_spark_authservice_endpoint_test()->[?assertEqual({error, endpoint_notfound}, get_spark_authservice_endpoint("BadHost")),
+					?assertEqual("https://api.spark.test", get_spark_authservice_endpoint("GoodHost"))].
 
 get_password_string_test()-> [?assertEqual("******", get_password_string("Password")),
 		       ?assertEqual("******", get_password_string(anyValue))].
