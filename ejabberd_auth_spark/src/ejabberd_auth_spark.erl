@@ -232,9 +232,10 @@ set_password_not_allowed_test()->[?assertEqual({error, not_allowed}, set_passwor
 
 
 check_password_return_false_test()->[?assertEqual(false,check_password("SomeUser", "SomeServer", "SomePassword","SomeDigest","DigestGen")),
-				     ?assertEqual(false,check_password(anyValue, anyValue, anyValue, anyValue, anyValue)),
-				     ?assertEqual(false,check_password("SomeUser", "SomeHost", "SomePassword")),
-				     ?assertEqual(false,check_password(anyValue, anyValue, anyValue))].
+				     ?assertEqual(false,check_password(anyValue, anyValue, anyValue, anyValue, anyValue))].
+
+check_password_return_test()->[?assertEqual(true,check_password("SomeUser", "SomeHost", "SomePassword")),
+			       ?assertEqual(true,check_password(anyValue, anyValue, anyValue))].
 
 
 get_password_return_false_test() -> [?assertEqual(false, get_password("SomeUser", "SomeServer")),
