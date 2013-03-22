@@ -31,7 +31,8 @@
 	 store_type/0,
 	 plain_password_required/0
 	]).
-
+%TODO change it to true at end of cycle
+-define(TEST, true).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("kernel/include/file.hrl").
@@ -168,11 +169,13 @@ plain_password_required() ->
     RETVAL.   
    
 %% @doc Flag to indicate if using external storage to cache credentials
--spec store_type()-> external.
+%% @doc TODO: I do not think we store any password right in external storage? 
+%%-spec store_type()-> scram | external | plain.
+-spec store_type()-> scram.
 store_type() ->
     ?DEBUG("~p~n", [?CURRENT_FUNCTION_NAME()]),
-    RETVAL = external,
-    ?DEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
+    RETVAL = scram,
+    ?DEBUG("~p with status ~p", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.  
 
 %%====================================================================
@@ -184,7 +187,9 @@ store_type() ->
 
 %%%%%% EUNIT %%%%%%%%%%%%%%%%%%
 -ifdef(TEST).
+store_type_No_Password_Stored_test()-> ?assertEqual(scram, store_type()).
 
+plain_password_always_required_test()-> ?assertEqual(true, plain_password_required()).
 
 
 
