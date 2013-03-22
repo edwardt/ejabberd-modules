@@ -190,17 +190,53 @@ store_type() ->
 %%====================================================================
 %% @private
 %% doc get the authentication endpoint rest client to talk to
+get_spark_auth_service_config(Host, TokenName) ->
+    case ejabberd_config:get_local_option({TokenName, Host}) of
+	undefined -> {error, not_found};
+	Val   -> Val
+    end.
+
 -spec get_spark_authservice_endpoint(Host::string()) -> string() | {error, endpoint_notfound}.
 get_spark_authservice_endpoint(Host) ->
-    case ejabberd_config:get_local_option({spark_auth_endpoint, Host}) of
-	undefined -> {error, endpoint_notfound};
-	Endpoint   -> Endpoint
+    get_spark_auth_service_config(Host, spark_auth_endpoint). 
+  
+-spec get_spark_application_id(Host::string()) -> string() | {error, not_found}.
+get_spark_application_id(Host) ->
+    get_spark_auth_service_config(Host, spark_application_id). 
+   
+-spec get_spark_client_secrete(Host::string()) -> integer() | {error, not_found}.
+get_spark_client_secrete(Host) ->
+    case get_spark_auth_service_config(Host,spark_client_secrete) of
+       {error, REASON} -> {error, REASON}; 	
+       HasValue -> string_to_integer(HasValue);
+        _ -> 0 %% don't retry by default
+    end. 
+ 
+-spec get_rest_client_timeout_in_sec(Host::string()) -> integer() | {error, not_found}.
+get_rest_client_timeout_in_secHost) ->
+    case get_spark_auth_service_config(Host,rest_client_timeout_in_sec) of
+       {error, REASON} -> {error, REASON}; 
+        HasValue -> string_to_integer(HasValue);
+        _ -> 15 %% 15 sec is default, this seems long to me
     end.
+-spec get_rest_call_retry_attempt(Host::string()) -> integer() | {error, not_found}.
+get_rest_call_retry_attempt(Host) ->
+    case get_spark_auth_service_config(Host,rest_call_retry_attempt) of
+        {error, REASON} -> {error, REASON}; 
+    	HasValue -> string_to_integer(HasValue);
+        _ -> 0
+    end.
+
 %% @private
 %% doc get password to be printed to log as ******
 -spec get_password_string(_Password::string())-> string().
 get_password_string(_Password)->
     "******".
+string_to_integer(StringValue)->
+    case string:to_integer(StringValue) of
+    	{Int, _} -> Int;
+        Else -> Else
+    end.
 
 %%%%%% EUNIT %%%%%%%%%%%%%%%%%%
 -ifdef(TEST).
