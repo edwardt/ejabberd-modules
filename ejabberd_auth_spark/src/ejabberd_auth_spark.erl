@@ -73,7 +73,7 @@ start(Host) ->
 -spec set_password(User::string(), Server::string(), Password::string()) -> {error, not_allowed}.
 set_password(User, Server, Password) ->
     %% TODO security issue to log this, doit another way but also enough info for debugging
-    ?MYDEBUG("~p with user ~p server ~p password ~p~n", [?CURRENT_FUNCTION_NAME(),User, Server, Password]),
+    ?MYDEBUG("~p with user ~p server ~p password ~p~n", [?CURRENT_FUNCTION_NAME(),User, Server, get_password_string(Password)]),
     RETVAL = {error, not_allowed},
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
@@ -83,32 +83,31 @@ set_password(User, Server, Password) ->
 %%        Digest::string(), DigestGen::function()) ->
 %%     true | false
 -spec check_password(User::string(), Server::string(), Password::string(),Digest::string(), DigestGen::function()) ->
-      true | false.
+     false.
 check_password(User, Server, Password, _Digest, _DigestGen) ->
     ?MYDEBUG("~p with user ~p server ~p password ~p digest ~p digestgen ~p~n", 
-	   [?CURRENT_FUNCTION_NAME(), User, Server, Password, _Digest, _DigestGen]),
+	   [?CURRENT_FUNCTION_NAME(), User, Server, get_password_string(Password), _Digest, _DigestGen]),
     RETVAL = check_password(User, Server, Password),
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
 
 %% @doc Check if the user and password can login in server.
--spec check_password(User::string(), Host::string(), Password::string()) -> true | false | {error, not_implemented} | {error, term()}.
+-spec check_password(User::string(), Host::string(), Password::string()) -> false .
 check_password(User, Host, Password) ->
-    ?MYDEBUG("~p with user ~p host ~p password ~p~n", [?CURRENT_FUNCTION_NAME(), User, Host, Password]),
-    
-    RETVAL = {error, not_implemented},
+    ?MYDEBUG("~p with user ~p host ~p password ~p~n", [?CURRENT_FUNCTION_NAME(), User, Host, get_password_string(Password)]),
+    RETVAL = false,
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
 
 %% @doc Try register new user. This is not needed as this will go through website/mobile site
 -spec try_register(_User::string(), _Server::string(), _Password::string()) -> {error, not_allowed}.
 try_register(_User, _Server, _Password) ->
-    ?MYDEBUG("~p with user ~p server ~p password ~p~n", [?CURRENT_FUNCTION_NAME(), _User, _Server, _Password]),
+    ?MYDEBUG("~p with user ~p server ~p password ~p~n", [?CURRENT_FUNCTION_NAME(), _User, _Server, get_password_string(_Password)]),
     RETVAL = {error, not_allowed},
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
 
-%% @doc Registered users list do not include anonymous users logged
+%% @doc Registered users list do not include anonymous users logged. This functionality we don't care.
 -spec dirty_get_registered_users() -> [].
 dirty_get_registered_users() ->
     ?MYDEBUG("~p~n", [?CURRENT_FUNCTION_NAME()]),
@@ -116,7 +115,7 @@ dirty_get_registered_users() ->
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
 
-%% @doc Registered users list do not include anonymous users logged
+%% @doc Registered users list do not include anonymous users logged. This function is not allowed, we just don't care.
 -spec get_vh_registered_users(_Host::string())->[] | [string()].
 get_vh_registered_users(_Host) ->
     ?MYDEBUG("~p with host ~p~n", [?CURRENT_FUNCTION_NAME(), _Host]),
@@ -124,18 +123,19 @@ get_vh_registered_users(_Host) ->
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
 
-%% @doc Get the password of the user.
+%% @doc Get the password of the user. This function is not allowed, this case taken by mainsite.
 -spec get_password(_User::string(), _Server::string()) -> false | string().
 get_password(_User, _Server) ->
-    ?MYDEBUG("~p with user ~p server ~p password ~p~n", [?CURRENT_FUNCTION_NAME(), _User, _Server]),
+    ?MYDEBUG("~p with user ~p server ~p~n", [?CURRENT_FUNCTION_NAME(), _User, _Server]),
     RETVAL = false,
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
 
--spec get_password_s(_User::string(), _Server::string()) -> string(). 
+%% @doc Get the password of the user. This function is not allowed, this case taken by mainsite.
+-spec get_password_s(_User::string(), _Server::string()) -> {error, not_allowed}. 
 get_password_s(_User, _Server) ->
     ?MYDEBUG("~p with user ~p server ~p~n", [?CURRENT_FUNCTION_NAME(), _User, _Server]),
-    RETVAL = "",
+    RETVAL = {error, not_allowed},
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
    
@@ -186,14 +186,30 @@ store_type() ->
 %% Internal functions
 %%====================================================================
 %% @private
-
+%% doc get the authentication endpoint rest client to talk to
+-spec get_spark_authservice_endpoint(Host::string()) -> string() | {error, endpoint_notfound}.
+get_spark_authservice_endpoint(Host) ->
+    case ejabberd_config:get_local_option({spark_auth_endpoint, Host}) of
+	undefined -> {error, endpoint_notfound};
+	Endpoint   -> Endpoint
+    end.
+%% @private
+%% doc get password to be printed to log as ******
+-spec get_password_string(_Password::string())-> string().
+get_password_string(_Password)->
+    "******".
 %% @private
 
 %%%%%% EUNIT %%%%%%%%%%%%%%%%%%
 -ifdef(TEST).
+
+get_password_string_test()-> [?assertEqual("******", get_password_string("Password")),
+		       ?assertEqual("******", get_password_string(anyValue))].
+
 store_type_No_Password_Stored_test()-> ?assertEqual(scram, store_type()).
 
 plain_password_always_required_test()-> ?assertEqual(true, plain_password_required()).
+
 
 remove_user_not_allowed_test()-> [?assertEqual(not_allowed,remove_user("SomeUser","SomeHost","SomePassword")),
 				 ?assertEqual(not_allowed,remove_user(anyValue,anyValue,anyValue)),
@@ -205,6 +221,20 @@ try_register_not_allowed_test()->[?assertEqual({error, not_allowed}, try_registe
 
 set_password_not_allowed_test()->[?assertEqual({error, not_allowed}, set_password("SomeUser", "SomeServer", "SomePassword")),
 			       ?assertEqual({error, not_allowed}, set_password(anyValue,anyValue,anyValue))]. 
+
+
+
+check_password_return_false_test()->[?assertEqual(false,check_password("SomeUser", "SomeServer", "SomePassword","SomeDigest","DigestGen")),
+				     ?assertEqual(false,check_password(anyValue, anyValue, anyValue, anyValue, anyValue)),
+				     ?assertEqual(false,check_password("SomeUser", "SomeHost", "SomePassword")),
+				     ?assertEqual(false,check_password(anyValue, anyValue, anyValue))].
+
+
+get_password_return_false_test() -> [?assertEqual(false, get_password("SomeUser", "SomeServer")),
+				     ?assertEqual(false, get_password(anyValue, anyValue)),
+				     ?assertEqual({error, not_allowed}, get_password_s("SomeUser", "SomeServer")),
+				     ?assertEqual({error, not_allowed}, get_password_s(anyValue, anyValue))].
+
 
 -endif.
 
