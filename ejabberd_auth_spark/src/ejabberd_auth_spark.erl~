@@ -48,10 +48,12 @@
 
 %%-record(profile, {identity, server, lang, jid}).
 
-%%-define(MYDEBUG(Format,Args),io:format("D(~p:~p:~p) : "++Format++"~n",
-%%				       [calendar:local_time(),?MODULE,?LINE]++Args)).
-
+-define(MYDEBUG(Format,Args),io:format("D(~p:~p:~p) : "++Format++"~n",
+				       [calendar:local_time(),?MODULE,?LINE]++Args)).
+%%TODO the following is janky becasue we are not finding ejabbberd_logger_h.beam just do this before fixing the build script
+-define(DEBUG, ?MYDEBUG).
 %%TODO READ THIS FROM config
+
 -define(SPARKAUTH_URI, "http://api....").
 -define(CURRENT_FUNCTION_NAME(), element(2, element(2, process_info(self(), current_function)))).
 
@@ -199,10 +201,10 @@ remove_user_not_allowed_test()-> [?assertEqual(not_allowed,remove_user("SomeUser
 				 ?assertEqual({error, not_allowed}, remove_user("SomeUser","SomeHost")),
 				 ?assertEqual({error, not_allowed}, remove_user(anyValue,anyValue))].
 
-try_register_not_allowed_test->[?assertEqual({error, not_allowed}, try_register("SomeUser", "SomeServer", "SomePassword")),
+try_register_not_allowed_test()->[?assertEqual({error, not_allowed}, try_register("SomeUser", "SomeServer", "SomePassword")),
 			       ?assertEqual({error, not_allowed}, try_register(anyValue,anyValue,anyValue))]. 
 
-set_password_not_allowed_test->[?assertEqual({error, not_allowed}, set_password("SomeUser", "SomeServer", "SomePassword")),
+set_password_not_allowed_test()->[?assertEqual({error, not_allowed}, set_password("SomeUser", "SomeServer", "SomePassword")),
 			       ?assertEqual({error, not_allowed}, set_password(anyValue,anyValue,anyValue))]. 
 
 -endif.
