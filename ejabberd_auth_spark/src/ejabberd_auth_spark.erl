@@ -68,10 +68,8 @@ start(Host) ->
     ?DEBUG("Spark authentication with status: ~p~n", [RETVAL]),    
     RETVAL.
 
-%% @spec (User::string(), Server::string(), Password::string()) ->
-%%       ok | {error, ErrorType}
-%% where ErrorType = empty_password | not_allowed | invalid_jid
--spec set_password(User::string(), Server::string(), Password::string()) -> ok | {error, empty_password} | {error, not_allowed} | {error, invalid_jid}.
+%% @doc Set user and password onto server. This is not needed; will be done on mainsite
+-spec set_password(User::string(), Server::string(), Password::string()) -> {error, not_allowed}.
 set_password(User, Server, Password) ->
     %% TODO security issue to log this, doit another way but also enough info for debugging
     ?DEBUG("~p with user ~p server ~p password ~p~n", [?CURRENT_FUNCTION_NAME(),User, Server, Password]),
@@ -102,7 +100,7 @@ check_password(User, Host, Password) ->
     RETVAL.
 
 %% @doc Try register new user. This is not needed as this will go through website/mobile site
--spec try_register(_User::string(), _Server::string(), _Password::string()) -> {atomic, ok} | {atomic, exists} | {error, not_allowed}.
+-spec try_register(_User::string(), _Server::string(), _Password::string()) -> {error, not_allowed}.
 try_register(_User, _Server, _Password) ->
     ?DEBUG("~p with user ~p server ~p password ~p~n", [?CURRENT_FUNCTION_NAME(), _User, _Server, _Password]),
     RETVAL = {error, not_allowed},
@@ -196,9 +194,16 @@ store_type_No_Password_Stored_test()-> ?assertEqual(scram, store_type()).
 
 plain_password_always_required_test()-> ?assertEqual(true, plain_password_required()).
 
+remove_user_not_allowed_test()-> [?assertEqual(not_allowed,remove_user("SomeUser","SomeHost","SomePassword")),
+				 ?assertEqual(not_allowed,remove_user(anyValue,anyValue,anyValue)),
+				 ?assertEqual({error, not_allowed}, remove_user("SomeUser","SomeHost")),
+				 ?assertEqual({error, not_allowed}, remove_user(anyValue,anyValue))].
 
+try_register_not_allowed_test()->[?assertEqual({error, not_allowed}, try_register("SomeUser", "SomeServer", "SomePassword")),
+			       ?assertEqual({error, not_allowed}, try_register(anyValue,anyValue,anyValue))]. 
 
-
+set_password_not_allowed_test()->[?assertEqual({error, not_allowed}, set_password("SomeUser", "SomeServer", "SomePassword")),
+			       ?assertEqual({error, not_allowed}, set_password(anyValue,anyValue,anyValue))]. 
 
 -endif.
 
