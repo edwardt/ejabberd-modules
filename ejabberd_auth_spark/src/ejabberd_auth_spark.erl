@@ -213,7 +213,7 @@ get_spark_client_secrete(Host) ->
     end. 
  
 -spec get_rest_client_timeout_in_sec(Host::string()) -> integer() | {error, not_found}.
-get_rest_client_timeout_in_secHost) ->
+get_rest_client_timeout_in_sec(Host) ->
     case get_spark_auth_service_config(Host,rest_client_timeout_in_sec) of
        {error, REASON} -> {error, REASON}; 
         HasValue -> string_to_integer(HasValue);
