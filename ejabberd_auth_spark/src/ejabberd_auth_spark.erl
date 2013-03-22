@@ -129,13 +129,19 @@ get_password_s(_User, _Server) ->
 %% @spec (User, Server) -> true | false | {error, REASON}
 %% 
 is_user_exists(_User, _Host) ->
-    {error, not_implemented}.
+    ?DEBUG("~p~n", [?CURRENT_FUNCTION_NAME()]),
+    RETVAL = {error, not_implemented},
+    ?DEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
+    RETVAL.     
 
 %% @spec (User, Server) -> 
 %% @doc Remove user.
 
 remove_user(_User, _Server) ->
-    {error, not_allowed}.
+    ?DEBUG("~p with user ~p server ~p~n", [?CURRENT_FUNCTION_NAME(), _User, _Server]),
+    RETVAL = {error, not_allowed},
+    ?DEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
+    RETVAL.
 
 %% @spec (User, Server, Password) -> ok | not_exists | not_allowed | bad_request | error
 %% @doc Try to remove user if the provided password is correct.
@@ -143,16 +149,24 @@ remove_user(_User, _Server) ->
 %% when one returns 'ok' the loop stops;
 %% if no method returns 'ok' then it returns the error message indicated by the last method attempted.
 remove_user(_User, _Server, _Password) ->
-    not_allowed.
+    ?DEBUG("~p with user ~p server password ~p~n", [?CURRENT_FUNCTION_NAME(), _User, _Server, _Password]),
+    RETVAL = not_allowed,
+    ?DEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
+    RETVAL.
 
 %% @doc This is only executed by ejabberd_c2s for non-SASL auth client
 plain_password_required() ->
-    
-    true.
-
+    ?DEBUG("~p~n", [?CURRENT_FUNCTION_NAME()]),
+    RETVAL = true,
+    ?DEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
+    RETVAL.   
+   
 %% @doc Flag to indicate if using external storage to cache credentials
 store_type() ->
-    external.
+    ?DEBUG("~p~n", [?CURRENT_FUNCTION_NAME()]),
+    RETVAL = external,
+    ?DEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
+    RETVAL.  
 
 %%====================================================================
 %% Internal functions
