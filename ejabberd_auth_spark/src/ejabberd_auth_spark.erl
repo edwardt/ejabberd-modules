@@ -159,7 +159,7 @@ remove_user(_User, _Server) ->
 %% @doc User removal be taken care by main site. 
 -spec remove_user(_User::string(), _Server::string(), _Password::string()) -> not_allowed.
 remove_user(_User, _Server, _Password) ->
-    ?MYDEBUG("~p with user ~p server password ~p~n", [?CURRENT_FUNCTION_NAME(), _User, _Server, _Password]),
+    ?MYDEBUG("~p with user ~p server ~p password ~p~n", [?CURRENT_FUNCTION_NAME(), _User, _Server, _Password]),
     RETVAL = not_allowed,
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
