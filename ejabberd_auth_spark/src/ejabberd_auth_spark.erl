@@ -133,7 +133,7 @@ is_user_exists(User, Host) ->
 
 %% @spec (User, Server) -> ok
 %% @doc Remove user.
-%% Note: it may return ok even if there was some problem removing the user.
+
 remove_user(_User, _Server) ->
     {error, not_allowed}.
 
