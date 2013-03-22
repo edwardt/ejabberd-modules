@@ -116,10 +116,10 @@ dirty_get_registered_users() ->
     RETVAL.
 
 %% @doc Registered users list do not include anonymous users logged. This function is not allowed, we just don't care.
--spec get_vh_registered_users(_Host::string())->[] | [string()].
+-spec get_vh_registered_users(_Host::string())-> false.
 get_vh_registered_users(_Host) ->
     ?MYDEBUG("~p with host ~p~n", [?CURRENT_FUNCTION_NAME(), _Host]),
-    RETVAL = [],
+    RETVAL = false,
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
 
@@ -171,7 +171,7 @@ remove_user(_User, _Server, _Password) ->
 -spec plain_password_required()-> true.
 plain_password_required() ->
     ?MYDEBUG("~p~n", [?CURRENT_FUNCTION_NAME()]),
-    RETVAL = true,
+    RETVAL = false,
     ?MYDEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.   
    
@@ -211,8 +211,12 @@ get_password_string_test()-> [?assertEqual("******", get_password_string("Passwo
 
 store_type_No_Password_Stored_test()-> ?assertEqual(scram, store_type()).
 
-plain_password_always_required_test()-> ?assertEqual(true, plain_password_required()).
+plain_password_always_required_test()-> ?assertEqual(false, plain_password_required()).
 
+dirty_get_registered_users_return_emptylist_test()-> ?assertEqual([], dirty_get_registered_users()).
+						     
+
+get_vh_registered_users_return_false_test() -> ?assertEqual(false, get_vh_registered_users("SomeHost")).
 
 remove_user_not_allowed_test()-> [?assertEqual(not_allowed,remove_user("SomeUser","SomeHost","SomePassword")),
 				 ?assertEqual(not_allowed,remove_user(anyValue,anyValue,anyValue)),
