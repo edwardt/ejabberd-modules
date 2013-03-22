@@ -61,7 +61,7 @@ check_password(User, Server, Password, _Digest, _DigestGen) ->
     check_password(User, Server, Password).
 
 check_password(User, Host, Password) ->
-    {error, not_implmented}.
+    {error, not_implemented}.
 
 try_register(_User, _Server, _Password) ->
     {error, not_allowed}.
