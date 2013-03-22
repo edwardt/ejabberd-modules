@@ -42,9 +42,10 @@
 -include("web/ejabberd_http.hrl").
 -include("web/ejabberd_web_admin.hrl").
 
--record(profile, {identity, server, lang, jid}).
 
--define(MYDEBUG(Format,Args),io:format("D(~p:~p:~p) : "++Format++"~n",
+%%-record(profile, {identity, server, lang, jid}).
+
+%%-define(MYDEBUG(Format,Args),io:format("D(~p:~p:~p) : "++Format++"~n",
 				       [calendar:local_time(),?MODULE,?LINE]++Args)).
 -define(CURRENT_FUNCTION_NAME(), element(2, element(2, process_info(self(), current_function)))).
 
