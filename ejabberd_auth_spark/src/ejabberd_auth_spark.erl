@@ -46,7 +46,7 @@
 %%-record(profile, {identity, server, lang, jid}).
 
 %%-define(MYDEBUG(Format,Args),io:format("D(~p:~p:~p) : "++Format++"~n",
-				       [calendar:local_time(),?MODULE,?LINE]++Args)).
+%%				       [calendar:local_time(),?MODULE,?LINE]++Args)).
 -define(CURRENT_FUNCTION_NAME(), element(2, element(2, process_info(self(), current_function)))).
 
 
@@ -128,10 +128,10 @@ get_password_s(_User, _Server) ->
    
 %% @spec (User, Server) -> true | false | {error, REASON}
 %% 
-is_user_exists(User, Host) ->
+is_user_exists(_User, _Host) ->
     {error, not_implemented}.
 
-%% @spec (User, Server) -> ok
+%% @spec (User, Server) -> 
 %% @doc Remove user.
 
 remove_user(_User, _Server) ->
