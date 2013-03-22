@@ -140,7 +140,10 @@ get_password_s(_User, _Server) ->
     RETVAL.
    
 %% @doc check if user exists 
--spec is_user_exists(_User::string(), _Host::string()) ->true | false | {error, term()}. 
+%% @doc This function checks user existence on database or on other authentication module
+%% @doc since we don't offer checking user existence on our internal api. We will always return
+%% @doc true - which is sad - for ejabberd to go on with its business
+-spec is_user_exists(_User::string(), _Host::string()) ->true. 
 is_user_exists(_User, _Host) ->
     ?MYDEBUG("~p with user ~p host ~p~~n", [?CURRENT_FUNCTION_NAME(), _User, _Host]),
     RETVAL = {error, not_implemented},
@@ -231,10 +234,12 @@ check_password_return_false_test()->[?assertEqual(false,check_password("SomeUser
 
 
 get_password_return_false_test() -> [?assertEqual(false, get_password("SomeUser", "SomeServer")),
-				     ?assertEqual(false, get_password(anyValue, anyValue),
-				     ?assertEqual({error, not_allowed}, get_password_s("SomeUser", "SomeServer"),
-				     ?assertEqual({error, not_allowed}, get_password_s(anyValue, anyValue)].
+				     ?assertEqual(false, get_password(anyValue, anyValue)),
+				     ?assertEqual({error, not_allowed}, get_password_s("SomeUser", "SomeServer")),
+				     ?assertEqual({error, not_allowed}, get_password_s(anyValue, anyValue))].
 
+is_user_exists_test_return_true()-> [?assertEqual(true, is_user_exists("SomeUser", "SomeHost")),
+				     ?assertEqual(true, is_user_exists(anyValue, anyValue)].
 
 -endif.
 
