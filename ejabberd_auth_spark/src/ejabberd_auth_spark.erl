@@ -87,7 +87,7 @@ try_register(_User, _Server, _Password) ->
     RETVAL.
 
 dirty_get_registered_users() ->
-    ?DEBUG("~p~n", [?CURRENT_FUNCTION_NAME]),
+    ?DEBUG("~p~n", [?CURRENT_FUNCTION_NAME()]),
     RETVAL = [],
     ?DEBUG("~p with status ~p~n", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.
