@@ -33,6 +33,8 @@
 	]).
 %TODO change it to true at end of cycle
 -define(TEST, true).
+
+
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("kernel/include/file.hrl").
@@ -48,6 +50,9 @@
 
 %%-define(MYDEBUG(Format,Args),io:format("D(~p:~p:~p) : "++Format++"~n",
 %%				       [calendar:local_time(),?MODULE,?LINE]++Args)).
+
+%%TODO READ THIS FROM config
+-define(SPARKAUTH_URI, "http://api....").
 -define(CURRENT_FUNCTION_NAME(), element(2, element(2, process_info(self(), current_function)))).
 
 
@@ -173,7 +178,7 @@ plain_password_required() ->
 %%-spec store_type()-> scram | external | plain.
 -spec store_type()-> scram.
 store_type() ->
-    ?DEBUG("~p~n", [?CURRENT_FUNCTION_NAME()]),
+    ?DEBUG(" store type ~p~n", [stored_type]),
     RETVAL = scram,
     ?DEBUG("~p with status ~p", [?CURRENT_FUNCTION_NAME(), RETVAL]),
     RETVAL.  
