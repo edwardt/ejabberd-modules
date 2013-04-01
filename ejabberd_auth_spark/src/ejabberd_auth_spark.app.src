@@ -1,0 +1,19 @@
+{application, ejabberd_auth_spark,
+ [
+  {description, ""},
+  {vsn, git},
+  {modules, []},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+		  inets,
+		  crypto,
+		  public_key,
+                  ssl
+                 ]},
+  {mod, {ejabberd_auth_spark_app, []}},
+  {env, [
+        ]}
+ ]}.
+
