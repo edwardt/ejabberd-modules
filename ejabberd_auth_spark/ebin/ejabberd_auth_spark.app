@@ -1,0 +1,10 @@
+{application,ejabberd_auth_spark,
+             [{description,[]},
+              {vsn,"41ed2e1"},
+              {modules,[ejabberd_auth_spark,ejabberd_auth_spark_config,
+                        ejabberd_config,ejabberd_logger_h,ejabberd_loglevel,
+                        gen_mod,spark_parse_isUserData,spark_parse_loginData]},
+              {registered,[]},
+              {applications,[kernel,stdlib,inets,crypto,public_key,ssl]},
+              {mod,{ejabberd_auth_spark_app,[]}},
+              {env,[]}]}.
