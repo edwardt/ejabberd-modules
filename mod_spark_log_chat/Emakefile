@@ -1,0 +1,10 @@
+{'src/mod_spark_log_chat',	
+	[debug_info,
+	 warn_unused_vars,
+	 warn_unused_imports, 
+	 verbose,
+	 {outdir, "ebin"},
+	 {i,"../ejabberd-dev/trunk/include"}, 
+	 {i,"../rabbit_common/include"}, 
+	 {i,"../amqp_client/include"}
+ ]}.
