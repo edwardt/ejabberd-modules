@@ -6,14 +6,13 @@
 -author('etsang@spark.net').
 
 -include_lib("amqp_client.hrl").
-%-include_lib("rabbit_framing.hrl").
 
 -export([get_connection_setting/1,
-	 setup_connection/0,
+	 setup_connection/1,
 	 teardown_connection/2,
 	 declare_exchange/3,
-	 declare_queue/3,
-	 publish_msg/3
+	 declare_queue/5,
+	 publish_msg/4
 %	 consume_msg/2
 	]).
 
@@ -35,10 +34,10 @@ get_connection_setting(Host)->
         socket_options     = get_channel_max(Host)					 
 	}.
 
-setup_connection()->
-  {ok, Connection} = amqp_connection:start(get_connection_setting(Host)),
+setup_connection(EjabVHost)->
+  {ok, Connection} = amqp_connection:start(get_connection_setting(EjabVHost)),
   {ok, Channel} = amqp_connection:open_channel(Connection),
-  {ok, ExchangePrefix} = get_exchangeprefix(Host),
+  {ok, ExchangePrefix} = get_exchangeprefix(EjabVHost),
   {ok, KeyPrefix} = get_keyprefix(Host),
   {ok, Connection, Channel, ExchangePrefix, KeyPrefix}.
 
@@ -55,7 +54,7 @@ declare_exchange(Connection, Channel, Exchange) ->
 			    durable = Durable}),
   ok.
 
-declare_queue(Channel, Exchange, RoutingKey)->
+declare_queue(Channel, Exchange, QueueName, RoutingKey, ControlTag)->
   {Name, Exclusive, Auto_Delete} = QueueName,
   #'queue.declare_ok'{queue = ControlQ}
 	= amqp_channel:call(Channel, 
@@ -74,17 +73,17 @@ declare_queue(Channel, Exchange, RoutingKey)->
   {ok, ControlTag}.
 
 
-publish_msg(Exchange, Message, RoutingKey)->
-  {ok, Connection, Channel, ExchangePrefix, KeyPrefix} = setup_connection(),
+publish_msg(EjabVHost,Exchange, Message, RoutingKey)->
+  {ok, Connection, Channel, ExchangePrefix, KeyPrefix} = setup_connection(EjabVHost),
   Exchange_Full = concat_exchange(ExchangePrefix, Exchange),
   Publish = #'basic.publish'{exchange = Exchange_Full, routing_key=RoutingKey},
   amqp_channel:call(Channel, Publish, #amqp_msg{payload = serialize(Message) }), 
   teardown_connection(Channel, Connection).
 
 
-%consume_msg()->
+consume_msg(EjabVHost)->
+  setup_connection(EjabVHost),
   
-
 
 
 

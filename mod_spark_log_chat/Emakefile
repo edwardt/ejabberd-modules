@@ -16,7 +16,9 @@
 	 warn_unused_imports, 
 	 verbose,
 	 {outdir, "ebin"},
-	 {i,[
-	     '../amqp_client/include']}
+	 {i,['../amqp_client/include']},
+	 {i,['../rabbit_common/include']}
+
+
    ]
 }.
