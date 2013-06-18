@@ -7,8 +7,7 @@
 	 {i,[
              '../ejabberd-dev/trunk/include' 
 	    ]}
-   ]
-}.
+ ]}.
 {
    'src/amqp_util',	
 	[debug_info,
@@ -17,6 +16,7 @@
 	 verbose,
 	 {outdir, "ebin"},
 	 {i,[
-	     '../amqp_client/include']}
-   ]
-}.
+	     '../amqp_client/include']},
+	 {i,[
+	     '../rabbit_common/include']}
+ ]}.

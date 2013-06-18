@@ -27,8 +27,6 @@
 
 -record(config, {path=?DEFAULT_PATH, format=?DEFAULT_FORMAT}).
 
--record(spark_user,{sourceUserId, targetUserId}).
-
 start(Host, Opts) ->
     ?DEBUG(" ~p  ~p~n", [Host, Opts]),
     case gen_mod:get_opt(host_config, Opts, []) of
@@ -79,9 +77,8 @@ stop(Host) ->
 log_packet_send(From, To, Packet) ->
     log_packet(From, To, Packet, From#jid.lserver).
 
-log_packet_receive(_JID, From, To, _Packet) 
-	when From#jid.lserver =:= To#jid.lserver->
-    ok; % self talk
+log_packet_receive(_JID, From, To, _Packet) when From#jid.lserver == To#jid.lserver->
+    ok; % only log at send time if the message is local to the server
 log_packet_receive(_JID, From, To, Packet) ->
     log_packet(From, To, Packet, To#jid.lserver).
 
@@ -155,7 +152,7 @@ write_packet(From, To, Packet, Host) ->
     end.
 
 get_im_transform_format(Config)->
-   Config#config.format.
+   Config#config.format;
 get_im_transform_format()->
    text.
 
@@ -227,6 +224,8 @@ count(String, Word) ->
 	N ->
 	    1+count(string:substr(String, N+length(Word)), Word)
     end.
+
+
 
 template(text, extension) ->
     ".log";

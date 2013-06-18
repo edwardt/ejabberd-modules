@@ -228,6 +228,9 @@ count(String, Word) ->
 	    1+count(string:substr(String, N+length(Word)), Word)
     end.
 
+is_same_person(From,To)->
+    From#jid.lserver == To#jid.lserver.
+
 template(text, extension) ->
     ".log";
 template(text, title) ->
