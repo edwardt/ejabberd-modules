@@ -86,19 +86,21 @@ log_packet_receive(_JID, From, To, Packet) ->
     log_packet(From, To, Packet, To#jid.lserver).
 
 log_packet(From, To, Packet = {xmlelement, "message", Attrs, _Els}, Host) ->
-    case xml:get_attr_s("type", Attrs) of
-	"groupchat" -> %% mod_muc_log already does it
-	    ?DEBUG("dropping groupchat: ~s", [xml:element_to_string(Packet)]),
-	    ok;
-	"error" -> %% we don't log errors
-	    ?DEBUG("dropping error: ~s", [xml:element_to_string(Packet)]),
-	    ok;
-	_ ->
-	    write_packet(From, To, Packet, Host)
-    end;
+    ChatType = xml:get_attr_s("type", Attrs),
+    handle_chat_msg(ChatType, From, To, Packet, Host);
 log_packet(_From, _To, _Packet, _Host) ->
     ok.
 
+handle_chat_msg("groupchat", _From, _To, Packet, _Host) ->
+    ?DEBUG("dropping groupchat: ~s", [xml:element_to_string(Packet)]),
+    ok;   
+handle_chat_msg("error", _From, _To, Packet, _Host) ->
+    ?DEBUG("dropping error: ~s", [xml:element_to_string(Packet)]),
+    ok;   
+   
+handle_chat_msg(ChatType, From, To, Packet, Host) -> 
+    write_packet(From, To, Packet, Host).
+   
 write_packet(From, To, Packet, Host) ->
     gen_mod:get_module_proc(Host, ?PROCNAME) ! {call, self(), get_config},
     Config = receive
@@ -159,15 +161,11 @@ get_im_transform_format(Config)->
 get_im_transform_format()->
    text.
 
-get_im_message_text(Subject, Format, Body)->
-    MessageText = case Subject of
-		       "" ->
-			   Body;
-		       _ ->
-			   io_lib:format(template(Format, subject), [Subject])++Body
-		   end,
-   MessageText.
 
+get_im_message_text("", _Format, Body)->
+   Body;
+get_im_message_text(Subject, Format, Body)->
+   io_lib:format(template(Format, subject), [Subject])++Body.
 
 
 

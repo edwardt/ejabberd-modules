@@ -38,7 +38,7 @@ setup_connection(EjabVHost)->
   {ok, Connection} = amqp_connection:start(get_connection_setting(EjabVHost)),
   {ok, Channel} = amqp_connection:open_channel(Connection),
   {ok, ExchangePrefix} = get_exchangeprefix(EjabVHost),
-  {ok, KeyPrefix} = get_keyprefix(Host),
+  {ok, KeyPrefix} = get_keyprefix(EjabVHost),
   {ok, Connection, Channel, ExchangePrefix, KeyPrefix}.
 
 teardown_connection(Channel, Connection)->
@@ -82,7 +82,7 @@ publish_msg(EjabVHost,Exchange, Message, RoutingKey)->
 
 
 consume_msg(EjabVHost)->
-  setup_connection(EjabVHost),
+  setup_connection(EjabVHost).
   
 
 
