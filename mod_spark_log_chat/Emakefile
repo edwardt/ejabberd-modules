@@ -5,7 +5,13 @@
 	 verbose,
 	 {outdir, "ebin"},
 	 {i,[
-             '../ejabberd-dev/trunk/include' 
+             ".." 
+	    ]},
+	 {i,[
+             "../ejabberd-dev/trunk/include" 
+	    ]},
+	 {i,[
+             "../deps" 
 	    ]}
    ]
 }.
