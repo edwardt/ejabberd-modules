@@ -40,14 +40,7 @@
 		 path		    = ?DEFAULT_PATH, 
 		 format		    = ?DEFAULT_FORMAT,
 		 idMap		    = [],
-		 username	    = <<"guest">>,
-                 password           = <<"guest">>,
-                 virtual_host       = <<"/">>,
-                 host               = "localhost",
-                 port               = undefined,
-		 heartbeat          = 0,
-		 connection_timeout = infinity,
-		 client_properties  = []
+		 amqp_params = #amqp_params_direct{}
 }).
 
 
@@ -164,7 +157,7 @@ handle_call({push_to_queue, From, To, Packet, ChatType}, _From, State)->
   Reply = case is_empty_message(Packet,State#config.format) of
        true -> ?WARNING_MSG("Will not log empty message",[]),
 	       empty_message; 
-       Else -> ok
+       _ -> post_to_queue(From, To, Packet, ChatType, State)
   end,
   {reply, Reply, State}.
 
@@ -191,32 +184,40 @@ equal(A,B) ->
 
 load_config([])->
    {ok, #config{}};
-load_config([Host, Opts])->
+load_config([Host1, Opts])->
    Path = gen_mod:get_opt(path, Opts, ?DEFAULT_PATH),     
    Format = gen_mod:get_opt(format, Opts, ?DEFAULT_FORMAT),
    Username = gen_mod:get_opt(username, Opts, <<"guest">>),
    Password = gen_mod:get_opt(password, Opts, <<"guest">>),
    Virtual_host = gen_mod:get_opt(virtual_host, Opts, <<"/">>),
-   Host         = gen_mod:get_opt(host, Opts, Host),
-   Port         = gen_mod:get_opt(port, Opts, undefined),
-   Heartbeat    = gen_mod:get_opt(heartbeat, Opts, 0),
-   Connection_timeout = gen_mod:get_opt(connection_timeout, Opts, infinity),
+   Node		= gen_mod:get_opt(node, Opts, node()),
+   Adapter_info	= gen_mod:get_opt(adapter_info, Opts, none),
+  % Host         = gen_mod:get_opt(host, Opts, Host1),
+  % Port         = gen_mod:get_opt(port, Opts, undefined),
+  % Heartbeat    = gen_mod:get_opt(heartbeat, Opts, 0),
+  % Connection_timeout = gen_mod:get_opt(connection_timeout, Opts, infinity),
    Client_properties  = gen_mod:get_opt(client_properties, Opts, []),
 
    CfgList = spark_app_config_srv:load_config("ejabberd_auth_spark.config"),
    IdMap = spark_app_config_srv:lookup(community2brandId, CfgList,required), ejabberd_auth_spark_config:spark_communityid_brandid_map(CfgList),
-
-   {ok, #config{ path		    = Path, 
-		 format		    = Format,
-		 idMap		    = IdMap,
+   Amqp_Params = #amqp_params_direct{
 		 username	    = Username,
                  password           = Password,
                  virtual_host       = Virtual_host,
-                 host               = Host ,
-                 port               = Port,
-		 heartbeat          = Heartbeat,
-		 connection_timeout = Connection_timeout,
-		 client_properties  = Client_properties}}.
+                 node              = Node,
+                 adapter_info      = Adapter_info,
+          %       host               = Host,
+          %       port               = Port,
+	  %	 heartbeat          = Heartbeat,
+	  %	 connection_timeout = Connection_timeout,
+          	 client_properties  =
+			      Client_properties			
+
+		},
+   {ok, #config{ path		    = Path, 
+		 format		    = Format,
+		 idMap		    = IdMap,
+		 amqp_params	    = Amqp_Params}}.
 
 escape(text, Text) ->
     Text;
