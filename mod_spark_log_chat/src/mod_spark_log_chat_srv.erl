@@ -25,6 +25,7 @@
 -define(DEFAULT_FORMAT, text).
 -define(DEFAULT_NAME,<<"dev">>).
 -define(DEFAULT_EXCHANGE, <<"conversation">>).
+-define(DEFAULT_QUEUE, <<"post_to_api">>).
 -define(PERF, perfcounter).
 -define(HIBERNATE_TIMEOUT, 90000).
 
@@ -46,7 +47,8 @@
 		 host		     = <<"">>,
 		 connection_timeout  = ?HIBERNATE_TIMEOUT,
 	  	 name = ?DEFAULT_NAME,
-    		 exchange = ?DEFAULT_EXCHANGE,
+    		 exchange = ?DEFAULT_EXCHANGE, 
+		 queue=?DEFAULT_QUEUE,
 		 amqp_params = #amqp_params_network {}
 }).
 
@@ -112,10 +114,14 @@ init([Host,Opts])->
     ?DEBUG("Starting ~p Host: ~p Opt: ~p~n", [?MODULE, Opts]),
     ok = lager:start(),
     Config = start_vhost(Host,Opts),
-   {ok, Channel} = amqp_channel(Config#config.amqp_params),
-  #'exchange.declare_ok'{} = amqp_channel:call(Channel,   #'exchange.declare'{ exchange = Config#config.exchange, type = <<"topic">> }),
-
+    {ok, Channel} = amqp_channel(Config#config.amqp_params),
+    declare_exchange(Channel, Config#config.exchange, Config#config.queue),
     {ok, Config}.
+
+declare_exchange(Channel, Exchange, Queue)->
+    #'exchange.declare_ok'{} = amqp_channel:call(Channel,   #'exchange.declare'{exchange = Exchange, type = <<"topic">> }),
+    #'queue.declare_ok'{} = amqp_channel:call(Channel,
+#'queue.declare'{queue = Queue}).
 
 stop(Host) ->
   ?INFO_MSG("~p Stopping Host: ~p",[?SERVER, Host]), 
@@ -179,7 +185,26 @@ handle_call({push_to_queue, From, To, Packet, ChatType}, _From, State)->
             post_to_queue(Date, Time, From, To, Packet, ChatType, 
 	        State) 
   end,
-  {reply, Reply, State, State#config.connection_timeout}.
+  {reply, Reply, State, State#config.connection_timeout};
+
+handle_call({get_from_queue}, _From, State)->
+  Reply = get_from_queue(State),
+  {reply, Reply, State};
+
+handle_call({post_to_api, Message}, _From, State)->
+  Reply = post_to_api(Message, State),  
+  
+  {reply, Reply, State, State#config.connection_timeout};
+
+handle_call({#'basic.consume_ok'{}}, From, State)-> 
+  Reply = gen_server:info({#'basic.consume_ok'{}}, From, State),
+  {reply, Reply, State};
+handle_call({#'basic.cancel_ok'{}}, From, State)->
+  Reply = gen_server:info({#'basic.cancel_ok'{}}, From,State),
+  {reply, Reply, State};
+handle_call({#'basic.deliver'{}}, From, State)->
+  Reply = gen_server:info({#'basic.deliver'{}},From ,State),
+  {reply, Reply, State}.
 
 handle_cast(stop, State)->
   {stop,normal, State};
@@ -188,11 +213,16 @@ handle_cast(_Request, State)->
   {noreply, State}.
 
 handle_info(timeout,State) ->
-  {noreply, State, hibernate};
+  {noreply, State, hibernate}.
 
-handle_info(_, State)->
+handle_info({#'basic.consume_ok'{}}, _From, State)->   
+  {noreply, State};
+handle_info({#'basic.cancel_ok'{}}, _From, State)->
+  {noreply, State};
+handle_info({#'basic.deliver'{delivery_tag=Tag},Content}, _From, State)->
+  gen_server:call({post_to_api, Content}, State),
   {noreply, State}.
-  
+ 
 
 is_empty_message(Packet, Format)->
   Subject = get_subject(Packet, Format),
@@ -212,6 +242,7 @@ load_config([Host1, Opts])->
    Virtual_host = gen_mod:get_opt(virtual_host, Opts, <<"/">>),
    Env_Name = gen_mod:get_opt(envionment_name, Opts, ?DEFAULT_NAME),
    Exchange = gen_mod:get_opt(exchange, Opts, ?DEFAULT_EXCHANGE),
+   Queue = gen_mod:get_opt(queue, Opts, ?DEFAULT_QUEUE),
 %   Node		= gen_mod:get_opt(node, Opts, node()),
 %   Adapter_info	= gen_mod:get_opt(adapter_info, Opts, none),
    Host         = gen_mod:get_opt(host, Opts, Host1),
@@ -243,6 +274,7 @@ load_config([Host1, Opts])->
 		 host 		    = Host1,
 		 name 		    = Env_Name,
 		 exchange 	    = Exchange,
+		 queue 		    = Queue,
 		 amqp_params	    = Amqp_Params}}.
 
 escape(text, Text) ->
@@ -287,9 +319,7 @@ transform_chat_msg(From, To, Packet, _ChatType, State)->
 get_session_id(User, Server, Resource)->
    ejabberd_sm:get_session_pid(User, Server, Resource).
 
-
-
-send(#config{ name = Name, exchange = Exchange } = State, Message, Channel, ChatType) ->
+send(#config{ name = Name, exchange = Exchange, queue = Queue} = State, Message, Channel, ChatType) ->
   RkPrefix = atom_to_list(ChatType),
   RoutingKey =  list_to_binary( case Name of
                                   [] ->
@@ -298,15 +328,27 @@ send(#config{ name = Name, exchange = Exchange } = State, Message, Channel, Chat
                                     string:join([RkPrefix, Name], ".")
                                 end
                               ),
-  Publish = #'basic.publish'{ exchange = Exchange, routing_key = RoutingKey },
+   
+  Publish = #'queue.bind'{queue= Queue, exchange = Exchange, routing_key = RoutingKey },
   Props = #'P_basic'{ content_type = <<"text/plain">> },
   Body = list_to_binary(lists:flatten(Message)),
   Msg = #amqp_msg{ payload = Body, props = Props },
 
   % io:format("message: ~p~n", [Msg]),
   amqp_channel:cast(Channel, Publish, Msg),
-
   State.
+
+
+get_from_queue(#config{amqp_params = AmqpParams, exchange = Exchange,queue = Queue } = State) ->
+  R = case amqp_channel(AmqpParams) of
+    {ok, Channel} ->
+      #'basic.consume_ok'{consumer_tag = Tag} = amqp_channel:subscribe(Channel, #'basic.consume'{queue=Queue}, self());
+       _ ->
+      State
+  end,
+  R.
+
+
 
 amqp_channel(AmqpParams) ->
   case maybe_new_pid({AmqpParams, connection},
@@ -335,4 +377,6 @@ maybe_new_pid(Group, StartFun) ->
       {ok, Pid}
   end.
 
-
+post_to_api(Message, State)->
+  io:format("sending to service api",[]),
+  ok.
