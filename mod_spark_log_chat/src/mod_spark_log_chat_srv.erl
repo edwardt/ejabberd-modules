@@ -23,7 +23,10 @@
 -define(PROCNAME, ?MODULE).
 -define(DEFAULT_PATH, ".").
 -define(DEFAULT_FORMAT, text).
+-define(DEFAULT_NAME,<<"dev">>).
+-define(DEFAULT_EXCHANGE, <<"conversation">>).
 -define(PERF, perfcounter).
+-define(HIBERNATE_TIMEOUT, 90000).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -40,10 +43,22 @@
 		 path		    = ?DEFAULT_PATH, 
 		 format		    = ?DEFAULT_FORMAT,
 		 idMap		    = [],
-		 amqp_params = #amqp_params_direct{}
+		 host		     = <<"">>,
+		 connection_timeout  = ?HIBERNATE_TIMEOUT,
+	  	 name = ?DEFAULT_NAME,
+    		 exchange = ?DEFAULT_EXCHANGE,
+		 amqp_params = #amqp_params_network {}
 }).
 
-
+-record(chat_msg, {
+		 sid = [],
+		 subject = [],
+		 from_mid = [],
+		 from_bid = [],
+		 to_mid = [],
+	  	 to_bid = [],
+		 body = []
+}).
 
 log_packet_send(From, To, Packet) ->
     %Start_time = app_helper:os_now(),
@@ -97,6 +112,9 @@ init([Host,Opts])->
     ?DEBUG("Starting ~p Host: ~p Opt: ~p~n", [?MODULE, Opts]),
     ok = lager:start(),
     Config = start_vhost(Host,Opts),
+   {ok, Channel} = amqp_channel(Config#config.amqp_params),
+  #'exchange.declare_ok'{} = amqp_channel:call(Channel,   #'exchange.declare'{ exchange = Config#config.exchange, type = <<"topic">> }),
+
     {ok, Config}.
 
 stop(Host) ->
@@ -134,32 +152,34 @@ write_packet(ChatType, From, To, Packet) ->
    gen_server:call(Proc, {push_to_queue, From, To, Packet, ChatType}).
 
 
-subject(Packet, Format)->
+get_subject(Packet, Format)->
   case xml:get_path_s(Packet, [{elem, "subject"}, cdata]) of
        false -> "";
        Text ->  escape(Format, Text)
   end.
 
-body(Packet, Format)->
+get_body(Packet, Format)->
    escape(Format, xml:get_path_s(Packet, [{elem, "body"}, cdata])).
 
 from_member(From, IdMap)->
   LUser = jlib:nodeprep(From),  
   app_helper:extract_id_from_jid(LUser, IdMap).
 
-to_member(To)->
+to_member(To, IdMap)->
   LUser = jlib:nodeprep(To),  
   app_helper:extract_id_from_jid(LUser, IdMap).
 
 
-
 handle_call({push_to_queue, From, To, Packet, ChatType}, _From, State)->
-  Reply = case is_empty_message(Packet,State#config.format) of
+  Reply = case is_empty_message(Packet, State#config.format) of
        true -> ?WARNING_MSG("Will not log empty message",[]),
 	       empty_message; 
-       _ -> post_to_queue(From, To, Packet, ChatType, State)
+       _ -> Date = erlang:date(),
+	    Time = erlang:now(),
+            post_to_queue(Date, Time, From, To, Packet, ChatType, 
+	        State) 
   end,
-  {reply, Reply, State}.
+  {reply, Reply, State, State#config.connection_timeout}.
 
 handle_cast(stop, State)->
   {stop,normal, State};
@@ -175,8 +195,8 @@ handle_info(_, State)->
   
 
 is_empty_message(Packet, Format)->
-  Subject = subject(Packet, Format),
-  Body = body(Packet, Format),
+  Subject = get_subject(Packet, Format),
+  Body = get_body(Packet, Format),
   equal(Subject,"") and equal(Body, "").
 
 equal(A,B) ->
@@ -190,26 +210,29 @@ load_config([Host1, Opts])->
    Username = gen_mod:get_opt(username, Opts, <<"guest">>),
    Password = gen_mod:get_opt(password, Opts, <<"guest">>),
    Virtual_host = gen_mod:get_opt(virtual_host, Opts, <<"/">>),
-   Node		= gen_mod:get_opt(node, Opts, node()),
-   Adapter_info	= gen_mod:get_opt(adapter_info, Opts, none),
-  % Host         = gen_mod:get_opt(host, Opts, Host1),
-  % Port         = gen_mod:get_opt(port, Opts, undefined),
-  % Heartbeat    = gen_mod:get_opt(heartbeat, Opts, 0),
-  % Connection_timeout = gen_mod:get_opt(connection_timeout, Opts, infinity),
+   Env_Name = gen_mod:get_opt(envionment_name, Opts, ?DEFAULT_NAME),
+   Exchange = gen_mod:get_opt(exchange, Opts, ?DEFAULT_EXCHANGE),
+%   Node		= gen_mod:get_opt(node, Opts, node()),
+%   Adapter_info	= gen_mod:get_opt(adapter_info, Opts, none),
+   Host         = gen_mod:get_opt(host, Opts, Host1),
+   Port         = gen_mod:get_opt(port, Opts, undefined),
+   Heartbeat    = gen_mod:get_opt(heartbeat, Opts, 0),
+   Connection_timeout = gen_mod:get_opt(connection_timeout, Opts, ?HIBERNATE_TIMEOUT),
    Client_properties  = gen_mod:get_opt(client_properties, Opts, []),
 
    CfgList = spark_app_config_srv:load_config("ejabberd_auth_spark.config"),
    IdMap = spark_app_config_srv:lookup(community2brandId, CfgList,required), ejabberd_auth_spark_config:spark_communityid_brandid_map(CfgList),
-   Amqp_Params = #amqp_params_direct{
+   Amqp_Params = #amqp_params_network{
 		 username	    = Username,
                  password           = Password,
                  virtual_host       = Virtual_host,
-                 node              = Node,
-                 adapter_info      = Adapter_info,
-          %       host               = Host,
-          %       port               = Port,
-	  %	 heartbeat          = Heartbeat,
-	  %	 connection_timeout = Connection_timeout,
+	 	 
+          %       node              = Node,
+          %       adapter_info      = Adapter_info,
+                 host               = Host,
+                 port               = Port,
+	  	 heartbeat          = Heartbeat,
+	  	 connection_timeout = Connection_timeout,
           	 client_properties  =
 			      Client_properties			
 
@@ -217,6 +240,9 @@ load_config([Host1, Opts])->
    {ok, #config{ path		    = Path, 
 		 format		    = Format,
 		 idMap		    = IdMap,
+		 host 		    = Host1,
+		 name 		    = Env_Name,
+		 exchange 	    = Exchange,
 		 amqp_params	    = Amqp_Params}}.
 
 escape(text, Text) ->
@@ -229,5 +255,84 @@ escape(html, [$& | Text]) ->
     "&amp;" ++ escape(html, Text);
 escape(html, [Char | Text]) ->
     [Char | escape(html, Text)].
+
+%%%  ********************************************************
+post_to_queue(Date, Time, From, To, Packet, ChatType, 
+	     #config{amqp_params = AmqpParams } = State) ->
+  case amqp_channel(AmqpParams) of
+    {ok, Channel} ->
+      Message = transform_chat_msg(From, To, Packet, ChatType, State),
+      send(State,[Date, " ", Time, " ", Message], Channel, ChatType);
+    _ ->
+      State
+  end.
+
+
+transform_chat_msg(From, To, Packet, _ChatType, State)-> 
+  Sid = get_session_id(From, State#config.host,[]),   
+  Format = State#config.format,
+  IdMap = State#config.idMap,
+  [From_Mid, From_Bid] = from_member(From, IdMap),  
+  [To_Mid, To_Bid] = to_member(To, IdMap),    
+  #chat_msg{
+	sid = Sid,
+	subject = get_subject(Packet,Format),
+        from_mid = From_Mid,
+	from_bid = From_Bid,
+	to_mid = To_Mid,
+	to_bid = To_Bid,
+	body = get_body(Packet,Format)
+  }. 
+
+get_session_id(User, Server, Resource)->
+   ejabberd_sm:get_session_pid(User, Server, Resource).
+
+
+
+send(#config{ name = Name, exchange = Exchange } = State, Message, Channel, ChatType) ->
+  RkPrefix = atom_to_list(ChatType),
+  RoutingKey =  list_to_binary( case Name of
+                                  [] ->
+                                    RkPrefix;
+                                  Name ->
+                                    string:join([RkPrefix, Name], ".")
+                                end
+                              ),
+  Publish = #'basic.publish'{ exchange = Exchange, routing_key = RoutingKey },
+  Props = #'P_basic'{ content_type = <<"text/plain">> },
+  Body = list_to_binary(lists:flatten(Message)),
+  Msg = #amqp_msg{ payload = Body, props = Props },
+
+  % io:format("message: ~p~n", [Msg]),
+  amqp_channel:cast(Channel, Publish, Msg),
+
+  State.
+
+amqp_channel(AmqpParams) ->
+  case maybe_new_pid({AmqpParams, connection},
+                     fun() -> amqp_connection:start(AmqpParams) end) of
+    {ok, Client} ->
+      maybe_new_pid({AmqpParams, channel},
+                    fun() -> amqp_connection:open_channel(Client) end);
+    Error ->
+      Error
+  end.
+
+maybe_new_pid(Group, StartFun) ->
+  case pg2:get_closest_pid(Group) of
+    {error, {no_such_group, _}} ->
+      pg2:create(Group),
+      maybe_new_pid(Group, StartFun);
+    {error, {no_process, _}} ->
+      case StartFun() of
+        {ok, Pid} ->
+          pg2:join(Group, Pid),
+          {ok, Pid};
+        Error ->
+          Error
+      end;
+    Pid ->
+      {ok, Pid}
+  end.
 
 
