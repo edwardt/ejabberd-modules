@@ -23,7 +23,7 @@
 -define(PROCNAME, ?MODULE).
 -define(DEFAULT_PATH, ".").
 -define(DEFAULT_FORMAT, text).
-
+-define(PERF, perfcounter).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -39,6 +39,7 @@
 -record(config, {
 		 path		    = ?DEFAULT_PATH, 
 		 format		    = ?DEFAULT_FORMAT,
+		 idMap		    = [],
 		 username	    = <<"guest">>,
                  password           = <<"guest">>,
                  virtual_host       = <<"/">>,
@@ -52,13 +53,21 @@
 
 
 log_packet_send(From, To, Packet) ->
-    log_packet(From, To, Packet, From#jid.lserver).
+    %Start_time = app_helper:os_now(),
+    lager:log(info,"~p ~p:user_send_message START",[?PERF, ?PROCNAME]), 
+    R = log_packet(From, To, Packet, From#jid.lserver),
+    %End_time = app_helper:os_now(), 
+    lager:log(info,"~p ~p:user_send_message END",[?PERF, ?PROCNAME]), 
+    R.
 
 log_packet_receive(_JID, From, To, _Packet) 
 	when From#jid.lserver =:= To#jid.lserver->
     ok; % self talk
 log_packet_receive(_JID, From, To, Packet) ->
-    log_packet(From, To, Packet, To#jid.lserver).
+    lager:log(info,"~p ~p:user_receive_message START",[?PERF, ?PROCNAME]),     
+    R = log_packet(From, To, Packet, To#jid.lserver),
+    lager:log(info,"~p ~p:user_receive_message END",[?PERF, ?PROCNAME]), 
+    R.
 
 log_packet(From, To, Packet = {xmlelement, "message", Attrs, _Els}, Host) ->
     ChatType = xml:get_attr_s("type", Attrs),
@@ -122,13 +131,63 @@ handle_chat_msg("groupchat", _From, _To, Packet, _Host) ->
 handle_chat_msg("error", _From, _To, Packet, _Host) ->
     ?DEBUG("dropping error: ~s", [xml:element_to_string(Packet)]),
     ok;   
-   
-handle_chat_msg(ChatType, From, To, Packet, Host) -> 
-    write_packet(ChatType, From, To, Packet, Host).
 
 
-write_packet(ChatType, From, To, Packet, Host) -> ok.
+handle_chat_msg(ChatType, From, To, Packet, _Host) -> 
+    write_packet(ChatType, From, To, Packet).
 
+write_packet(ChatType, From, To, Packet) -> 
+   Proc = gen_mod:get_module_proc(From#jid.server,?PROCNAME),
+   gen_server:call(Proc, {push_to_queue, From, To, Packet, ChatType}).
+
+
+subject(Packet, Format)->
+  case xml:get_path_s(Packet, [{elem, "subject"}, cdata]) of
+       false -> "";
+       Text ->  escape(Format, Text)
+  end.
+
+body(Packet, Format)->
+   escape(Format, xml:get_path_s(Packet, [{elem, "body"}, cdata])).
+
+from_member(From, IdMap)->
+  LUser = jlib:nodeprep(From),  
+  app_helper:extract_id_from_jid(LUser, IdMap).
+
+to_member(To)->
+  LUser = jlib:nodeprep(To),  
+  app_helper:extract_id_from_jid(LUser, IdMap).
+
+
+
+handle_call({push_to_queue, From, To, Packet, ChatType}, _From, State)->
+  Reply = case is_empty_message(Packet,State#config.format) of
+       true -> ?WARNING_MSG("Will not log empty message",[]),
+	       empty_message; 
+       Else -> ok
+  end,
+  {reply, Reply, State}.
+
+handle_cast(stop, State)->
+  {stop,normal, State};
+
+handle_cast(_Request, State)->
+  {noreply, State}.
+
+handle_info(timeout,State) ->
+  {noreply, State, hibernate};
+
+handle_info(_, State)->
+  {noreply, State}.
+  
+
+is_empty_message(Packet, Format)->
+  Subject = subject(Packet, Format),
+  Body = body(Packet, Format),
+  equal(Subject,"") and equal(Body, "").
+
+equal(A,B) ->
+  A =:= B.
 
 load_config([])->
    {ok, #config{}};
@@ -144,8 +203,12 @@ load_config([Host, Opts])->
    Connection_timeout = gen_mod:get_opt(connection_timeout, Opts, infinity),
    Client_properties  = gen_mod:get_opt(client_properties, Opts, []),
 
+   CfgList = spark_app_config_srv:load_config("ejabberd_auth_spark.config"),
+   IdMap = spark_app_config_srv:lookup(community2brandId, CfgList,required), ejabberd_auth_spark_config:spark_communityid_brandid_map(CfgList),
+
    {ok, #config{ path		    = Path, 
 		 format		    = Format,
+		 idMap		    = IdMap,
 		 username	    = Username,
                  password           = Password,
                  virtual_host       = Virtual_host,
@@ -154,3 +217,16 @@ load_config([Host, Opts])->
 		 heartbeat          = Heartbeat,
 		 connection_timeout = Connection_timeout,
 		 client_properties  = Client_properties}}.
+
+escape(text, Text) ->
+    Text;
+escape(_, "") ->
+    "";
+escape(html, [$< | Text]) ->
+    "&lt;" ++ escape(html, Text);
+escape(html, [$& | Text]) ->
+    "&amp;" ++ escape(html, Text);
+escape(html, [Char | Text]) ->
+    [Char | escape(html, Text)].
+
+
