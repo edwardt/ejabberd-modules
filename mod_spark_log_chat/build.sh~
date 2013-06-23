@@ -1,5 +1,5 @@
 #!/bin/sh
-EJABBERD_DEV= ../ejabberd-dev/trunk
+EJABBERD_DEV=../ejabberd-dev/trunk
 AMQP_DEV=../amqp_client
 RABBITC_DEV=../rabbit_common
 

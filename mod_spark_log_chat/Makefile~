@@ -3,11 +3,12 @@
 
 ERL ?= $(shell which erl)
 EJABBERD_DEV ?= ../ejabberd-dev/trunk
+SPARK_APP_CONFIG ?=./apps/spark_common_util
 AMQP_DEV ?=../amqp_client
 RABBITC_DEV ?=../rabbit_common
 
 all:
-	$(ERL) -pa $(EJABBERD_DEV)/ebin $(AMQP_DEV)/ebin $(RABBITC_DEV)/ebin -make
+	$(ERL) -pa $(EJABBERD_DEV)/ebin $(SPARK_APP_CONFIG)/ebin $(AMQP_DEV)/ebin  $(RABBITC_DEV)/ebin -make
 
 clean:
 	rm -f ebin/*.beam

@@ -1,24 +1,18 @@
-{'src/mod_spark_log_chat',	
+{'src/mod_spark_log_chat*',	
 	[debug_info,
 	 warn_unused_vars,
 	 warn_unused_imports, 
 	 verbose,
 	 {outdir, "ebin"},
 	 {i,[
-             '../ejabberd-dev/trunk/include' 
+             ".." 
+	    ]}
+	 {i,[
+             "../ejabberd-dev/trunk/include" 
+	    ]},
+	 {i,[
+             "../deps" 
 	    ]}
    ]
 }.
-{
-   'src/amqp_util',	
-	[debug_info,
-	 warn_unused_vars,
-	 warn_unused_imports, 
-	 verbose,
-	 {outdir, "ebin"},
-	 {i,['../amqp_client/include']},
-	 {i,['../rabbit_common/include']}
 
-
-   ]
-}.
