@@ -12,7 +12,6 @@
              mod_spark_log_chat,
 	     mod_spark_log_chat_app,
 	     mod_spark_log_chat_sup,
-	     spark_amqp_client,
 	     mod_spark_log_chat_srv
 	     }},
   {mod, { mod_spark_log_chat_app, []}},
