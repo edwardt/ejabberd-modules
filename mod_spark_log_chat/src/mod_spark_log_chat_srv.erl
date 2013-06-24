@@ -36,31 +36,7 @@
 
 -include_lib("ejabberd.hrl").
 -include_lib("jlib.hrl").
-
--include_lib("lager/include/lager.hrl").
--include_lib("amqp_client/include/amqp_client.hrl").
-
--record(config, {
-		 path		    = ?DEFAULT_PATH, 
-		 format		    = ?DEFAULT_FORMAT,
-		 idMap		    = [],
-		 host		     = <<"">>,
-		 connection_timeout  = ?HIBERNATE_TIMEOUT,
-	  	 name = ?DEFAULT_NAME,
-    		 exchange = ?DEFAULT_EXCHANGE, 
-		 queue=?DEFAULT_QUEUE,
-		 amqp_params = #amqp_params_network {}
-}).
-
--record(chat_msg, {
-		 sid = [],
-		 subject = [],
-		 from_mid = [],
-		 from_bid = [],
-		 to_mid = [],
-	  	 to_bid = [],
-		 body = []
-}).
+-include_lib("mod_spark_log_chat.hrl").
 
 log_packet_send(From, To, Packet) ->
     %Start_time = app_helper:os_now(),
@@ -378,5 +354,6 @@ maybe_new_pid(Group, StartFun) ->
   end.
 
 post_to_api(Message, State)->
+
   io:format("sending to service api",[]),
   ok.
