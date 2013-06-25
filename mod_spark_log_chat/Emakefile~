@@ -6,12 +6,16 @@
 	 {outdir, "ebin"},
 	 {i,[
              ".." 
-	    ]}
-	 {i,[
-             "../ejabberd-dev/trunk/include" 
 	    ]},
 	 {i,[
-             "../deps" 
+             "include" 
+	    ]},
+
+	 {i,[
+             "../../ejabberd-dev/trunk/include" 
+	    ]},
+	 {i,[
+             "../../deps" 
 	    ]}
    ]
 }.

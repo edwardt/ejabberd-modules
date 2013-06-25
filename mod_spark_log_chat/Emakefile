@@ -8,6 +8,10 @@
              ".." 
 	    ]},
 	 {i,[
+             "include" 
+	    ]},
+
+	 {i,[
              "../ejabberd-dev/trunk/include" 
 	    ]},
 	 {i,[
