@@ -39,14 +39,15 @@
 }).
 
 -record(chat_message, {
-		from,
-		from_brandId,
-		to,
-		to_brandId,
-		type, 
-		subject, 
-		body, 
-		thread,
+		from = "",
+		from_brandId = "",
+		to = "",
+		to_brandId = "",
+		type = "chat", 
+		format = "text",
+		subject = "", 
+		body = "", 
+		thread = "",
 		time_stamp}).
 
 -record(state, {
@@ -149,15 +150,16 @@ handle_chat_msg("error", _From, _To, Packet, _Host) ->
    
 handle_chat_msg(ChatType, From, To, Packet, Host) -> 
     ?INFO_MSG("Writing packet to rabbitmq: ", []),
-    gen_server:call(?PROCNAME, {write_packet, From, To, Packet, Host}).
+    gen_server:call(?PROCNAME, {write_packet, ChatType, From, To, Packet, Host}).
 %    write_packet(From, To, Packet, Host).
 
 -spec handle_call(tuple(), pid(), state()) -> {reply, any(), state()}.
-handle_call({write_packet, FromJid, ToJid, Packet, Host}, _From, State) ->
+handle_call({write_packet, Type, FromJid, ToJid, Packet, Host}, _From, State) ->
   Start = os_now(),
   IdMap = State#state.idMap,
-  Reply = write_packet(FromJid, ToJid, Packet, Host, IdMap),
+  Reply = write_packet(Type, FromJid, ToJid, Packet, Host, IdMap),
   End = os_now(),
+  ?INFO_MSG("Writing packet to rabbitmq: start ~p end ~p time span ~p", [Start, End, timespan(State, End)]),
   {reply, Reply, State};
 
 handle_call(ping, _From, State) ->
@@ -189,7 +191,7 @@ code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
 -spec write_packet(jid(), jid(), string(), string(), [tuple()]) -> ok | {error, term()}.  
-write_packet(FromJid, ToJid, Packet, Host, IdMap) ->
+write_packet(Type, FromJid, ToJid, Packet, Host, IdMap) ->
  %    gen_mod:get_module_proc(Host, ?PROCNAME) ! {call, self(), get_config},
  %   Format = get_im_transform_format(Config),
     Format = ?DEFAULT_FORMAT,
@@ -201,7 +203,7 @@ write_packet(FromJid, ToJid, Packet, Host, IdMap) ->
             ?INFO_MSG("not logging empty message from ~s",[jlib:jid_to_string(FromJid)]),
             ok;
         _ ->
-        	Type = chat,
+        	%Type = chat,
         	Thread = get_thread(Format, Packet),
         	MessageItem = parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap), 
         	post_to_rabbitmq(MessageItem)
@@ -219,16 +221,18 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
     	to = To,
     	to_brandId = ToBrandId,
     	type = Type,
+    	format = Format,
     	subject = Subject,
     	body = Body,
     	thread = Thread,
     	time_stamp = TimeStamp
     }.
 
--spec get_memberId(jid()) ->[string()].
+-spec get_memberId(jid(), [tuple()]) ->[string()].
 get_memberId(Jid, IdMap)->
    UserName = jlib:jid_to_string(Jid),
-   [MemberId, BrandId] = get_login_data(UserName, IdMap).
+   [MemberId, BrandId] = get_login_data(UserName, IdMap),
+   [MemberId, BrandId].
 
 -spec get_im_transform_format(any())->atom().
 get_im_transform_format(_)->
