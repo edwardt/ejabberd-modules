@@ -60,14 +60,14 @@ start_link([Host, Opts]) -> start_link(Host, Opts).
 -spec start_link(string(), list()) ->ok | {error, term()}.
 start_link(Host, Opts)->
 	?INFO_MSG("gen_server ~p  ~p~n", [Host, Opts]),
-	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-	gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts]).
+	%Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+	gen_server:start_link({local, ?PROCNAME}, ?MODULE, [Host, Opts]).
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
     ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
-   	%Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-   	ChildSpec = {?PROCNAME,
+   	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+   	ChildSpec = {Proc,
        {?MODULE, start_link, [Host, Opts]},
        temporary,
        1000,
