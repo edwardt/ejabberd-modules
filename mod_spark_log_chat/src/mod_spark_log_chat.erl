@@ -9,12 +9,21 @@
 -author('etsang@spark.net').
 
 -behaviour(gen_mod).
+-behaviour(gen_server).
 
 -export([start/2,
          init/1,
 	 	 stop/1,
 	 	 log_packet_send/3,
 	 	 log_packet_receive/4]).
+
+-export([start_link/0]).
+-export([init/1, 
+		 handle_call/3,
+		 handle_cast/2,
+		 handle_info/2, 
+		 terminate/2, 
+		 code_change/3]).
 
 %-define(ejabberd_debug, true).
 
@@ -25,7 +34,7 @@
 -define(DEFAULT_PATH, ".").
 -define(DEFAULT_FORMAT, text).
 
--record(config, {path=?DEFAULT_PATH,
+-record(config, {path=?DEFAULT_FORMAT
 	   format=?DEFAULT_FORMAT
 }).
 
@@ -41,18 +50,26 @@
 		time_stamp}).
 
 -record(state, {
-	idMap =[]
-
+	idMap =[],
+	config = ?DEFAULT_PATH,
+	format = ?DEFAULT_FORMAT
 }).
+
+start_link(Host, Opts)->
+	?DEBUG("gen_server ~p  ~p~n", [Host, Opts]),
+	Proc = gen_mod:get_module_proc(Host, ?Proc),
+	gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts]).
 
 start(Host, Opts) ->
     ?DEBUG(" ~p  ~p~n", [Host, Opts]),
-    case gen_mod:get_opt(host_config, Opts, []) of
-	[] ->
-	    start_vh(Host, Opts);
-	HostConfig ->
-	    start_vhs(Host, HostConfig)
-    end.
+   	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+   	ChildSpec = {Proc,
+       {?MODULE, start_link, [Host, Opts]},
+       temporary,
+       1000,
+       worker,
+       [?MODULE]},
+   	supervisor:start_child(ejabberd_sup, ChildSpec).
 
 start_vhs(_, []) ->
     ok;
@@ -70,12 +87,17 @@ start_vh(Host, Opts) ->
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
     
-    register(gen_mod:get_module_proc(Host, ?PROCNAME),
-	     spawn(?MODULE, init, [#config{path=Path, format=Format}])).
+%    register(gen_mod:get_module_proc(Host, ?PROCNAME),
+%	     spawn(?MODULE, init, [#config{path=Path, format=Format}])).
 
-init(Config)->
-    ?DEBUG("Starting ~p with config ~p~n", [?MODULE, Config]),
-    ok.
+init([Host, Opts])->
+    ?DEBUG("Starting ~p with host ~p config ~p~n", [?MODULE, Host, Opts]),
+    case gen_mod:get_opt(host_config, Opts, []) of
+		[] ->
+		    start_vh(Host, Opts);
+		HostConfig ->
+	 	    start_vhs(Host, HostConfig)
+   	end.
 
 stop(Host) ->
     ejabberd_hooks:delete(user_send_packet, Host,
