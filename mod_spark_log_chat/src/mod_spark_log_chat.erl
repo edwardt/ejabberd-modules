@@ -194,7 +194,7 @@ code_change(_OldVsn, State, _Extra) ->
 
 -spec write_packet(jid(), jid(), string(), string(), string(),[tuple()]) -> ok | {error, term()}.  
 write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
-    Format = get_im_transform_format(),
+    Format = get_im_transform_format(Type),
     Subject = get_subject(Format, Packet),
     Body = get_body(Format, Packet),
     case Subject ++ Body of
