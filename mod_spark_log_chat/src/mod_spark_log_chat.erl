@@ -61,7 +61,7 @@ start_link([Host, Opts]) -> start_link(Host, Opts).
 start_link(Host, Opts)->
 	?INFO_MSG("gen_server ~p  ~p~n", [Host, Opts]),
 	%Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-	gen_server:start_link({local, ?PROCNAME}, ?MODULE, [Host, Opts]).
+	gen_server:start_link({local, ?PROCNAME}, ?MODULE, [Host, Opts],[]).
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
