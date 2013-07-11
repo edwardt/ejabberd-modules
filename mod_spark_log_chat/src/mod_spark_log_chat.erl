@@ -156,9 +156,10 @@ handle_chat_msg(ChatType, From, To, Packet, Host) ->
 handle_call({write_packet, Type, FromJid, ToJid, Packet, Host}, _From, State) ->
   Start = os_now(),
   IdMap = State#state.idMap,
+  ?INFO_MSG("Start publish message to rabbitmq: start ~p ", [Start]),
   Reply = write_packet(Type, FromJid, ToJid, Packet, Host, IdMap),
   End = os_now(),
-  ?INFO_MSG("Writing packet to rabbitmq: start ~p end ~p time span ~p", [Start, End, timespan(State, End)]),
+  ?INFO_MSG("Published packet to rabbitmq: start ~p end ~p time span ~p", [Start, End, timespan(State, End)]),
   {reply, Reply, State};
 
 handle_call(ping, _From, State) ->
@@ -202,6 +203,7 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
         	%Type = chat,
         	Thread = get_thread(Format, Packet),
         	MessageItem = parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap), 
+        	?INFO_MSG("Will publish Message Payload ~p ", [MessageItem]),
         	post_to_rabbitmq(MessageItem)
     end.
 
