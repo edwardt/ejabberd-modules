@@ -56,6 +56,7 @@
 -type state() :: #state{}.
 -type chat_message() :: #chat_message{}.
 -type jid() :: #jid{}.
+-type xmlelement() :: string(). % TODO just say string for now.
 
 start_link([Host, Opts]) -> start_link(Host, Opts).
 -spec start_link(string(), list()) ->ok | {error, term()}.
