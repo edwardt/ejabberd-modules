@@ -89,9 +89,6 @@ start_vhs(Host, [{_VHost, _Opts}| Tail]) ->
     ?INFO_MSG("start_vhs ~p  ~p~n", [Host, [{_VHost, _Opts}| Tail]]),
     start_vhs(Host, Tail).
 start_vh(Host, Opts) ->
-  %  ConfPath = gen_mod:get_opt(config_path, Opts, ?DEFAULT_PATH),
-  %	ConfFile = gen_mod:get_opt(config_file, Opts, ?DEFAULT_PATH),
-
     Format = gen_mod:get_opt(format, Opts, ?DEFAULT_FORMAT),
     IdMap = gen_mod:get_opt(idMap, Opts, []),
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
@@ -100,8 +97,6 @@ start_vh(Host, Opts) ->
     	 	config_file,
     		format = Format,
     		idMap = IdMap}.
-%    register(gen_mod:get_module_proc(Host, ?PROCNAME),
-%	     spawn(?MODULE, init, [#config{path=Path, format=Format}])).
 
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
 init([Host, Opts])->
