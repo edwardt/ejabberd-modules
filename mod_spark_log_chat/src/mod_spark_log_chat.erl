@@ -12,9 +12,9 @@
 
 -export([start/2,
          init/1,
-	 stop/1,
-	 log_packet_send/3,
-	 log_packet_receive/4]).
+	 	 stop/1,
+	 	 log_packet_send/3,
+	 	 log_packet_receive/4]).
 
 %-define(ejabberd_debug, true).
 
@@ -27,7 +27,12 @@
 
 -record(config, {path=?DEFAULT_PATH, format=?DEFAULT_FORMAT}).
 
--record(spark_user,{sourceUserId, targetUserId}).
+-record(message, {from, to, type, subject, body, thread}).
+
+-record(state, {
+	idMap =[]
+
+}).
 
 start(Host, Opts) ->
     ?DEBUG(" ~p  ~p~n", [Host, Opts]),
@@ -50,23 +55,16 @@ start_vhs(Host, [{_VHost, _Opts}| Tail]) ->
 start_vh(Host, Opts) ->
     Path = gen_mod:get_opt(path, Opts, ?DEFAULT_PATH),
     Format = gen_mod:get_opt(format, Opts, ?DEFAULT_FORMAT),
+    IdMap = gen_mod:get_opt(idMap, Opts, []),
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
+    
     register(gen_mod:get_module_proc(Host, ?PROCNAME),
 	     spawn(?MODULE, init, [#config{path=Path, format=Format}])).
 
 init(Config)->
     ?DEBUG("Starting ~p with config ~p~n", [?MODULE, Config]),
-    loop(Config).
-
-loop(Config) ->
-    receive
-	{call, Caller, get_config} ->
-	    Caller ! {config, Config},
-	    loop(Config);
-	stop ->
-	    exit(normal)
-    end.
+    ok.
 
 stop(Host) ->
     ejabberd_hooks:delete(user_send_packet, Host,
@@ -103,179 +101,85 @@ handle_chat_msg(ChatType, From, To, Packet, Host) ->
    
 write_packet(From, To, Packet, Host) ->
     gen_mod:get_module_proc(Host, ?PROCNAME) ! {call, self(), get_config},
-    Config = receive
-	       {config, Result} ->
-		   Result
-	   end,
-    Format = get_im_transform_format(Config),
 
-    {Subject, Body} = {case xml:get_path_s(Packet, [{elem, "subject"}, cdata]) of
-			   false ->
-			       "";
-			   Text ->
-			       escape(Format, Text)
-		       end,
-		       escape(Format, xml:get_path_s(Packet, [{elem, "body"}, cdata]))},
+ %   Format = get_im_transform_format(Config),
+    Format = ?DEFAULT_FORMAT,
+    Subject = get_subject(Format, Packet),
+    Body = get_body(Format, Packet),
+    Thread = get_thread(Format, Packet),
     case Subject ++ Body of
         "" -> %% don't log empty messages
             ?DEBUG("not logging empty message from ~s",[jlib:jid_to_string(From)]),
             ok;
-        _ ->
-	    Path = Config#config.path,
-	    FromJid = From#jid.luser++"@"++From#jid.lserver,
-	    ToJid = To#jid.luser++"@"++To#jid.lserver,
-	    {FilenameTemplate, DateString, Header, MessageType} =
-		case calendar:local_time() of
-		    {{Y, M, D}, {H, Min, S}} ->
-			SortedJid = lists:sort([FromJid, ToJid]),
-			Title = io_lib:format(template(Format, title), [FromJid, ToJid, Y, M, D]),
-			{lists:flatten(io_lib:format("~s/~~p-~~2.2.0w-~~2.2.0w ~s - ~s~s",
-				       [Path | SortedJid]++[template(Format, extension)])),
-			 io_lib:format(template(Format, date), [Y, M, D, H, Min, S]),
-
-			 io_lib:format(template(Format, header),
-				       lists:duplicate(count(template(Format, header), "~s"),
-						       Title)
-				      ),
-			 case hd(SortedJid) of
-			     FromJid ->
-				 message1;
-			     ToJid ->
-				 message2
-			 end
-			}
-		end,
-
-	    File = prepare_logfile(FilenameTemplate,[Y, M, D], Header, From, Format ),
-
-            MessageText = get_im_message_text(Subject, Format, Body),
-
-	    ?DEBUG("MessageTemplate ~s~n",[template(Format, MessageType)]),
-	    io:format(File, lists:flatten(template(Format, MessageType)), [DateString, FromJid, From#jid.lresource, ToJid,
-							    To#jid.lresource, MessageText]),
-	    file:close(File)
+        _ -> post_to_rabbitmq(From, To, Subject, Thread, Body)
     end.
 
-get_im_transform_format(Config)->
-   Config#config.format.
-get_im_transform_format()->
+parse_message(FromJid, ToJid, Type)->
+	{From, FromBrandId} = get_memberId(FromJid),
+	{To, ToBrandId} = get_memberId(ToJid),
+    Format = ?DEFAULT_FORMAT,
+    Subject = get_subject(Format, Packet),
+    Body = get_body(Format, Packet),
+    Thread = get_thread(Format, Packet),
+    #message{
+    	from = From,
+	 	from_brandId = FromBrandId,
+    	to = To,
+    	to_brandId = ToBrandId,
+    	type = Type,
+    	subject = Subject,
+    	body = Body,
+    	thread = Thread
+    }.
+
+get_memberId(Jid)->
+   UserName = jlib:jid_to_string(Jid),
+   [MemberId, BrandId] = get_login_data(UserName, IdMap).
+
+get_im_transform_format(_)->
    text.
 
+get_subject(Format, Text) ->
+	parse_body(Format, xml:get_path_s(Packet, [{elem, "subject"}, cdata]).
 
-get_im_message_text("", _Format, Body)->
-   Body;
-get_im_message_text(Subject, Format, Body)->
-   io_lib:format(template(Format, subject), [Subject])++Body.
+get_body(Format, Text) ->
+   parse_body(Format, xml:get_path_s(Packet, [{elem, "body"}, cdata])).
 
+get_thread(Format, Text) ->
+   parse_body(Format, xml:get_path_s(Packet, [{elem, "thread"}, cdata])).
 
+parse_body(Format, false) -> "";
+parse_body(Format, Text) -> escape(Format, Text).
 
-prepare_logfile(FilenameTemplate,[Y, M, D], Header, From, Format )->
-    ?DEBUG("FilenameTemplate ~p~n",[FilenameTemplate]),
-    Filename = io_lib:format(FilenameTemplate, [Y, M, D]),
-    ?DEBUG("logging message from ~s into ~s~n",[jlib:jid_to_string(From), Filename]),
-    File = case file:read_file_info(Filename) of
-           {ok, _} ->
-		   open_logfile(Filename);
-	   {error, enoent} ->
-		   close_previous_logfile(FilenameTemplate, Format, {Y, M, D}),
-		   NewFile = open_logfile(Filename),
-		   io:format(NewFile, Header, []),
-	 	   NewFile
-	   end, 
-    File.
-
-
-open_logfile(Filename) ->
-    case file:open(Filename, [append]) of
-	{ok, File} ->
-	    File;
-	{error, Reason} ->
-	    ?ERROR_MSG("Cannot write into file ~s: ~p~n", [Filename, Reason])
-    end.
-
-close_previous_logfile(FilenameTemplate, Format, Date) ->
-    Yesterday = calendar:gregorian_days_to_date(calendar:date_to_gregorian_days(Date) - 1),
-    Filename = io_lib:format(FilenameTemplate, tuple_to_list(Yesterday)),
-    case file:read_file_info(Filename) of
-	{ok, _} ->
-	    File = open_logfile(Filename),
-	    io:format(File, template(Format, footer), []),
-	    file:close(File);
-	{error, enoent} ->
-	    ok
-    end.
-
-escape(text, Text) ->
-    Text;
-escape(_, "") ->
-    "";
+escape(text, Text) -> Text;
+escape(_, "") -> "";
 escape(html, [$< | Text]) ->
-    "&lt;" ++ escape(html, Text);
+	lists:concat(["&lt;", escape(html, Text)]);
+%    "&lt;" ++ escape(html, Text);
 escape(html, [$& | Text]) ->
-    "&amp;" ++ escape(html, Text);
+	lists:concat(["&amp;" , escape(html, Text)]);
+%    "&amp;" ++ escape(html, Text);
 escape(html, [Char | Text]) ->
     [Char | escape(html, Text)].
 
+get_memberId_communityId([])-> [];
+get_memberId_communityId(UserName) ->
+  case re:split(UserName,"-") of 
+      [MemberId, CommunityId] -> [MemberId, CommunityId];
+              {error, Reason} -> {error, Reason};
+              Else -> {error, Else}
+  end.
 
-% return the number of occurence of Word in String
-count(String, Word) ->
-    case string:str(String, Word) of
-	0 ->
-	    0;
-	N ->
-	    1+count(string:substr(String, N+length(Word)), Word)
-    end.
+get_login_data(UserName, IdMap) ->
+  [MemberId, CommunityId] = get_memberId_communityId(UserName), 
+  BrandIdStr = find_value(CommunityId, IdMap),
+  MemberIdStr = erlang:binary_to_list(MemberId),
+  [MemberIdStr, BrandIdStr]. 
 
-template(text, extension) ->
-    ".log";
-template(text, title) ->
-    "Messages log between ~s and ~s on ~p-~2.2.0w-~2.2.0w";
-template(text, header) ->
-    "~s~n-----------------------------------------------------------------------~n";
-template(text, subject) ->
-    "Subject: ~s~n";
-template(text, message) ->
-    "~~s ~~s/~~s -> ~~s/~~s~n~s~~s~n";
-template(text, message1) ->
-    io_lib:format(template(text, message), ["> "]);
-template(text, message2) ->
-    io_lib:format(template(text, message), ["< "]);
-template(text, date) ->
-    "~p-~2.2.0w-~2.2.0w ~2.2.0w:~2.2.0w:~2.2.0w";
-template(text, footer) ->
-    "---- End ----~n";
-
-template(html, extension) ->
-    ".html";
-template(html, title) ->
-    template(text, title);
-template(html, header) ->
-    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">~n"++
-	"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /><title>~s</title>"++
-	css()++
-	"</head><body>~n<h1>~s</h1>~n";
-template(html, subject) ->
-    "<div class=\"subject\"><span>Subject:</span> ~s</div>";
-template(html, message) ->
-    "<div class=\"message~w\"><span class=\"date\">~~s</span> <span class=\"jid\">~~s</span>/<span class=\"ressource\">~~s</span> -&gt; <span class=\"jid\">~~s</span>/<span class=\"ressource\">~~s</span>~~n<span class=\"messagetext\">~~s</span></div>~~n";
-template(html, message1) ->
-    io_lib:format(template(html, message), [1]);
-template(html, message2) ->
-    io_lib:format(template(html, message), [2]);
-template(html, date) ->
-    "~p-~2.2.0w-~2.2.0w ~2.2.0w:~2.2.0w:~2.2.0w";
-template(html, footer) ->
-    "</body></html>".
-
-css() ->
-    "<style type=\"text/css\">~n<!--~n"++
-	"h1 {border-bottom: #224466 solid 3pt; margin-left: 20pt; color: #336699; font-size: 1.5em; font-weight: bold; font-family: sans-serif; letter-spacing: 0.1empx; text-decoration: none;}~n"++
-	".message1 {border: black solid 1pt; background-color: #d7e4f1; margin: 0.3em}~n"++
-	".message2 {border: black solid 1pt; background-color: #b39ccb; margin: 0.3em}~n"++
-	".subject {margin-left: 0.5em}~n"++
-	".subject span {font-weight: bold;}~n"++
-	".date {color: #663399; font-size: 0.8em; font-weight: bold; font-family: sans-serif; letter-spacing: 0.05em; margin-left:0.5em; margin-top:20px;}~n"++
-	".jid {color: #336699; font-weight: bold; font-size: 1em; }~n"++
-	".ressource {color: #336699; }~n"++
-	".messagetext {color: black; margin: 0.2em; clear: both; display: block;}~n"++
-	"//-->~n</style>~n".
+find_value(Key, List) ->
+  Key1 = erlang:binary_to_list(Key),
+  case lists:keyfind(Key1, 2, List) of
+        {_Type, _Key, Result} -> Result;
+        false -> {error, not_found};
+        {error, Reason} -> {error, Reason}
+  end.
