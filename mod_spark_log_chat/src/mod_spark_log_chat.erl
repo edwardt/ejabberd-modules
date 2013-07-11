@@ -48,8 +48,6 @@
 
 -record(state, {
 	idMap =[],
-	config_path = ?DEFAULT_PATH,
-	config_file = "",
 	format = ?DEFAULT_FORMAT
 }).
 
@@ -93,10 +91,8 @@ start_vh(Host, Opts) ->
     IdMap = gen_mod:get_opt(idMap, Opts, []),
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
-    #state{	
+    #state{
     		idMap = IdMap,
-    		config_path, 
-    	 	config_file,
     		format = Format
     	}.
 
