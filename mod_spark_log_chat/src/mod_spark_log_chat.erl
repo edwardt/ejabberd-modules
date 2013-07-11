@@ -17,7 +17,7 @@
 	 	 log_packet_send/3,
 	 	 log_packet_receive/4]).
 
--export([start_link/0]).
+-export([start_link/1, start_link/2]).
 -export([init/1, 
 		 handle_call/3,
 		 handle_cast/2,
@@ -55,9 +55,11 @@
 	format = ?DEFAULT_FORMAT
 }).
 
+-type state() :: #state{}.
 -type chat_message() :: #chat_message{}.
 -type jid() :: #jid{}.
 
+start_link([Host, Opts]) -> start_link(Host, Opts).
 -spec start_link(string(), list()) ->ok | {error, term()}.
 start_link(Host, Opts)->
 	?INFO_MSG("gen_server ~p  ~p~n", [Host, Opts]),
@@ -180,7 +182,6 @@ handle_info(stop, _From, State)->
 
 -spec terminate(atom(), state()) -> ok.
 terminate(_Reason, _State) ->
-
   ok.
 
 -spec code_change(atom, state(), list()) -> ok.
@@ -188,26 +189,27 @@ code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
 -spec write_packet(jid(), jid(), string(), string(), [tuple()]) -> ok | {error, term()}.  
-write_packet(From, To, Packet, Host, IdMap) ->
+write_packet(FromJid, ToJid, Packet, Host, IdMap) ->
  %    gen_mod:get_module_proc(Host, ?PROCNAME) ! {call, self(), get_config},
  %   Format = get_im_transform_format(Config),
-%    Format = ?DEFAULT_FORMAT,
+    Format = ?DEFAULT_FORMAT,
     Subject = get_subject(Format, Packet),
     Body = get_body(Format, Packet),
 %    Thread = get_thread(Format, Packet),
     case Subject ++ Body of
         "" -> %% don't log empty messages
-            ?INFO_MSG("not logging empty message from ~s",[jlib:jid_to_string(From)]),
+            ?INFO_MSG("not logging empty message from ~s",[jlib:jid_to_string(FromJid)]),
             ok;
         _ ->
+        	Type = chat,
         	Thread = get_thread(Format, Packet),
         	MessageItem = parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap), 
         	post_to_rabbitmq(MessageItem)
     end.
 
--spec parse_message(jid(), jid(), atom()) -> chat_message().
-parse_message(FromJid, ToJid, Type, Subject, Body, Thread)->
-	{From, FromBrandId} = get_memberId(FromJid),
+-spec parse_message(jid(), jid(), atom(), string(), string(), string(), [tuple()]) -> chat_message().
+parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
+	{From, FromBrandId} = get_memberId(FromJid, IdMap),
 	{To, ToBrandId} = get_memberId(ToJid, IdMap),
     Format = ?DEFAULT_FORMAT,
     TimeStamp = get_timestamp(),
