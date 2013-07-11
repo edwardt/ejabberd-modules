@@ -100,7 +100,7 @@ init([Host, Opts])->
 		[] ->
 		    start_vh(Host, Opts);
 		HostConfig ->
-			?ERROR_MSG("Multiple virtual host unsupported"),
+			?ERROR_MSG("Multiple virtual host unsupported",[]),
 			#state{}
 %	 	    start_vhs(Host, HostConfig)
    	end.
@@ -204,7 +204,7 @@ parse_message(FromJid, ToJid, Type)->
     	time_stamp = TimeStamp
     }.
 
--spec get_memberId(jid()) -> [string(),string()].
+-spec get_memberId(jid()) ->[string()].
 get_memberId(Jid)->
    UserName = jlib:jid_to_string(Jid),
    [MemberId, BrandId] = get_login_data(UserName, IdMap).
@@ -220,15 +220,15 @@ post_to_rabbitmq(MessageItem)
 	rabbit_farms:publish(call, Payload).
 
 -spec get_subject(atom, xmlelement())-> string().
-get_subject(Format, Text) ->
-	parse_body(Format, xml:get_path_s(Packet, [{elem, "subject"}, cdata]).
+get_subject(Format, Packet) ->
+	parse_body(Format, xml:get_path_s(Packet, [{elem, "subject"}, cdata])).
 
 -spec get_body(atom, xmlelement())-> string().
-get_body(Format, Text) ->
+get_body(Format, Packet) ->
    parse_body(Format, xml:get_path_s(Packet, [{elem, "body"}, cdata])).
 
 -spec get_thread(atom, xmlelement())-> string().
-get_thread(Format, Text) ->
+get_thread(Format, Packet) ->
    parse_body(Format, xml:get_path_s(Packet, [{elem, "thread"}, cdata])).
 
 -spec parse_body(atom, false|xmlelement())->string().
@@ -260,7 +260,7 @@ get_timestamp() ->
   R =os:timestamp(),
   calendar:now_to_universal_time(R).
 
--spec get_login_data(jid(), string()) -> [jid(),jid()].
+-spec get_login_data(jid(), string()) -> [jid()].
 get_login_data(UserName, IdMap) ->
   [MemberId, CommunityId] = get_memberId_communityId(UserName), 
   BrandIdStr = find_value(CommunityId, IdMap),
