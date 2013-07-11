@@ -93,10 +93,12 @@ start_vh(Host, Opts) ->
     IdMap = gen_mod:get_opt(idMap, Opts, []),
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
-    #state{	config_path, 
+    #state{	
+    		idMap = IdMap,
+    		config_path, 
     	 	config_file,
-    		format = Format,
-    		idMap = IdMap}.
+    		format = Format
+    	}.
 
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
 init([Host, Opts])->
