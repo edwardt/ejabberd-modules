@@ -96,7 +96,9 @@ init([Host, Opts])->
 		[] ->
 		    start_vh(Host, Opts);
 		HostConfig ->
-	 	    start_vhs(Host, HostConfig)
+			?ERROR_MSG("Multiple virtual host unsupported"),
+			#state{}
+%	 	    start_vhs(Host, HostConfig)
    	end.
 
 stop(Host) ->
