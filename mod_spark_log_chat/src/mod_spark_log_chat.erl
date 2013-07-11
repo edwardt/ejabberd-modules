@@ -103,6 +103,7 @@ start_vh(Host, Opts) ->
 %    register(gen_mod:get_module_proc(Host, ?PROCNAME),
 %	     spawn(?MODULE, init, [#config{path=Path, format=Format}])).
 
+-spec init([any()]) -> {ok, pid()} | {error, tuple()}.
 init([Host, Opts])->
     ?INFO_MSG("Starting ~p with host ~p config ~p~n", [?MODULE, Host, Opts]),
     case gen_mod:get_opt(host_config, Opts, []) of
@@ -123,6 +124,7 @@ stop(Host) ->
     gen_mod:get_module_proc(Host, ?PROCNAME) ! stop,
     ok.
 
+-spec ping()-> {ok, state()}.
 ping()->
 	gen_server:call(?PROCNAME, ping).
 
