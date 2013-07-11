@@ -18,7 +18,7 @@
 	 	 log_packet_receive/4]).
 
 -export([start_link/1, start_link/2]).
--export([init/1, 
+-export([
 		 handle_call/3,
 		 handle_cast/2,
 		 handle_info/2, 
@@ -33,10 +33,6 @@
 -define(PROCNAME, ?MODULE).
 -define(DEFAULT_PATH, ".").
 -define(DEFAULT_FORMAT, text).
-
--record(config, {path=?DEFAULT_PATH,
-	   format=?DEFAULT_FORMAT
-}).
 
 -record(chat_message, {
 		from = "",
@@ -77,6 +73,9 @@ start(Host, Opts) ->
        1000,
        worker,
        [?MODULE]},
+
+    ConfPath = gen_mod:get_opt(config_path, Opts, ?DEFAULT_PATH),
+
    	supervisor:start_child(ejabberd_sup, ChildSpec),
    	supervisor:start_child(rabbit_farms_sup, ChildSpec).
 
@@ -105,7 +104,7 @@ init([Host, Opts])->
     case gen_mod:get_opt(host_config, Opts, []) of
 		[] ->
 		    start_vh(Host, Opts);
-		HostConfig ->
+		_HostConfig ->
 			?ERROR_MSG("Multiple virtual host unsupported",[]),
 			#state{}
 %	 	    start_vhs(Host, HostConfig)
@@ -191,13 +190,10 @@ code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
 -spec write_packet(jid(), jid(), string(), string(), [tuple()]) -> ok | {error, term()}.  
-write_packet(Type, FromJid, ToJid, Packet, Host, IdMap) ->
- %    gen_mod:get_module_proc(Host, ?PROCNAME) ! {call, self(), get_config},
- %   Format = get_im_transform_format(Config),
-    Format = ?DEFAULT_FORMAT,
+write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
+    Format = get_im_transform_format(),
     Subject = get_subject(Format, Packet),
     Body = get_body(Format, Packet),
-%    Thread = get_thread(Format, Packet),
     case Subject ++ Body of
         "" -> %% don't log empty messages
             ?INFO_MSG("not logging empty message from ~s",[jlib:jid_to_string(FromJid)]),
@@ -220,7 +216,7 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
 	 	from_brandId = FromBrandId,
     	to = To,
     	to_brandId = ToBrandId,
-    	type = Type,
+    	type = atom_to_list(Type),
     	format = Format,
     	subject = Subject,
     	body = Body,
@@ -236,7 +232,7 @@ get_memberId(Jid, IdMap)->
 
 -spec get_im_transform_format(any())->atom().
 get_im_transform_format(_)->
-   text.
+   ?DEFAULT_FORMAT.
 
 -spec post_to_rabbitmq(chat_message())-> ok | {error, term()}.
 post_to_rabbitmq(MessageItem) 
@@ -257,7 +253,7 @@ get_thread(Format, Packet) ->
    parse_body(Format, xml:get_path_s(Packet, [{elem, "thread"}, cdata])).
 
 -spec parse_body(atom, false|xmlelement())->string().
-parse_body(Format, false) -> "";
+parse_body(_Format, false) -> "";
 parse_body(Format, Text) -> escape(Format, Text).
 
 -spec escape(atom, xmlelement()) -> string().
