@@ -27,7 +27,16 @@
 
 -record(config, {path=?DEFAULT_PATH, format=?DEFAULT_FORMAT}).
 
--record(message, {from, to, type, subject, body, thread}).
+-record(message, {
+		from,
+		from_brandId,
+		to,
+		to_brandId,
+		type, 
+		subject, 
+		body, 
+		thread,
+		time_stamp}).
 
 -record(state, {
 	idMap =[]
@@ -121,6 +130,7 @@ parse_message(FromJid, ToJid, Type)->
     Subject = get_subject(Format, Packet),
     Body = get_body(Format, Packet),
     Thread = get_thread(Format, Packet),
+    TimeStamp = get_timestamp(),
     #message{
     	from = From,
 	 	from_brandId = FromBrandId,
@@ -129,7 +139,8 @@ parse_message(FromJid, ToJid, Type)->
     	type = Type,
     	subject = Subject,
     	body = Body,
-    	thread = Thread
+    	thread = Thread,
+    	time_stamp = TimeStamp
     }.
 
 get_memberId(Jid)->
@@ -138,6 +149,8 @@ get_memberId(Jid)->
 
 get_im_transform_format(_)->
    text.
+
+post_to_rabbitmq(From, To, Subject, Thread, Body)->
 
 get_subject(Format, Text) ->
 	parse_body(Format, xml:get_path_s(Packet, [{elem, "subject"}, cdata]).
@@ -169,6 +182,10 @@ get_memberId_communityId(UserName) ->
               {error, Reason} -> {error, Reason};
               Else -> {error, Else}
   end.
+
+get_timestamp() ->
+  R =os:timestamp(),
+  calendar:now_to_universal_time(R).
 
 get_login_data(UserName, IdMap) ->
   [MemberId, CommunityId] = get_memberId_communityId(UserName), 
