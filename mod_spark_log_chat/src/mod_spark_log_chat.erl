@@ -51,7 +51,7 @@
 
 -record(state, {
 	idMap =[],
-	config = ?DEFAULT_PATH,
+	config_path = ?DEFAULT_PATH,
 	format = ?DEFAULT_FORMAT
 }).
 
@@ -81,12 +81,12 @@ start_vhs(Host, [{_VHost, _Opts}| Tail]) ->
     ?DEBUG("start_vhs ~p  ~p~n", [Host, [{_VHost, _Opts}| Tail]]),
     start_vhs(Host, Tail).
 start_vh(Host, Opts) ->
-    Path = gen_mod:get_opt(path, Opts, ?DEFAULT_PATH),
+    ConfPath = gen_mod:get_opt(config_path, Opts, ?DEFAULT_PATH),
     Format = gen_mod:get_opt(format, Opts, ?DEFAULT_FORMAT),
     IdMap = gen_mod:get_opt(idMap, Opts, []),
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
-    
+    #state{config_path=ConfPath, format = Format, idMap = IdMap}.
 %    register(gen_mod:get_module_proc(Host, ?PROCNAME),
 %	     spawn(?MODULE, init, [#config{path=Path, format=Format}])).
 
