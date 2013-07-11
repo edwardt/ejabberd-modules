@@ -189,7 +189,7 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
--spec write_packet(jid(), jid(), string(), string(), [tuple()]) -> ok | {error, term()}.  
+-spec write_packet(jid(), jid(), string(), string(), string(),[tuple()]) -> ok | {error, term()}.  
 write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
     Format = get_im_transform_format(),
     Subject = get_subject(Format, Packet),
