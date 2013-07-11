@@ -25,9 +25,11 @@
 -define(DEFAULT_PATH, ".").
 -define(DEFAULT_FORMAT, text).
 
--record(config, {path=?DEFAULT_PATH, format=?DEFAULT_FORMAT}).
+-record(config, {path=?DEFAULT_PATH,
+	   format=?DEFAULT_FORMAT
+}).
 
--record(message, {
+-record(chat_message, {
 		from,
 		from_brandId,
 		to,
@@ -120,7 +122,7 @@ write_packet(From, To, Packet, Host) ->
         "" -> %% don't log empty messages
             ?DEBUG("not logging empty message from ~s",[jlib:jid_to_string(From)]),
             ok;
-        _ -> post_to_rabbitmq(From, To, Subject, Thread, Body)
+        _ -> post_to_rabbitmq(MessageItem)
     end.
 
 parse_message(FromJid, ToJid, Type)->
@@ -131,7 +133,7 @@ parse_message(FromJid, ToJid, Type)->
     Body = get_body(Format, Packet),
     Thread = get_thread(Format, Packet),
     TimeStamp = get_timestamp(),
-    #message{
+    #chat_message{
     	from = From,
 	 	from_brandId = FromBrandId,
     	to = To,
@@ -150,7 +152,10 @@ get_memberId(Jid)->
 get_im_transform_format(_)->
    text.
 
-post_to_rabbitmq(From, To, Subject, Thread, Body)->
+post_to_rabbitmq(MessageItem) 
+	when is_record(MessageItem, message) ->
+	Payload = ensure_binary(MessageItem),
+	rabbit_farms:publish(call, Payload).
 
 get_subject(Format, Text) ->
 	parse_body(Format, xml:get_path_s(Packet, [{elem, "subject"}, cdata]).
@@ -200,3 +205,12 @@ find_value(Key, List) ->
         false -> {error, not_found};
         {error, Reason} -> {error, Reason}
   end.
+
+ensure_binary(undefined)->
+	undefined;
+ensure_binary(Value) when is_binary(Value)->
+	Value;
+ensure_binary(Value) when is_list(Value)->
+	Json = json_rec:to_json(chat_message, Value),
+	mochijson2:encode(Json).
+	
