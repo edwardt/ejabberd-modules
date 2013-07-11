@@ -13,7 +13,7 @@
 
 -export([start/2,
          init/1,
-	 	 stop/1,
+	 	 stop/1, ping/0,
 	 	 log_packet_send/3,
 	 	 log_packet_receive/4]).
 
@@ -58,7 +58,7 @@
 -spec start_link(string(), list()) ->ok | {error, term()}.
 start_link(Host, Opts)->
 	?INFO_MSG("gen_server ~p  ~p~n", [Host, Opts]),
-	Proc = gen_mod:get_module_proc(Host, ?Proc),
+	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
 	gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts]).
 
 -spec start(string(), list()) -> ok | {error, term()}.
@@ -114,6 +114,9 @@ stop(Host) ->
     gen_mod:get_module_proc(Host, ?PROCNAME) ! stop,
     ok.
 
+ping()->
+	gen_server:call(?PROCNAME, ping).
+
 -spec log_packet_send(jid(), jid(),xmlelement()) -> ok | {error, term()}.
 log_packet_send(From, To, Packet) ->
     log_packet(From, To, Packet, From#jid.lserver).
@@ -131,7 +134,7 @@ log_packet(From, To, Packet = {xmlelement, "message", Attrs, _Els}, Host) ->
     handle_chat_msg(ChatType, From, To, Packet, Host);
 log_packet(_From, _To, _Packet, _Host) ->
     ok.
--spec handle_cast_msg(atom(),jid(), jid(), xmlelement(), string()) -> ok | {error, term()}.
+-spec handle_chat_msg(atom(),jid(), jid(), xmlelement(), string()) -> ok | {error, term()}.
 handle_chat_msg("groupchat", _From, _To, Packet, _Host) ->
     ?INFO_MSG("dropping groupchat: ~s", [xml:element_to_string(Packet)]),
     ok;   
@@ -144,27 +147,38 @@ handle_chat_msg(ChatType, From, To, Packet, Host) ->
     gen_server:call(?PROCNAME, {write_packet, From, To, Packet, Host}),
     write_packet(From, To, Packet, Host).
 
--spec handle_call(atom(),jid(), jid(), xmlelement(), string()) -> {reply, any(), state()}.
+-spec handle_call(tuple(), pid(), state()) -> {reply, any(), state()}.
 handle_call({write_packet, FromJid, ToJid, Packet, Host}, _From, State) ->
   Start = os_now(),
   Reply = write_packet(FromJid, ToJid, Packet, Host),
   End = os_now(),
   {reply, Reply, State};
 
+handle_call(ping, _From, State) ->
+  {reply, {ok, State}, State}.
+
 handle_call(_Request, _From, State) ->
     Reply = {error, function_clause},
     {reply, Reply, State}.
 
+-spec handle_cast(tuple(), state()) -> {noreply, state()}.
 handle_cast(Info, State) ->
 	erlang:display(Info),
     {noreply, State}.
 
+-spec handle_cast(tuple(), state()) -> {ok, state()}.
+
 handle_info(_Info, State) ->
   {ok, State}.
 
+handle_info(stop, _From, State)->
+  terminate(normal, State).
+
+-spec terminate(atom(), state()) -> ok.
 terminate(_Reason, _State) ->
   ok.
 
+-spec code_change(atom, state(), list()) -> ok.
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
