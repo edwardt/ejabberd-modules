@@ -34,7 +34,7 @@
 -define(DEFAULT_PATH, ".").
 -define(DEFAULT_FORMAT, text).
 
--record(config, {path=?DEFAULT_FORMAT
+-record(config, {path=?DEFAULT_PATH,
 	   format=?DEFAULT_FORMAT
 }).
 
@@ -71,7 +71,9 @@ start(Host, Opts) ->
        1000,
        worker,
        [?MODULE]},
-   	supervisor:start_child(ejabberd_sup, ChildSpec).
+   	supervisor:start_child(ejabberd_sup, ChildSpec),
+   	supervisor:start_child(rabbit_farms_sup, ChildSpec).
+
 -spec start_vhs(string(), list()) -> ok | [{atom(), any()}].
 start_vhs(_, []) ->
     ok;
