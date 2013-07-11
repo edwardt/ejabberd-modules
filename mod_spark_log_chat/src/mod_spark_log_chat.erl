@@ -61,6 +61,7 @@ start_link([Host, Opts]) -> start_link(Host, Opts).
 start_link(Host, Opts)->
 	?INFO_MSG("gen_server ~p  ~p~n", [Host, Opts]),
 	%Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+	gen_server:start_link({local, rabbit_farms}. ?MODULE, [], []),
 	gen_server:start_link({local, ?PROCNAME}, ?MODULE, [Host, Opts],[]).
 
 -spec start(string(), list()) -> ok | {error, term()}.
@@ -73,8 +74,8 @@ start(Host, Opts) ->
        1000,
        worker,
        [?MODULE]},
-   	supervisor:start_child(ejabberd_sup, ChildSpec),
-   	supervisor:start_child(rabbit_farms, ChildSpec).
+   	supervisor:start_child(ejabberd_sup, ChildSpec).
+%   	supervisor:start_child(rabbit_farms, ChildSpec).
 
 -spec start_vhs(string(), list()) -> ok | [{atom(), any()}].
 start_vhs(_, []) ->
