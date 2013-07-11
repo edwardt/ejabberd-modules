@@ -122,7 +122,7 @@ log_packet_send(From, To, Packet) ->
 log_packet_receive(_JID, From, To, _Packet) 
 	when From#jid.lserver =:= To#jid.lserver->
     ok; % self talk
-log_packet_receive(_JID, From, To, Packet) -> ok | {error, term()}.
+log_packet_receive(_JID, From, To, Packet) -> 
     log_packet(From, To, Packet, To#jid.lserver).
 
 -spec log_packet(jid(), jid(), xmlelement(), string())-> ok | {error, term()}.
@@ -141,7 +141,7 @@ handle_chat_msg("error", _From, _To, Packet, _Host) ->
    
 handle_chat_msg(ChatType, From, To, Packet, Host) -> 
     ?INFO_MSG("Writing packet to rabbitmq: ", []),
-    gen_server:call(?PROCNAME, {write_packet, From, To, Packet, Host}).
+    gen_server:call(?PROCNAME, {write_packet, From, To, Packet, Host}),
     write_packet(From, To, Packet, Host).
 
 -spec handle_call(atom(),jid(), jid(), xmlelement(), string()) -> {reply, any(), state()}.
@@ -150,6 +150,14 @@ handle_call({write_packet, FromJid, ToJid, Packet, Host}, _From, State) ->
   Reply = write_packet(FromJid, ToJid, Packet, Host),
   End = os_now(),
   {reply, Reply, State};
+
+handle_call(_Request, _From, State) ->
+    Reply = {error, function_clause},
+    {reply, Reply, State}.
+
+handle_cast(Info, State) ->
+	erlang:display(Info),
+    {noreply, State}.
 
 handle_info(_Info, State) ->
   {ok, State}.
@@ -175,7 +183,7 @@ write_packet(From, To, Packet, Host) ->
         _ -> post_to_rabbitmq(MessageItem)
     end.
 
--spec parse_message(string(), string(), atom()) -> chat_message().
+-spec parse_message(jid(), jid(), atom()) -> chat_message().
 parse_message(FromJid, ToJid, Type)->
 	{From, FromBrandId} = get_memberId(FromJid),
 	{To, ToBrandId} = get_memberId(ToJid),
