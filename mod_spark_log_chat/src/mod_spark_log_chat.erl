@@ -66,8 +66,8 @@ start_link(Host, Opts)->
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
     ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
-   	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-   	ChildSpec = {Proc,
+   	%Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+   	ChildSpec = {?PROCNAME,
        {?MODULE, start_link, [Host, Opts]},
        temporary,
        1000,
