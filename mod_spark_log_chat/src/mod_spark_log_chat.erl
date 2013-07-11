@@ -55,6 +55,9 @@
 	format = ?DEFAULT_FORMAT
 }).
 
+-type chat_message() :: #chat_message{}.
+-type jid() :: #jid{}.
+
 -spec start_link(string(), list()) ->ok | {error, term()}.
 start_link(Host, Opts)->
 	?INFO_MSG("gen_server ~p  ~p~n", [Host, Opts]),
@@ -144,18 +147,19 @@ handle_chat_msg("error", _From, _To, Packet, _Host) ->
    
 handle_chat_msg(ChatType, From, To, Packet, Host) -> 
     ?INFO_MSG("Writing packet to rabbitmq: ", []),
-    gen_server:call(?PROCNAME, {write_packet, From, To, Packet, Host}),
-    write_packet(From, To, Packet, Host).
+    gen_server:call(?PROCNAME, {write_packet, From, To, Packet, Host}).
+%    write_packet(From, To, Packet, Host).
 
 -spec handle_call(tuple(), pid(), state()) -> {reply, any(), state()}.
 handle_call({write_packet, FromJid, ToJid, Packet, Host}, _From, State) ->
   Start = os_now(),
-  Reply = write_packet(FromJid, ToJid, Packet, Host),
+  IdMap = State#state.idMap,
+  Reply = write_packet(FromJid, ToJid, Packet, Host, IdMap),
   End = os_now(),
   {reply, Reply, State};
 
 handle_call(ping, _From, State) ->
-  {reply, {ok, State}, State}.
+  {reply, {ok, State}, State};
 
 handle_call(_Request, _From, State) ->
     Reply = {error, function_clause},
@@ -166,45 +170,46 @@ handle_cast(Info, State) ->
 	erlang:display(Info),
     {noreply, State}.
 
--spec handle_cast(tuple(), state()) -> {ok, state()}.
-
+-spec handle_info(tuple(), state()) -> {ok, state()}.
 handle_info(_Info, State) ->
   {ok, State}.
 
+-spec handle_info(tuple(), pid(), state()) -> {ok, state()}.
 handle_info(stop, _From, State)->
   terminate(normal, State).
 
 -spec terminate(atom(), state()) -> ok.
 terminate(_Reason, _State) ->
+
   ok.
 
 -spec code_change(atom, state(), list()) -> ok.
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
--spec write_packet(jid(), jid(), string(), string()) -> ok | {error, term()}.  
-write_packet(From, To, Packet, Host) ->
+-spec write_packet(jid(), jid(), string(), string(), [tuple()]) -> ok | {error, term()}.  
+write_packet(From, To, Packet, Host, IdMap) ->
  %    gen_mod:get_module_proc(Host, ?PROCNAME) ! {call, self(), get_config},
  %   Format = get_im_transform_format(Config),
-    Format = ?DEFAULT_FORMAT,
+%    Format = ?DEFAULT_FORMAT,
     Subject = get_subject(Format, Packet),
     Body = get_body(Format, Packet),
-    Thread = get_thread(Format, Packet),
+%    Thread = get_thread(Format, Packet),
     case Subject ++ Body of
         "" -> %% don't log empty messages
             ?INFO_MSG("not logging empty message from ~s",[jlib:jid_to_string(From)]),
             ok;
-        _ -> post_to_rabbitmq(MessageItem)
+        _ ->
+        	Thread = get_thread(Format, Packet),
+        	MessageItem = parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap), 
+        	post_to_rabbitmq(MessageItem)
     end.
 
 -spec parse_message(jid(), jid(), atom()) -> chat_message().
-parse_message(FromJid, ToJid, Type)->
+parse_message(FromJid, ToJid, Type, Subject, Body, Thread)->
 	{From, FromBrandId} = get_memberId(FromJid),
-	{To, ToBrandId} = get_memberId(ToJid),
+	{To, ToBrandId} = get_memberId(ToJid, IdMap),
     Format = ?DEFAULT_FORMAT,
-    Subject = get_subject(Format, Packet),
-    Body = get_body(Format, Packet),
-    Thread = get_thread(Format, Packet),
     TimeStamp = get_timestamp(),
     #chat_message{
     	from = From,
@@ -219,7 +224,7 @@ parse_message(FromJid, ToJid, Type)->
     }.
 
 -spec get_memberId(jid()) ->[string()].
-get_memberId(Jid)->
+get_memberId(Jid, IdMap)->
    UserName = jlib:jid_to_string(Jid),
    [MemberId, BrandId] = get_login_data(UserName, IdMap).
 
