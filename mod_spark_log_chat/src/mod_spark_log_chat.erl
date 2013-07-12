@@ -184,6 +184,7 @@ handle_info(stop, _From, State)->
 
 -spec terminate(atom(), state()) -> ok.
 terminate(_Reason, _State) ->
+  ?INFO_MSG("~p has been terminated ~p ", [?PROCNAME, Reason]),
   ok.
 
 -spec code_change(atom, state(), list()) -> ok.
