@@ -10,6 +10,7 @@
 
 -behaviour(gen_mod).
 -behaviour(gen_server).
+-compile({parse_transform, exprecs}).
 
 -export([start/2,
          init/1,
@@ -50,6 +51,8 @@
 	idMap =[],
 	format = ?DEFAULT_FORMAT
 }).
+
+-export([chat_message]).
 
 -type state() :: #state{}.
 -type chat_message() :: #chat_message{}.
@@ -239,8 +242,7 @@ get_im_transform_format(_)->
    ?DEFAULT_FORMAT.
 
 -spec post_to_rabbitmq(chat_message())-> ok | {error, term()}.
-post_to_rabbitmq(MessageItem) 
-	when is_record(MessageItem, chat_message) ->
+post_to_rabbitmq(#chat_message{} = MessageItem) ->
 	Payload = ensure_binary(MessageItem),
 	rabbit_farms:publish(call, Payload).
 
