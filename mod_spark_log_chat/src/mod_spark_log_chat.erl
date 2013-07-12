@@ -197,14 +197,13 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
     Format = get_im_transform_format(Type),
     Subject = get_subject(Format, Packet),
     Body = get_body(Format, Packet),
-    ?INFO_MSG("Extracted Subject ~p Body ~p",[Subject, Body]),
+    Thread = get_thread(Format, Packet),
+    ?INFO_MSG("Extracted Subject ~p Body ~p Thread ~p",[Subject, Body, Thread]),
     case Subject ++ Body of
         "" -> %% don't log empty messages
             ?INFO_MSG("not logging empty message from ~s",[jlib:jid_to_string(FromJid)]),
             ok;
         _ ->
-        	%Type = chat,
-        	Thread = get_thread(Format, Packet),
         	MessageItem = parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap), 
         	?INFO_MSG("Will publish Message Payload ~p ", [MessageItem]),
         	post_to_rabbitmq(MessageItem)
@@ -212,8 +211,8 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
 
 -spec parse_message(jid(), jid(), atom(), string(), string(), string(), [tuple()]) -> chat_message().
 parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
-	{From, FromBrandId} = get_memberId(FromJid, IdMap),
-	{To, ToBrandId} = get_memberId(ToJid, IdMap),
+	[From, FromBrandId] = get_memberId(FromJid, IdMap),
+	[To, ToBrandId]= get_memberId(ToJid, IdMap),
     Format = ?DEFAULT_FORMAT,
     TimeStamp = get_timestamp(),
     #chat_message{
