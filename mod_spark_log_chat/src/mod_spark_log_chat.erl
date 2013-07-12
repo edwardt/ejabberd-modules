@@ -10,7 +10,6 @@
 
 -behaviour(gen_mod).
 -behaviour(gen_server).
-%-compile({parse_transform, exprecs}).
 
 -export([start/2,
          init/1,
@@ -30,7 +29,7 @@
 
 -include("ejabberd.hrl").
 -include("jlib.hrl").
-%-include_lib("chat_message.hrl").
+-include_lib("chat_message.hrl").
 
 -define(PROCNAME, ?MODULE).
 -define(DEFAULT_PATH, ".").
