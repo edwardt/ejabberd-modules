@@ -10,7 +10,7 @@
 		thread = "" ::string(),
 		time_stamp = "" ::string()}).
 
--compile([parse_transform, exprecs]).
+
 -export_records([chat_message]).
 
 
