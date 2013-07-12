@@ -304,7 +304,7 @@ find_value(Key, List) ->
 -spec ensure_binary(atom | any()) -> binary().
 ensure_binary(undefined)->
 	undefined;
-ensure_binary(Value) when is_record(Value, chat_message)->
+ensure_binary(#chat_message{} = Value) ->
 	Json = json_rec:to_json(chat_message, Value),
 	mochijson2:encode(Json);	
 ensure_binary(Value) when is_binary(Value)->
