@@ -189,8 +189,8 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
     Body = get_body(Format, Packet),
     Thread = get_thread(Format, Packet),
     ?INFO_MSG("Type ~p Extracted Subject ~p Body ~p Thread ~p",[Type, Subject, Body, Thread]),
-    case Subject ++ Body of
-        "" -> %% don't log empty messages
+    case <<Subject/binary,Body/binary>> of
+        <<>> -> %% don't log empty messages
             ?INFO_MSG("not logging empty message from ~s",[jlib:jid_to_string(FromJid)]),
             ok;
         _ ->
