@@ -148,7 +148,7 @@ handle_chat_msg("error", _From, _To, Packet, _Host) ->
     ok;   
    
 handle_chat_msg(ChatType, From, To, Packet, Host) -> 
-    ?INFO_MSG("Writing packet to rabbitmq: ", []),
+    ?INFO_MSG("Writing packet to ~p rabbitmq: ", [?PROCNAME]),
     gen_server:call(?PROCNAME, {write_packet, ChatType, From, To, Packet, Host}).
 %    write_packet(From, To, Packet, Host).
 
