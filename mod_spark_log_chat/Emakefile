@@ -1,3 +1,38 @@
+{'src/chat_message_model*',	
+	[debug_info,
+	 warn_unused_vars,
+	 warn_unused_imports, 
+	 verbose,
+	 {outdir, "ebin"},
+	 {i,[
+             ".." 
+	    ]},
+	 {i,[
+             "include" 
+	    ]},
+         {i, [
+	     "../json_rec/include"
+	    ]},
+	 {i, [
+	     "../json_rec/deps/parse_trans/include"
+	    ]}
+
+   ]
+}.
+
+{'src/mongrel*',	
+	[debug_info,
+	 warn_unused_vars,
+	 warn_unused_imports, 
+	 verbose,
+	 {outdir, "ebin"},
+	 {i,[
+             "include" 
+	    ]}
+   ]
+}.
+
+
 {'src/mod_spark_log_chat*',	
 	[debug_info,
 	 warn_unused_vars,
@@ -16,6 +51,12 @@
 	    ]},
 	 {i,[
              "../deps" 
+	    ]},
+	 {i, [
+	     "../json_rec"
+	    ]},
+	 {i, [
+	     "../json_rec/deps"
 	    ]}
    ]
 }.
