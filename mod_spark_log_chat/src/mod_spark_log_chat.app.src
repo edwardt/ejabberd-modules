@@ -9,7 +9,8 @@
 		  spark_app_config
                  ]},
   {modules, {
-             mod_spark_log_chat,
+       chat_message_model,
+       mod_spark_log_chat,
 	     mod_spark_log_chat_app,
 	     mod_spark_log_chat_sup,
 	     mod_spark_log_chat_srv
