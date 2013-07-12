@@ -281,7 +281,7 @@ get_login_data(_,[])-> ["",""];
 get_login_data(UserName, IdMap) ->
   [MemberId, CommunityId] = get_memberId_communityId(UserName), 
   BrandIdStr = find_value(CommunityId, IdMap),
-  [ensure_binary(MemberId), ensure_binary(BrandIdStr)]. 
+  [erlang:binary_to_list(MemberId), BrandIdStr]. 
 
 find_value(Key, List) ->
   Key1 = erlang:binary_to_list(Key),
