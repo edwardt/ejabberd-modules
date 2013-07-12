@@ -286,6 +286,7 @@ get_timestamp() ->
   calendar:now_to_universal_time(R).
 
 -spec get_login_data(jid(), string()) -> [jid()].
+get_login_data(_,[])-> ["",""];
 get_login_data(UserName, IdMap) ->
   [MemberId, CommunityId] = get_memberId_communityId(UserName), 
   BrandIdStr = find_value(CommunityId, IdMap),
