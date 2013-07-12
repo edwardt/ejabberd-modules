@@ -295,21 +295,8 @@ find_value(Key, List) ->
 ensure_binary(undefined)->
 	undefined;
 ensure_binary(#chat_message{} = Value) ->
-	%Json = json_rec:to_json(chat_message, Value),
-	mochijson2:encode({
-		struct,[
-		{from = "",
-		from_brandId = "",
-		to = "",
-		to_brandId = "",
-		type = "chat", 
-		format = "text",
-		subject = "", 
-		body = "", 
-		thread = "",
-		time_stamp
-		]
-});
+	Json = json_rec:to_json(Value, chat_message_model),
+	R = lists:flattern(mochijson2:encode(Json));
 
 ensure_binary(Value) when is_binary(Value)->
 	Value;
