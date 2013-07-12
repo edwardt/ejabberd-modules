@@ -184,7 +184,7 @@ handle_info(stop, _From, State)->
   terminate(normal, State).
 
 -spec terminate(atom(), state()) -> ok.
-terminate(_Reason, _State) ->
+terminate(Reason, _State) ->
   ?INFO_MSG("~p has been terminated ~p ", [?PROCNAME, Reason]),
   ok.
 
