@@ -10,7 +10,7 @@
 
 -behaviour(gen_mod).
 -behaviour(gen_server).
--compile({parse_transform, exprecs}).
+%-compile({parse_transform, exprecs}).
 
 -export([start/2,
          init/1,
@@ -30,29 +30,17 @@
 
 -include("ejabberd.hrl").
 -include("jlib.hrl").
+-include_lib("chat_message.hrl")
 
 -define(PROCNAME, ?MODULE).
 -define(DEFAULT_PATH, ".").
 -define(DEFAULT_FORMAT, text).
-
--record(chat_message, {
-		from = "",
-		from_brandId = "",
-		to = "",
-		to_brandId = "",
-		type = "chat", 
-		format = "text",
-		subject = "", 
-		body = "", 
-		thread = "",
-		time_stamp}).
 
 -record(state, {
 	idMap =[],
 	format = ?DEFAULT_FORMAT
 }).
 
--export([chat_message]).
 
 -type state() :: #state{}.
 -type chat_message() :: #chat_message{}.
@@ -307,8 +295,22 @@ find_value(Key, List) ->
 ensure_binary(undefined)->
 	undefined;
 ensure_binary(#chat_message{} = Value) ->
-	Json = json_rec:to_json(chat_message, Value),
-	mochijson2:encode(Json);	
+	%Json = json_rec:to_json(chat_message, Value),
+	mochijson2:encode({
+		struct,[
+		{from = "",
+		from_brandId = "",
+		to = "",
+		to_brandId = "",
+		type = "chat", 
+		format = "text",
+		subject = "", 
+		body = "", 
+		thread = "",
+		time_stamp
+		]
+});
+
 ensure_binary(Value) when is_binary(Value)->
 	Value;
 ensure_binary(Value) when is_list(Value)->
