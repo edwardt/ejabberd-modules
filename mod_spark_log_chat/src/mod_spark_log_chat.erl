@@ -197,6 +197,7 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
     Format = get_im_transform_format(Type),
     Subject = get_subject(Format, Packet),
     Body = get_body(Format, Packet),
+    ?INFO_MSG("Extracted Subject ~p Body ~p",[Subject, Body]),
     case Subject ++ Body of
         "" -> %% don't log empty messages
             ?INFO_MSG("not logging empty message from ~s",[jlib:jid_to_string(FromJid)]),
