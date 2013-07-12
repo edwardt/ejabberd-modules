@@ -1,14 +1,14 @@
 -record(chat_message, {
-		from ::string(),
-		from_brandId  ::string(),
-		to  ::string(),
-		to_brandId ::string(),
-		type ::string(), 
-		format ::string(),
-		subject ::string(), 
-		body ::string(), 
-		thread ::string(),
-		time_stamp ::string()}).
+		from ::bitstring(),
+		from_brandId  ::bitstring(),
+		to  ::bitstring(),
+		to_brandId ::bitstring(),
+		type ::bitstring(), 
+		format ::bitstring(),
+		subject ::bitstring(), 
+		body ::bitstring(), 
+		thread ::bitstring(),
+		time_stamp ::bitstring()}).
 
 
 -export_records([chat_message]).

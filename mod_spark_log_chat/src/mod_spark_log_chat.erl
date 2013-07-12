@@ -235,16 +235,18 @@ post_to_rabbitmq(#chat_message{} = MessageItem) ->
 
 -spec get_subject(atom, xmlelement())-> string().
 get_subject(Format, Packet) ->
-	parse_body(Format, xml:get_path_s(Packet, [{elem, "subject"}, cdata])).
+	R = parse_body(Format, xml:get_path_s(Packet, [{elem, "subject"}, cdata])),
+  ensure_binary(R).
 
 -spec get_body(atom, xmlelement())-> string().
 get_body(Format, Packet) ->
-   parse_body(Format, xml:get_path_s(Packet, [{elem, "body"}, cdata])).
+  R = parse_body(Format, xml:get_path_s(Packet, [{elem, "body"}, cdata])),
+  ensure_binary(R).
 
 -spec get_thread(atom, xmlelement())-> string().
 get_thread(Format, Packet) ->
-   parse_body(Format, xml:get_path_s(Packet, [{elem, "thread"}, cdata])).
-
+  R = parse_body(Format, xml:get_path_s(Packet, [{elem, "thread"}, cdata])),
+  ensure_binary(R).
 -spec parse_body(atom, false|xmlelement())->string().
 parse_body(_Format, false) -> "";
 parse_body(Format, Text) -> escape(Format, Text).
@@ -271,16 +273,15 @@ get_memberId_communityId(UserName) ->
   end.
 -spec get_timestamp() -> calendar:datetime1970().
 get_timestamp() ->
-  R =os:timestamp(),
-  calendar:now_to_universal_time(R).
+  R =os_now(),
+  ensure_binary(R).
 
 -spec get_login_data(jid(), string()) -> [jid()].
 get_login_data(_,[])-> ["",""];
 get_login_data(UserName, IdMap) ->
   [MemberId, CommunityId] = get_memberId_communityId(UserName), 
   BrandIdStr = find_value(CommunityId, IdMap),
-  MemberIdStr = erlang:binary_to_list(MemberId),
-  [MemberIdStr, BrandIdStr]. 
+  [ensure_binary(MemberId), ensure_binary(BrandIdStr)]. 
 
 find_value(Key, List) ->
   Key1 = erlang:binary_to_list(Key),
