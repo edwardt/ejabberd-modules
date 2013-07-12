@@ -30,7 +30,7 @@
 
 -include("ejabberd.hrl").
 -include("jlib.hrl").
--include_lib("chat_message.hrl")
+-include_lib("chat_message.hrl").
 
 -define(PROCNAME, ?MODULE).
 -define(DEFAULT_PATH, ".").
