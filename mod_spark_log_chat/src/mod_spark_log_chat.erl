@@ -198,7 +198,7 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
     Subject = get_subject(Format, Packet),
     Body = get_body(Format, Packet),
     Thread = get_thread(Format, Packet),
-    ?INFO_MSG("Extracted Subject ~p Body ~p Thread ~p",[Subject, Body, Thread]),
+    ?INFO_MSG("Type ~p Extracted Subject ~p Body ~p Thread ~p",[Type, Subject, Body, Thread]),
     case Subject ++ Body of
         "" -> %% don't log empty messages
             ?INFO_MSG("not logging empty message from ~s",[jlib:jid_to_string(FromJid)]),
@@ -220,7 +220,7 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
 	 	from_brandId = FromBrandId,
     	to = To,
     	to_brandId = ToBrandId,
-    	type = atom_to_list(Type),
+    	type = Type,
     	format = Format,
     	subject = Subject,
     	body = Body,
