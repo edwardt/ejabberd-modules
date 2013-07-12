@@ -99,7 +99,7 @@ start_vh(Host, Opts) ->
 
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
 init([Host, Opts])->
-    ?INFO_MSG("Starting ~p with host ~p config ~p~n", [?MODULE, Host, Opts]),
+    ?INFO_MSG("Starting Module ~p PROCNAME ~p with host ~p config ~p~n", [?MODULE, ?PROCNAME, Host, Opts]),
     case gen_mod:get_opt(host_config, Opts, []) of
 		[] ->
 		    start_vh(Host, Opts);
