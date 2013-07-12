@@ -5,5 +5,5 @@
 -compile([parse_transform, exprecs]).
 -export([new/1]).
 new(<<"chat_message">>)->
-   '#chat_message'();
+   '#new-chat_message'();
 new(_)-> undefined.
