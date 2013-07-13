@@ -102,7 +102,8 @@ write_packet(From, To, Packet, Host) ->
 	       {config, Result} ->
 		   Result
 	   end,
-    Format = Config#config.format,
+    Format = get_im_transform_format(Config),
+
     {Subject, Body} = {case xml:get_path_s(Packet, [{elem, "subject"}, cdata]) of
 			   false ->
 			       "";
@@ -139,29 +140,49 @@ write_packet(From, To, Packet, Host) ->
 			 end
 			}
 		end,
-	    ?DEBUG("FilenameTemplate ~p~n",[FilenameTemplate]),
-	    Filename = io_lib:format(FilenameTemplate, [Y, M, D]),
-	    ?DEBUG("logging message from ~s into ~s~n",[jlib:jid_to_string(From), Filename]),
-	    File = case file:read_file_info(Filename) of
-		       {ok, _} ->
-			   open_logfile(Filename);
-		       {error, enoent} ->
-			   close_previous_logfile(FilenameTemplate, Format, {Y, M, D}),
-			   NewFile = open_logfile(Filename),
-			   io:format(NewFile, Header, []),
-			   NewFile
-		   end,
-	    MessageText = case Subject of
-		       "" ->
-			   Body;
-		       _ ->
-			   io_lib:format(template(Format, subject), [Subject])++Body
-		   end,
+
+	    File = prepare_logfile(FilenameTemplate,[Y, M, D], Header, From, Format ),
+
+            MessageText = get_im_message_text(Subject, Format, Body),
+
 	    ?DEBUG("MessageTemplate ~s~n",[template(Format, MessageType)]),
 	    io:format(File, lists:flatten(template(Format, MessageType)), [DateString, FromJid, From#jid.lresource, ToJid,
 							    To#jid.lresource, MessageText]),
 	    file:close(File)
     end.
+
+get_im_transform_format(Config)->
+   Config#config.format.
+get_im_transform_format()->
+   text.
+
+get_im_message_text(Subject, Format, Body)->
+    MessageText = case Subject of
+		       "" ->
+			   Body;
+		       _ ->
+			   io_lib:format(template(Format, subject), [Subject])++Body
+		   end,
+   MessageText.
+
+
+
+
+prepare_logfile(FilenameTemplate,[Y, M, D], Header, From, Format )->
+    ?DEBUG("FilenameTemplate ~p~n",[FilenameTemplate]),
+    Filename = io_lib:format(FilenameTemplate, [Y, M, D]),
+    ?DEBUG("logging message from ~s into ~s~n",[jlib:jid_to_string(From), Filename]),
+    File = case file:read_file_info(Filename) of
+           {ok, _} ->
+		   open_logfile(Filename);
+	   {error, enoent} ->
+		   close_previous_logfile(FilenameTemplate, Format, {Y, M, D}),
+		   NewFile = open_logfile(Filename),
+		   io:format(NewFile, Header, []),
+	 	   NewFile
+	   end, 
+    File.
+
 
 open_logfile(Filename) ->
     case file:open(Filename, [append]) of
