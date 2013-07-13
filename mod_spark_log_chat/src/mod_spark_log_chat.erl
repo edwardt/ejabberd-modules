@@ -51,8 +51,11 @@ start_link([Host, Opts]) -> start_link(Host, Opts).
 start_link(Host, Opts)->
 	?INFO_MSG("gen_server ~p  ~p~n", [Host, Opts]),
 	%Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-	gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
-	gen_server:start_link({local, ?PROCNAME}, ?MODULE, [Host, Opts],[]).
+%	R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
+	R1 = gen_server:start_link({local, ?PROCNAME}, ?MODULE, [Host, Opts],[])
+  R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
+  ?INFO_MSG("gen_server started rabbit_farms ~p  local ~p~n", [R0, R1]),
+  R1.
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
