@@ -65,7 +65,6 @@ start(Host, Opts) ->
        worker,
        [?MODULE]},
    	supervisor:start_child(ejabberd_sup, ChildSpec).
-%   	supervisor:start_child(rabbit_farms, ChildSpec).
 
 -spec start_vhs(string(), list()) -> ok | [{atom(), any()}].
 start_vhs(_, []) ->
@@ -83,8 +82,8 @@ start_vh(Host, Opts) ->
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
     #state{
-    		idMap = IdMap,
-    		format = Format
+        format = Format.
+    		idMap = IdMap
     	}.
 
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
@@ -273,7 +272,7 @@ get_memberId_communityId(UserName) ->
   end.
 -spec get_timestamp() -> calendar:datetime1970().
 get_timestamp() ->
-  {A,B} =os_now(),
+  R =os_now(),
   mongreljson:tuple_to_json({date_time, R}).
 
 -spec get_login_data(jid(), string()) -> [jid()].
