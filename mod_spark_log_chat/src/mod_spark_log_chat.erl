@@ -138,8 +138,8 @@ handle_chat_msg("error", _From, _To, Packet, _Host) ->
    
 handle_chat_msg(ChatType, FromJid, ToJid, Packet, Host) -> 
     ?INFO_MSG("Writing packet to ~p rabbitmq: ", [?PROCNAME]),
-     write_packet(ChatType, FromJid, ToJid, Packet, Host, []).
-%    gen_server:call(?PROCNAME, {write_packet, ChatType, From, To, Packet, Host}).
+%     write_packet(ChatType, FromJid, ToJid, Packet, Host, []).
+    gen_server:call(?PROCNAME, {write_packet,FromJid, ToJid, Packet, Host, []}).
 %    write_packet(From, To, Packet, Host).
 
 -spec handle_call(tuple(), pid(), state()) -> {reply, any(), state()}.
