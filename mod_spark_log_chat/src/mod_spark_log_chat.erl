@@ -49,10 +49,10 @@
 start_link([Host, Opts]) -> start_link(Host, Opts).
 -spec start_link(string(), list()) ->ok | {error, term()}.
 start_link(Host, Opts)->
-	?INFO_MSG("gen_server ~p  ~p~n", [Host, Opts]),
-	%Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+	?INFO_MSG("gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
+	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
 %	R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
-	R1 = gen_server:start_link({local, ?PROCNAME}, ?MODULE, [Host, Opts],[]),
+	R1 = gen_server:start_link({local, ?PROC}, ?MODULE, [Host, Opts],[]),
   R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
   ?INFO_MSG("gen_server started rabbit_farms ~p  local ~p~n", [R0, R1]),
   R1.
@@ -107,7 +107,8 @@ stop(Host) ->
 			  ?MODULE, log_packet_send, 55),
     ejabberd_hooks:delete(user_receive_packet, Host,
 			  ?MODULE, log_packet_receive, 55),
-    gen_mod:get_module_proc(Host, ?PROCNAME) ! stop,
+    Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+    gen_mod:get_module_proc(Host, Proc) ! stop,
     ok.
 
 -spec ping()-> {ok, state()}.
