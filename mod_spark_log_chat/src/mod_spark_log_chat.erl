@@ -49,12 +49,13 @@
 start_link([Host, Opts]) -> start_link(Host, Opts).
 -spec start_link(string(), list()) ->ok | {error, term()}.
 start_link(Host, Opts)->
-	?INFO_MSG("gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
+	?INFO_MSG("~p gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
 	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
 %	R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
 	R1 = gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]),
+  ?INFO_MSG("gen_server started mod_spark_log_chat ~p~n", [R1]),
   R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
-  ?INFO_MSG("gen_server started rabbit_farms ~p  local ~p~n", [R0, R1]),
+  ?INFO_MSG("gen_server started rabbit_farms ~p", [R0]),
   R1.
 
 -spec start(string(), list()) -> ok | {error, term()}.
