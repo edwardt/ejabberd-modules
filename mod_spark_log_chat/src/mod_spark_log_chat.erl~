@@ -10,7 +10,6 @@
 
 -behaviour(gen_mod).
 -behaviour(gen_server).
-%-compile({parse_transform, exprecs}).
 
 -export([start/2,
          init/1,
@@ -52,8 +51,11 @@ start_link([Host, Opts]) -> start_link(Host, Opts).
 start_link(Host, Opts)->
 	?INFO_MSG("gen_server ~p  ~p~n", [Host, Opts]),
 	%Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-	gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
-	gen_server:start_link({local, ?PROCNAME}, ?MODULE, [Host, Opts],[]).
+%	R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
+	R1 = gen_server:start_link({local, ?PROCNAME}, ?MODULE, [Host, Opts],[])
+  R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
+  ?INFO_MSG("gen_server started rabbit_farms ~p  local ~p~n", [R0, R1]),
+  R1.
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
@@ -66,7 +68,6 @@ start(Host, Opts) ->
        worker,
        [?MODULE]},
    	supervisor:start_child(ejabberd_sup, ChildSpec).
-%   	supervisor:start_child(rabbit_farms, ChildSpec).
 
 -spec start_vhs(string(), list()) -> ok | [{atom(), any()}].
 start_vhs(_, []) ->
@@ -84,8 +85,8 @@ start_vh(Host, Opts) ->
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
     #state{
-    		idMap = IdMap,
-    		format = Format
+        format = Format,
+   	idMap = IdMap
     	}.
 
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
@@ -140,8 +141,8 @@ handle_chat_msg("error", _From, _To, Packet, _Host) ->
    
 handle_chat_msg(ChatType, FromJid, ToJid, Packet, Host) -> 
     ?INFO_MSG("Writing packet to ~p rabbitmq: ", [?PROCNAME]),
-     write_packet(ChatType, FromJid, ToJid, Packet, Host, []).
-%    gen_server:call(?PROCNAME, {write_packet, ChatType, From, To, Packet, Host}).
+%     write_packet(ChatType, FromJid, ToJid, Packet, Host, []).
+    gen_server:call(?PROCNAME, {write_packet,FromJid, ToJid, Packet, Host, []}).
 %    write_packet(From, To, Packet, Host).
 
 -spec handle_call(tuple(), pid(), state()) -> {reply, any(), state()}.
@@ -190,8 +191,8 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
     Body = get_body(Format, Packet),
     Thread = get_thread(Format, Packet),
     ?INFO_MSG("Type ~p Extracted Subject ~p Body ~p Thread ~p",[Type, Subject, Body, Thread]),
-    case Subject ++ Body of
-        "" -> %% don't log empty messages
+    case <<Subject/binary,Body/binary>> of
+        <<>> -> %% don't log empty messages
             ?INFO_MSG("not logging empty message from ~s",[jlib:jid_to_string(FromJid)]),
             ok;
         _ ->
@@ -236,16 +237,18 @@ post_to_rabbitmq(#chat_message{} = MessageItem) ->
 
 -spec get_subject(atom, xmlelement())-> string().
 get_subject(Format, Packet) ->
-	parse_body(Format, xml:get_path_s(Packet, [{elem, "subject"}, cdata])).
+	R = parse_body(Format, xml:get_path_s(Packet, [{elem, "subject"}, cdata])),
+  ensure_binary(R).
 
 -spec get_body(atom, xmlelement())-> string().
 get_body(Format, Packet) ->
-   parse_body(Format, xml:get_path_s(Packet, [{elem, "body"}, cdata])).
+  R = parse_body(Format, xml:get_path_s(Packet, [{elem, "body"}, cdata])),
+  ensure_binary(R).
 
 -spec get_thread(atom, xmlelement())-> string().
 get_thread(Format, Packet) ->
-   parse_body(Format, xml:get_path_s(Packet, [{elem, "thread"}, cdata])).
-
+  R = parse_body(Format, xml:get_path_s(Packet, [{elem, "thread"}, cdata])),
+  ensure_binary(R).
 -spec parse_body(atom, false|xmlelement())->string().
 parse_body(_Format, false) -> "";
 parse_body(Format, Text) -> escape(Format, Text).
@@ -272,16 +275,17 @@ get_memberId_communityId(UserName) ->
   end.
 -spec get_timestamp() -> calendar:datetime1970().
 get_timestamp() ->
-  R =os:timestamp(),
-  calendar:now_to_universal_time(R).
+  {A,B} =os_now(),
+  O = tuple_to_list(A),
+  P = tuple_to_list(B),
+  mongreljson:tuple_to_json({date_time, lists:concat([O,P])}).
 
 -spec get_login_data(jid(), string()) -> [jid()].
 get_login_data(_,[])-> ["",""];
 get_login_data(UserName, IdMap) ->
   [MemberId, CommunityId] = get_memberId_communityId(UserName), 
   BrandIdStr = find_value(CommunityId, IdMap),
-  MemberIdStr = erlang:binary_to_list(MemberId),
-  [MemberIdStr, BrandIdStr]. 
+  [erlang:binary_to_list(MemberId), BrandIdStr]. 
 
 find_value(Key, List) ->
   Key1 = erlang:binary_to_list(Key),
@@ -296,7 +300,9 @@ ensure_binary(undefined)->
 	undefined;
 ensure_binary(#chat_message{} = Value) ->
 	Json = json_rec:to_json(Value, chat_message_model),
-	R = lists:flattern(mochijson2:encode(Json));
+  ?INFO_MSG("Chat Message as Json ~p",[Json]),
+	R = lists:flatten(mochijson2:encode(Json)),
+  R;
 
 ensure_binary(Value) when is_binary(Value)->
 	Value;
