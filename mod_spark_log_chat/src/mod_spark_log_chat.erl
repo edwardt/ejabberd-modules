@@ -54,7 +54,7 @@ start_link(Host, Opts)->
 %	R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
 	R1 = gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]),
   ?INFO_MSG("gen_server started mod_spark_log_chat ~p~n", [R1]),
-  R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
+  R0 = gen_server:start_link({local, rabbit_farms}, rabbit_farms, [], []),
   ?INFO_MSG("gen_server started rabbit_farms ~p", [R0]),
   R1.
 
@@ -85,22 +85,24 @@ start_vh(Host, Opts) ->
     IdMap = gen_mod:get_opt(idMap, Opts, []),
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
+    %?INFO_MSG(" Format ~p  IdMap ~p~n", [Format, IdMap]),
     #state{
         format = Format,
-   	idMap = IdMap
+   	    idMap = IdMap
     	}.
 
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
 init([Host, Opts])->
     ?INFO_MSG("Starting Module ~p PROCNAME ~p with host ~p config ~p~n", [?MODULE, ?PROCNAME, Host, Opts]),
-    case gen_mod:get_opt(host_config, Opts, []) of
+    R = case gen_mod:get_opt(host_config, Opts, []) of
 		[] ->
 		    start_vh(Host, Opts);
 		_HostConfig ->
 			?ERROR_MSG("Multiple virtual host unsupported",[]),
 			#state{}
 %	 	    start_vhs(Host, HostConfig)
-   	end.
+   	end,
+    {ok, R}.
 
 -spec stop(string()) -> ok.
 stop(Host) ->
