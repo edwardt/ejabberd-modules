@@ -274,7 +274,7 @@ get_memberId_communityId(UserName) ->
 -spec get_timestamp() -> calendar:datetime1970().
 get_timestamp() ->
   R =os_now(),
-  ensure_binary(R).
+  mogrel:tuple_to_json({date_time, R}).
 
 -spec get_login_data(jid(), string()) -> [jid()].
 get_login_data(_,[])-> ["",""];
