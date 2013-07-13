@@ -298,7 +298,7 @@ ensure_binary(undefined)->
 ensure_binary(#chat_message{} = Value) ->
 	Json = json_rec:to_json(Value, chat_message_model),
   ?INFO_MSG("Chat Message as Json ~p",[Json]),
-	R = lists:flattern(mochijson2:encode(Json)),
+	R = lists:flatten(mochijson2:encode(Json)),
   R;
 
 ensure_binary(Value) when is_binary(Value)->
