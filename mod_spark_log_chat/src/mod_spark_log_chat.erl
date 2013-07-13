@@ -82,8 +82,8 @@ start_vh(Host, Opts) ->
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
     #state{
-        format = Format.
-    		idMap = IdMap
+        format = Format,
+   	idMap = IdMap
     	}.
 
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
