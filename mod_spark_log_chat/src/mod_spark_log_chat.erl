@@ -113,7 +113,7 @@ stop(Host) ->
 			  ?MODULE, log_packet_receive, 55),
     Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
     gen_server:call(Proc, stop),
-    supervisor:dele_child(ejabberd_sup, Proc),
+    supervisor:delete_child(ejabberd_sup, Proc),
     ok.
 
 -spec ping()-> {ok, state()}.
