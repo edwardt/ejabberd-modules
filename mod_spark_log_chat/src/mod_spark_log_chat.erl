@@ -57,6 +57,7 @@ start_link(Host, Opts)->
   Ret = ensure_dependency_started(),
   R0 = gen_server:start_link({local, rabbit_farms}, rabbit_farms, [], []),
   ?INFO_MSG("Started rabbit_farms ~p", [Ret]),
+  ok = self_test(),
   R1.
 ensure_dependency_started()->
   ?INFO_MSG("Starting depedenecies", []),
@@ -72,9 +73,14 @@ ensure_dependency_started()->
   ok = app_util:start_app(ssl),
   ok = app_util:start_app(inets),
   ok = app_util:start_app(restc),
-  ok = app_util:start_app(rabbit_farms),
-  ?INFO_MSG("Started rabbit_farms depedenecies", []),
+  ?INFO_MSG("Started depedenecies", []),
   ok.
+
+-spec self_test()-> ok | {error, term()}.
+self_test()->
+  ?INFO_MSG("Start self_test procedure ", []),
+  R = rabbit_farms:publish(call, <<"self_test from mod_spark_chat_log">>),
+  R.
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
