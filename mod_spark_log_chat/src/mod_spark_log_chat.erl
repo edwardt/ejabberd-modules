@@ -147,7 +147,7 @@ handle_chat_msg(ChatType, FromJid, ToJid, Packet, Host) ->
     ?INFO_MSG("Writing packet to ~p rabbitmq: ", [?PROCNAME]),
 %     write_packet(ChatType, FromJid, ToJid, Packet, Host, []).
     Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-    gen_server:call(Proc, {write_packet,FromJid, ToJid, Packet, Host, []}).
+    gen_server:call(Proc, {write_packet, ChatType, FromJid, ToJid, Packet, Host, []}).
 %    write_packet(From, To, Packet, Host).
 
 -spec handle_call(tuple(), pid(), state()) -> {reply, any(), state()}.
