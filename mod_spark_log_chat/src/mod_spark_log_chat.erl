@@ -106,12 +106,14 @@ init([Host, Opts])->
 
 -spec stop(string()) -> ok.
 stop(Host) ->
+    ?INFO_MSG("Stopping Module ~p PROCNAME ~p with Host ~p config ~p~n", [?MODULE, ?PROCNAME, Host]),
     ejabberd_hooks:delete(user_send_packet, Host,
 			  ?MODULE, log_packet_send, 55),
     ejabberd_hooks:delete(user_receive_packet, Host,
 			  ?MODULE, log_packet_receive, 55),
     Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-    gen_mod:get_module_proc(Host, Proc) ! stop,
+    gen_server:call(Proc, stop),
+    supervisor:dele_child(ejabberd_sup, Proc),
     ok.
 
 -spec ping()-> {ok, state()}.
@@ -162,7 +164,8 @@ handle_call({write_packet, Type, FromJid, ToJid, Packet, Host}, _From, State) ->
 
 handle_call(ping, _From, State) ->
   {reply, {ok, State}, State};
-
+handle_call(stop, _From, State) ->
+  {stop, normal, State};
 handle_call(_Request, _From, State) ->
     Reply = {error, function_clause},
     {reply, Reply, State}.
