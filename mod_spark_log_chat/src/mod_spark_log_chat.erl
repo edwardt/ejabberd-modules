@@ -164,7 +164,7 @@ handle_call({write_packet, Type, FromJid, ToJid, Packet, Host}, _From, State) ->
 handle_call(ping, _From, State) ->
   {reply, {ok, State}, State};
 handle_call(stop, _From, State) ->
-  {stop, normal, State};
+  {stop, normal, stopped, State};
 handle_call(_Request, _From, State) ->
     Reply = {error, function_clause},
     {reply, Reply, State}.
