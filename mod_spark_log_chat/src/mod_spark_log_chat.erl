@@ -54,9 +54,21 @@ start_link(Host, Opts)->
 %	R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
 	R1 = gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]),
   ?INFO_MSG("gen_server started mod_spark_log_chat ~p~n", [R1]),
-  R0 = gen_server:start_link({local, rabbit_farms}, rabbit_farms, [], []),
-  ?INFO_MSG("gen_server started rabbit_farms ~p", [R0]),
+  Ret = start_rabbitmq_farms(),
+  %R0 = gen_server:start_link({local, rabbit_farms}, rabbit_farms, [], []),
+  ?INFO_MSG("Started rabbit_farms ~p", [Ret]),
   R1.
+start_rabbitmq_farms()->
+  ok = app_util:start_app(syntax_tools),
+  ok = app_util:start_app(compiler),
+  ok = app_util:start_app(goldrush),
+  ok = lager:start(),
+  ok = app_util:start_app(gen_server),
+  ok = app_util:start_app(rabbit_common),
+  ok = app_util:start_app(amqp_client),
+  ok = app_util:start_app(crypto),
+  ok = app_util:start_app(restc),
+  ok = app_util:start_app(rabbit_farms).
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
