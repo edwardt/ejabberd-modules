@@ -106,7 +106,6 @@ init([Host, Opts])->
 
 -spec stop(string()) -> ok.
 stop(Host) ->
-    ?INFO_MSG("Stopping Module ~p PROCNAME ~p with Host ~p config ~p~n", [?MODULE, ?PROCNAME, Host]),
     ejabberd_hooks:delete(user_send_packet, Host,
 			  ?MODULE, log_packet_send, 55),
     ejabberd_hooks:delete(user_receive_packet, Host,
