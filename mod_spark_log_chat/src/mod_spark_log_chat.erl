@@ -159,7 +159,7 @@ handle_call({write_packet, Type, FromJid, ToJid, Packet, Host}, _From, State) ->
   ?INFO_MSG("Start publish message to rabbitmq: start ~p ", [Start]),
   Reply = write_packet(Type, FromJid, ToJid, Packet, Host, IdMap),
   End = os_now(),
-  ?INFO_MSG("Published packet to rabbitmq: start ~p end ~p time span ~p", [Start, End, timespan(State, End)]),
+  ?INFO_MSG("Published packet to rabbitmq: start ~p end ~p time span ~p", [Start, End, timespan(Start, End)]),
   {reply, Reply, State};
 
 handle_call(ping, _From, State) ->
