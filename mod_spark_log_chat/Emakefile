@@ -21,13 +21,8 @@
 	    ]},
 
      {i,[
-             "../amqp_client/include" 
-	    ]},
-
-	 {i,[
-             "../rabbit_common/include" 
-	    ]} 
-
+             ".." 
+	    ]}
    ]
 }.
 
