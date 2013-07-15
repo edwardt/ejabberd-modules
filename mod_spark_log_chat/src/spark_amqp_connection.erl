@@ -1,111 +1,217 @@
--module(spark_amqp_connection).
+-module(spark_amqp_session).
 -behaviour(gen_server).
 
 -include_lib("chat_message.hrl").
 -include_lib("amqp_client/include/amqp_client.hrl").
 
--export([open/1, close/1]).
+-export([start/0, stop/0, 
+         establish/1,
+         tear_down/1,
+         list_active/1,
+         list_all_active/0,
+         ping/0,
+         test/0]).
+
+-export([publish/2]).
+
+-export([start_link/1, start_link/2]).
 
 -export([
+  init/0,
   init/1, 
-  handle_call/2, 
-  handle_event/2, 
+  handle_call/3,
+  handle_cast/2,
   handle_info/2, 
   terminate/2,
   code_change/3,
   test/0
 ]).
 
+-define(ConfPath,"conf").
+-define(ConfFile, "spark_amqp.config").
+-define(SERVER, ?MODULE).
+
 -record(state, {
   name,
   level,
   exchange,
+  queue_declare,
+  queue_bind,
   params
 }).
 
-init(Params) ->
-  
-  Name = config_val(name, Params, ?MODULE),  
-  Level = config_val(level, Params, debug),
-  Exchange = config_val(exchange, Params, list_to_binary(atom_to_list(?MODULE))),
-  
-  AmqpParams = get_amqp_param(),
-  
+
+-spec establish(atom()) -> {ok, pid()} | {error, badarg}.
+establish(ProcGroupName) when is_atom(ProcGroupName)-> 
+  gen_server:call(?SERVER, setup, ProcGroupName);
+establish(_) -> {error, badarg}.
+
+tear_down(ProcGroupName) when is_atom(ProcGroupName)-> 
+  gen_server:call(?SERVER, tear_down, ProcGroupName);
+tear_down(_) -> {error, badarg}.
+
+list_active(ProcGroupName) when is_atom(ProcGroupName)-> 
+  gen_server:call(?SERVER, list_active, ProcGroupName);
+list_active(_) -> {error, badarg}.
+
+list_all_active() -> 
+  gen_server:call(?SERVER, list_all_active);
+
+ping()->
+  gen_server :call(?SERVER, ping).
+
+test()->
+  {ok, Pid} = establish(test),
+  {ok, stopped} = tear_down(test).
+
+publish(call, Message) ->
+  gen_server:call(?SERVER, {publish, call, Module, Message});
+publish(cast, Messages) when is_list(Messages) ->
+  gen_server:call(?SERVER, {publish, cast, Module, Messages}).
+
+init()->
+  init([?ConfPath, ?ConfFile]).
+
+init(Args) ->
+  [{Path, File}] = Args,
+  {ok, [ConfList]} = app_config_util:load_config(Path,File),
+  {ok, AmqpConfList} = app_config_util:get_value(amqp_connection, ConfList, []),
+  {ok, ExchangeConfList} = app_config_util:get_value(amqp_exchange, ConfList, []),
+  {ok, QueueConfList} = app_config_util:get_value(amqp_queue, ConfList, []),
+  setup(AmqpConfList,ExchangeConfList,QueueConfList).
+
+setup(AmqpConfList,ExchangeConfList,QueueConfList)->
+  AmqpParams = spark_rabbit_config:get_connection_setting(AmqpConfList), 
+  ExchangeDeclare = spark_rabbit_config:get_exchange_setting(ExchangeConfList),
+  QueueDeclare = spark_rabbit_config:get_queue_setting(QueueConfList),
+  QueueBind = spark_rabbit_config:get_queue_bind(ConfList),
   {ok, Channel} = amqp_channel(AmqpParams),
-  #'exchange.declare_ok'{} = amqp_channel:call(Channel, #'exchange.declare'{ exchange = Exchange, type = <<"topic">> }),
-  
+  {'exchange.declare_ok'}  = amqp_channel:call(Channel, ExchangeDeclare),
+  {'queue.declare_ok', _, _, _} = amqp_channel:call(Channel, QueueDeclare),
+  {'queue.bind_ok'}  = amqp_channel:call(Channel, QueueBind),
   {ok, #state{ 
     name = Name, 
     level = Level, 
     exchange = Exchange,
+    queue_declare = QueueDeclare,
+    queue_bind = QueueBind,
     params = AmqpParams
   }}.
-
-handle_call({set_loglevel, Level}, #state{ name = _Name } = State) ->
-  % io:format("Changed loglevel of ~s to ~p~n", [Name, Level]),
-  {ok, ok, State#state{ level=lager_util:level_to_num(Level) }};
-    
-handle_call(get_loglevel, #state{ level = Level } = State) ->
-  {ok, Level, State};
-    
-handle_call(_Request, State) ->
-  {ok, ok, State}.
-
-handle_event({log, Dest, Level, {Date, Time}, Message}, #state{ name = Name, level = L} = State) when Level > L ->
-  case lists:member({lager_amqp_backend, Name}, Dest) of
-    true ->
-      {ok, log(Level, Date, Time, Message, State)};
-    false ->
-      {ok, State}
-  end;
-
-handle_event({log, Level, {Date, Time}, Message}, #state{ level = L } = State) when Level =< L->
-  {ok, log(Level, Date, Time, Message, State)};
   
-handle_event(_Event, State) ->
-  {ok, State}.
+handle_call({setup, ProcGroupName}, From, State)->
+  AmqpParams = State#state.params,
+  Reply = amqp_channel(ProcGroupName, AmqpParam),
+  {reply, Reply, State}.
 
-handle_info(_Info, State) ->
-  {ok, State}.
+handle_call({tear_down, ProcGroupName, Pids}, From, State)->
+  Reply =
+  case handle_call({list_all_active, Group}, From, State) of
+     {error, _} -> {ok, stopped};
+     Pids -> lists:map(
+                  fun(Pid) -> 
+                    amqp_connection:close(Pid) 
+                  end,
+                  Pids
+             ),
+  end,
 
-terminate(_Reason, _State) ->
-  ok.
+  {reply, Reply, State}.
 
-code_change(_OldVsn, State, _Extra) ->
-  {ok, State}.
+handle_call({list_active, ProcGroupName}, From, State)->
+  Reply = 
+  case pg2:get_closest_pid(Group) of
+    {error, {no_such_group, G}} -> {error, {no_such_group, G}};
+    {error, {no_process, G0}} ->  {error, {no_process, G0}};
+    Pid -> Pid
+  end,
+  {reply, Reply, State}.
 
-log(Level, Date, Time, Message, #state{params = AmqpParams } = State) ->
+handle_call({list_all_active, Group}, From, State)->
+  Reply = 
+  case pg2:get_local_members(Group) of
+    {error, {no_such_group, G}} -> {error, {no_such_group, G}};
+    Pid -> Pid
+  end,
+  {reply, Reply, State}.
+
+handle_call({publish, call, Module, AMessage}, From, State)->
+  AmqpParams = State#state.amqp_connection,
+  Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
-      send(State, Level, [Date, " ", Time, " ", Message], Channel);
+      sync_send(#state{ name = Name, exchange = Exchange } = State, Level, [AMessage], Channel, Module); 
     _ ->
       State
   end.
+  {reply, Reply, State};
 
-send(#state{ name = Name, exchange = Exchange } = State, Level, Message, Channel) ->
-  RkPrefix = atom_to_list(lager_util:num_to_level(Level)),
-  RoutingKey =  list_to_binary( case Name of
-                                  [] ->
-                                    RkPrefix;
-                                  Name ->
-                                    string:join([RkPrefix, Name], ".")
-                                end
-                              ),
-  Publish = #'basic.publish'{ exchange = Exchange, routing_key = RoutingKey },
-  Props = #'P_basic'{ content_type = <<"text/plain">> },
-  Body = list_to_binary(lists:flatten(Message)),
-  Msg = #amqp_msg{ payload = Body, props = Props },
+handle_call({publish, cast, Module, Messages}, From, State)->
+  AmqpParams = State#state.amqp_connection,
+  Reply =
+  case amqp_channel(AmqpParams) of
+    {ok, Channel} ->
+      async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Module); 
+    _ ->
+      State
+  end.
+  {reply, Reply, State}.  
 
-  % io:format("message: ~p~n", [Msg]),
-  amqp_channel:cast(Channel, Publish, Msg),
+handle_call(ping, _From, State) ->
+  {reply, {ok, State}, State};
+
+handle_call(stop, _From, State) ->
+  {stop, normal, stopped, State};
+
+handle_call(_Request, _From, State) ->
+  {ok, ok, State}.
+
+-spec handle_info(tuple(), pid(), state()) -> {ok, state()}.
+handle_info(stop, _From, State)->
+  terminate(normal, State).
+
+-spec handle_cast(tuple(), state()) -> {noreply, state()}.
+handle_cast(Info, State) ->
+  erlang:display(Info),
+  {noreply, State}.
+
+
+
+-spec handle_info(atom, state()) -> {ok, state()}.
+handle_info(_Info, State) ->
+  {ok, State}.
+
+-spec terminate(atom(), state() ) ->ok.
+terminate(_Reason, _State) ->
+  ok.
+
+-spec code_change(atom(), state(), list()) -> {ok, state()}
+code_change(_OldVsn, State, _Extra) ->
+  {ok, State}.
+
+sync_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Module) ->
+  Fun = publish_fun(call, Exchange, RoutingKey, Message, ContentType, Module)
+  Ret =  lists:map(
+          fun(Message) ->
+              Method = Fun(Message),
+              Module:ensure_binary(Message),
+              amqp_channel:call(Method, Message)
+          end <- Messages),
 
   State.
 
+async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Module) ->
+  ContentType = <<"text/binary">>,
+  Fun = publish_fun(cast, Exchange, Message, ContentType, Module),
+  Ret =  lists:map(
+          fun(Message) ->
+              Method = Fun(Message),
+              Module:ensure_binary(Message),
+              amqp_channel:cast(Method, Message)
+          end <- Messages),
+  State.
+
+-spec (config_val(atom(), list(), any())) -> any().
 config_val(C, Params, Default) -> proplists:get_value(Key, List, Default).
-%  case lists:keyfind(C, 1, Params) of
-%    {C, V} -> V;
-%    _ -> Default
-%  end.
 
 amqp_channel(AmqpParams) ->
   case maybe_new_pid({AmqpParams, connection},
@@ -113,8 +219,7 @@ amqp_channel(AmqpParams) ->
     {ok, Client} ->
       maybe_new_pid({AmqpParams, channel},
                     fun() -> amqp_connection:open_channel(Client) end);
-    Error ->
-      Error
+    Error -> Error
   end.
 
 maybe_new_pid(Group, StartFun) ->
@@ -127,28 +232,23 @@ maybe_new_pid(Group, StartFun) ->
         {ok, Pid} ->
           pg2:join(Group, Pid),
           {ok, Pid};
-        Error ->
-          Error
+        Error -> Error
       end;
-    Pid ->
-      {ok, Pid}
+    Pid -> {ok, Pid}
   end.
 
-get_amqp_param()->
-	#amqp_params_network {
-    username       = config_val(amqp_user, Params, <<"guest">>),
-    password       = config_val(amqp_pass, Params, <<"guest">>),
-    virtual_host   = config_val(amqp_vhost, Params, <<"/">>),
-    host           = config_val(amqp_host, Params, "localhost"),
-    port           = config_val(amqp_port, Params, 5672)
-  }. 
 
-test() ->
-  application:load(lager),
-  application:set_env(lager, handlers, [{lager_console_backend, debug}, {lager_amqp_backend, []}]),
-  application:set_env(lager, error_logger_redirect, false),
-  application:start(lager),
-  lager:log(info, self(), "Test INFO message"),
-  lager:log(debug, self(), "Test DEBUG message"),
-  lager:log(error, self(), "Test ERROR message").
-  
+publish_fun(CallType, Exchange, Message, ContentType) ->
+  rabbit_farm_util:get_fun(CallType, 
+      #'basic.publish'{ exchange   = Exchange,
+                  routing_key = Exchange.routing_key},
+      
+      #amqp_msg{props = #'P_basic'{content_type = ContentType,
+                  message_id=message_id()}, 
+              
+      payload = Message}).
+
+message_id()->
+  uuid:uuid4().
+
+
