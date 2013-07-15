@@ -35,7 +35,7 @@ get_fun(call, Method, Content)->
 			amqp_channel:call(Channel, Method, Content)
 	end.
 -spec ensure_binary(any())-> bitstring().
-ensure_binary(Value) -> app_util:ensure_binary(Value);
+ensure_binary(Value) -> app_util:ensure_binary(Value).
 
 -spec load_config()-> list().
 load_config()->
