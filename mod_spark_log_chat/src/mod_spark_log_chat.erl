@@ -51,13 +51,12 @@ start_link([Host, Opts]) -> start_link(Host, Opts).
 start_link(Host, Opts)->
 	?INFO_MSG("~p gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
 	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-%	R0 = gen_server:start_link({local, rabbit_farms}, ?MODULE, [], []),
 	R1 = gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]),
   ?INFO_MSG("gen_server started mod_spark_log_chat ~p~n", [R1]),
   Ret = ensure_dependency_started(),
   R0 = gen_server:start_link({local, rabbit_farms}, rabbit_farms, [], []),
   ?INFO_MSG("Started rabbit_farms ~p", [Ret]),
-  ok = self_test(),
+  ok = self_test([R0, R1]),
   R1.
 ensure_dependency_started()->
   ?INFO_MSG("Starting depedenecies", []),
@@ -77,8 +76,9 @@ ensure_dependency_started()->
   ok.
 
 -spec self_test()-> ok | {error, term()}.
-self_test()->
+self_test(Args)->
   ?INFO_MSG("Start self_test procedure ", []),
+  
   R = rabbit_farms:publish(call, <<"self_test from mod_spark_chat_log">>),
   R.
 
@@ -231,6 +231,7 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
         	post_to_rabbitmq(MessageItem)
     end.
 
+
 -spec parse_message(jid(), jid(), atom(), string(), string(), string(), [tuple()]) -> chat_message().
 parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
 	[From, FromBrandId] = get_memberId(FromJid, IdMap),
@@ -326,25 +327,16 @@ find_value(Key, List) ->
   end.
 
 -spec ensure_binary(atom | any()) -> binary().
-ensure_binary(undefined)->
-	undefined;
 ensure_binary(#chat_message{} = Value) ->
 	Json = json_rec:to_json(Value, chat_message_model),
   ?INFO_MSG("Chat Message as Json ~p",[Json]),
-	R = lists:flatten(mochijson2:encode(Json)),
-  R;
+  lists:flatten(mochijson2:encode(Json));
 
-ensure_binary(Value) when is_binary(Value)->
-	Value;
-ensure_binary(Value) when is_list(Value)->
-	list_to_binary(Value).
+ensure_binary(Value) -> app_util:ensure_binary(Value).
 
 -spec os_now() -> calendar:datetime1970().
-os_now()->
-  R =os:timestamp(),
-  calendar:now_to_universal_time(R).
+os_now()-> app_util:os_now().
 
 -spec timespan( calendar:datetime1970(), calendar:datetime1970())-> calendar:datetime1970().
-timespan(A,B)->
-  calendar:time_difference(A,B).
+timespan(A,B)-> app_util:timespan(A,B).
 	
