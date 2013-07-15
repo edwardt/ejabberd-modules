@@ -75,7 +75,7 @@ ensure_dependency_started()->
   ?INFO_MSG("Started depedenecies", []),
   ok.
 
--spec self_test()-> ok | {error, term()}.
+-spec self_test(list())-> ok | {error, term()}.
 self_test(Args)->
   ?INFO_MSG("Start self_test procedure ", []),
   
@@ -240,7 +240,7 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
     TimeStamp = get_timestamp(),
     #chat_message{
     	from = From,
-	 	from_brandId = FromBrandId,
+	 	  from_brandId = FromBrandId,
     	to = To,
     	to_brandId = ToBrandId,
     	type = Type,
