@@ -1,3 +1,5 @@
+-ifndef(CHAT_MESSAGE_HRL).
+-define(CHAT_MESSAGE_HRL, true).
 -record(chat_message, {
 		from ::bitstring(),
 		from_brandId  ::bitstring(),
@@ -14,3 +16,4 @@
 -export_records([chat_message]).
 
 
+-endif.
