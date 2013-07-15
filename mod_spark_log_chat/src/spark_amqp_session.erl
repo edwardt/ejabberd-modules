@@ -36,7 +36,8 @@
     exchange,
     queue_declare,
     queue_bind ,
-    params 
+    params,
+    message_module, 
 }).
 
 
@@ -63,10 +64,10 @@ test()->
   {ok, Pid} = establish(test),
   {ok, stopped} = tear_down(test).
 
-publish(call, Message) ->
-  gen_server:call(?SERVER, {publish, call, Module, Message});
-publish(cast, Messages) when is_list(Messages) ->
-  gen_server:call(?SERVER, {publish, cast, Module, Messages}).
+publish(call, Mod, Message) ->
+  gen_server:call(?SERVER, {publish, call, Mod, Message});
+publish(cast, Mod, Messages) when is_list(Messages) ->
+  gen_server:call(?SERVER, {publish, cast, Mod, Messages}).
 
 init()->
   init([?ConfPath, ?ConfFile]).
@@ -132,23 +133,23 @@ handle_call({list_all_active, Group}, From, State)->
   end,
   {reply, Reply, State}.
 
-handle_call({publish, call, Module, AMessage}, From, State)->
+handle_call({publish, call, Mod, AMessage}, From, State)->
   AmqpParams = State#state.amqp_connection,
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
-      sync_send(#state{ name = Name, exchange = Exchange } = State, Level, [AMessage], Channel, Module); 
+      sync_send(#state{ name = Name, exchange = Exchange } = State, Level, [AMessage], Channel, Mod); 
     _ ->
       State
   end.
   {reply, Reply, State};
 
-handle_call({publish, cast, Module, Messages}, From, State)->
+handle_call({publish, cast, Mod, Messages}, From, State)->
   AmqpParams = State#state.amqp_connection,
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
-      async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Module); 
+      async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Mod); 
     _ ->
       State
   end.
@@ -186,27 +187,31 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
-sync_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Module) ->
-  Fun = publish_fun(call, Exchange, RoutingKey, Message, ContentType, Module)
+sync_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Mod) ->
+  ContentType = <<"text/binary">>,
+  Fun = publish_fun(call, Exchange, RoutingKey, Message, ContentType, Mod)
+  {Mod, Loaded} = #state.message_module,
+  R = ensure_load(Mod, Loaded),
   Ret =  lists:map(
           fun(Message) ->
               Method = Fun(Message),
-              Module:ensure_binary(Message),
+              Mod:ensure_binary(Message),
               amqp_channel:call(Method, Message)
           end <- Messages),
+  State#state{message_module = R}.
 
-  State.
-
-async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Module) ->
+async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
-  Fun = publish_fun(cast, Exchange, Message, ContentType, Module),
+  {Mod, Loaded} = #state.message_module,
+  R = ensure_load(Mod, Loaded),
+  Fun = publish_fun(cast, Exchange, Message, ContentType, Mod),
   Ret =  lists:map(
           fun(Message) ->
               Method = Fun(Message),
-              Module:ensure_binary(Message),
+              Mod:ensure_binary(Message),
               amqp_channel:cast(Method, Message)
           end <- Messages),
-  State.
+  State#state{message_module = R}.
 
 -spec (config_val(atom(), list(), any())) -> any().
 config_val(C, Params, Default) -> proplists:get_value(Key, List, Default).
@@ -245,8 +250,16 @@ publish_fun(CallType, Exchange, Message, ContentType) ->
                   message_id=message_id()}, 
               
       payload = Message}).
-
+-spec message_id()-> binary().
 message_id()->
   uuid:uuid4().
+
+-spec ensure_load(atom(), trye|false)-> {ok, loaded} | {error, term()}.
+ensure_load(Mod, true) -> {ok, loaded};
+ensure_load(Mod, _) when is_atom(Mod)-> 
+  case code:ensure_loaded(Mod) ->
+      {module, Mod} -> {ok, true};
+      E -> {error, E}
+  end.
 
 
