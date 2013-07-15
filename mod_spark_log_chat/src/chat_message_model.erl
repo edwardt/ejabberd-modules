@@ -6,7 +6,7 @@
 -export([new/1, 
 	 	 rec/1,
 	  	 ensure_binary/1]).
--spec new(bitstring())-> #chat_message() | undefined.
+-spec new( bitstring() )-> #chat_message{} | undefined.
 new(<<"chat_message">>)->
    '#new-chat_message'();
 new(_)-> undefined.
