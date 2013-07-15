@@ -32,12 +32,11 @@
 -define(SERVER, ?MODULE).
 
 -record(state, {
-  name,
-  level,
-  exchange,
-  queue_declare,
-  queue_bind,
-  params
+    name = <<"">>, 
+    exchange,
+    queue_declare,
+    queue_bind ,
+    params 
 }).
 
 
@@ -91,7 +90,6 @@ setup(AmqpConfList,ExchangeConfList,QueueConfList)->
   {'queue.bind_ok'}  = amqp_channel:call(Channel, QueueBind),
   {ok, #state{ 
     name = Name, 
-    level = Level, 
     exchange = Exchange,
     queue_declare = QueueDeclare,
     queue_bind = QueueBind,
