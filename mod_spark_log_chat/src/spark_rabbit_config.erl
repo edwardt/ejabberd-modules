@@ -9,7 +9,6 @@
 ]).
 
 -include_lib("amqp_client/include/amqp_client.hrl").
--include_lib("lager/include/lager.hrl").
 
 -spec get_connection_setting(list()) ->#'amqp_params_network'{}.
 get_connection_setting(ConfList) ->
