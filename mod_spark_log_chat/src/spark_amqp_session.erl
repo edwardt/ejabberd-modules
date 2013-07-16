@@ -205,8 +205,8 @@ sync_send(#state{ name = Name, amqp_exchange = Exchange, amqp_queue_bind= QueueB
 
   R = ensure_load(Mod, Loaded),
   Ret =  lists:map(
-          fun(Exchange, AMessage, ContentType, Mod) ->
-              Method = publish_fun(call, Exchange, Routing_key, AMessage, ContentType, Mod),
+          fun(AMessage) ->
+              Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),  
               Mod:ensure_binary(AMessage),
               amqp_channel:call(Channel, Method, AMessage)
           end ,Messages),
