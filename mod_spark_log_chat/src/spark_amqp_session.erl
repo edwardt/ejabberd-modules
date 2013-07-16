@@ -199,7 +199,7 @@ code_change(_OldVsn, State, _Extra) ->
 
 sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
-  
+
   Routing_key = QueueBind#'queue_bind'.routing_key,
   {Mod, Loaded} = State#state.message_module,
 
