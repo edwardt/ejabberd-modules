@@ -20,6 +20,7 @@
 		 terminate/2, 
 		 code_change/3]).
 
+-include_lib("user_webpresence.hrl").
 
 -define(SERVER, ?MODULE).
 -define(COPY_TYPE, disc_copies).
@@ -44,6 +45,7 @@ init([{Path, File}])->
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, Interval} = proplists:get_value(refresh_interval, ConfList,-1),
   Now = app_util:os_now(),
+  ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
   {ok, State#state{refresh_interval = Interval, last_check=Now}}.
 
@@ -75,15 +77,18 @@ list_online_count(Type, Since) when is_function(Type) ->
 	gen_server:Type(?SERVER,{list_online_count, Since}).
 
 handle_call({list_online, UserId}, _From, State)->
-  Reply = 
+  OnlineUsers = users_with_active_sessions(UserId, ?EPOCH),
+  Reply = transform(OnlineUsers),
   {reply, Reply, State}.
 
 handle_call({list_online, UserId, Since}, _From, State)->
-  Reply = 
+  OnlineUsers = users_with_active_sessions(UserId, Since),
+  Reply = transform(OnlineUsers),
   {reply, Reply, State}.
 
 handle_call({list_all_count, Since}, _From, State)->
-  Reply = 
+  OnlineUsers = users_with_active_sessions(all, Since),
+  Reply = transform(OnlineUsers),
   {reply, Reply, State}.
 
 handle_call({list_online_count, Since}, _From, State)->
@@ -127,5 +132,20 @@ code_change(_OldVsn, State, _Extra) ->
 
 get_active_users_count() ->
   mnesia:table_info(session, size).
+
+create_user_webpresence()->
+  case mnesia:create_schema([node()]) of
+  	ok ->
+  		mnesia:start()
+  		{atomic, ok} = mnesia:create_table(user_webpresence,
+  							[{ram_copies, [node()]},
+  							{type, set},
+  							{attribute, record_info(fields, user_webpresence)}
+  							]
+  			),
+  		mnesia:add_table_index(user_webpresence, since);
+  	_ -> mnesia:start() 
+  end
+
 
 

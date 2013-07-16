@@ -4,8 +4,7 @@
 -export([reach_node/1,
 		 join/1,
 		 join_as_master/1,
-		 sync_node/1,
-		 list_change_since/2
+		 sync_node/1
 		]).
 
 -export([ping/0]).
@@ -19,6 +18,8 @@
 		handle_info/2,
 		code_change/3,
 		terminate/2]).
+
+-include_lib("user_webpresence.hrl").
 
 %-define(USER_TABLE, ).
 -define(SERVER, ?MODULE).
@@ -49,9 +50,6 @@ join_as_master(Name)->
 sync_node(Name) ->
   gen_server:call(?SERVER, {sync_node, Name}).
 
-list_change_since(TableName, Since) ->
-  gen_server:call(?SERVER, {list_change_since, TableName, Since}).
-
 handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
   Reply = 
   case net_adm:ping(Name) of
@@ -73,11 +71,6 @@ handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
 
 handle_call({sync_node, Name}, From, State) when is_atom(Name)->
   Reply = sync_node(Name),
-  {ok, Reply, State};
-
-handle_call({list_change_since, TableName, Since}, From, State) when is_atom(TableName)->
-  OnlineUsers = users_with_active_sessions(),
-  Reply = transform(OnlineUsers),
   {ok, Reply, State};
 
 handle_call(ping, _From, State) ->
