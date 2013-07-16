@@ -119,7 +119,7 @@ handle_call({tear_down, Pids}, _From, State)->
 
   {reply, Reply, State};
 
-handle_call({list_active}, _From, State)->
+handle_call({list_active}, From, State)->
   R1 = handle_call({list_all_active_conn}, From, State),
   R2 = handle_call({list_all_active_chan}, From, State),
   Reply = lists:concat([R1, R2]),
@@ -199,8 +199,8 @@ code_change(_OldVsn, State, _Extra) ->
 
 sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
-
-  Routing_key = State#QueueBind.routing_key,
+  
+  Routing_key = QueueBind.routing_key,
   {Mod, Loaded} = State#state.message_module,
 
   R = ensure_load(Mod, Loaded),
@@ -214,7 +214,7 @@ sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = St
 
 async_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
-  Routing_key = State#state.QueueBind.routing_key,
+  Routing_key = QueueBind.routing_key,
   {Mod, Loaded} = State#state.message_module,
   
   R = ensure_load(Mod, Loaded),
