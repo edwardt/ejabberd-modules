@@ -106,7 +106,7 @@ handle_call({setup}, From, State)->
   {reply, Reply, State};
 
 handle_call({tear_down, Pids}, From, State)->
-  Reply =
+  Reply = 
   case handle_call({list_all_active}, From, State) of
      {error, _} -> {ok, stopped};
      Pids -> lists:map(
@@ -120,6 +120,9 @@ handle_call({tear_down, Pids}, From, State)->
   {reply, Reply, State};
 
 handle_call({list_active}, From, State)->
+  R1 = handle_call({list_all_active_conn, Group}, From, State),
+  R2 = handle_call({list_all_active_chan, Group}, From, State)->
+
   AmqpParams = State#state.amqp_connection,
   Reply = 
   case pg2:get_closest_pid(ProcGroupName) of
@@ -270,7 +273,7 @@ message_id()->
   uuid:uuid4().
 
 -spec ensure_load(atom(), trye|false)-> {ok, loaded} | {error, term()}.
-ensure_load(Mod, true) -> {ok, loaded};
+ensure_load(_, true) -> {ok, loaded};
 ensure_load(Mod, _) when is_atom(Mod)-> 
   case code:ensure_loaded(Mod) of
       {module, Mod} -> {ok, true};
