@@ -21,7 +21,8 @@
 		terminate/2]).
 
 %-define(USER_TABLE, ).
--define(SERVER, ?MODULE)
+-define(SERVER, ?MODULE).
+-define(COPY_TYPE, disc_copies).
 
 start()->
    gen_server:call(?SERVER, start).
@@ -73,6 +74,7 @@ handle_call({sync_node, Name}, From, State) when is_atom(Name)->
   {ok, Reply, State};
 
 handle_call({list_change_since, TableName, Since}, From, State) when is_atom(TableName)->
+  
   {ok, Reply, State};
 
 handle_call(ping, _From, State) ->
@@ -105,11 +107,14 @@ handle_info(_Info State)- >
   {ok, State}.
 
 prepare_sync(Name) ->
+  prepare_sync(Name, ?COPY_TYPE).  
+  
+prepare_sync(Name, Type) ->
   mnesia:stop(),
   mnesia:delete_schema([node()]),
   mnesia:start(),
   mnesia:change_config(extra_db_nodes,[Name]),
-  mnesia:change_table_copy_type(schema, node(), disc_copies).
+  mnesia:change_table_copy_type(schema, node(), Type).
 
 post_sync(Name) when is_atom(Name) ->
   app_util:stop_app(Name),
