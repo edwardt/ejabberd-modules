@@ -125,7 +125,7 @@ handle_call({list_active}, _From, State)->
   Reply = lists:concat([R1, R2]),
   {reply, Reply, State};
 
-handle_call({list_all_active_conn, Group}, _From, State)->
+handle_call({list_all_active_conn}, _From, State)->
   AmqpParams = State#state.amqp_connection,
   Reply = 
   case pg2:get_local_members({AmqpParams, connection} ) of
@@ -134,7 +134,7 @@ handle_call({list_all_active_conn, Group}, _From, State)->
   end,
   {reply, Reply, State};
 
-handle_call({list_all_active_chan, Group}, _From, State)->
+handle_call({list_all_active_chan}, _From, State)->
   AmqpParams = State#state.amqp_connection,
   Reply = 
   case pg2:get_local_members({AmqpParams, channel} ) of
@@ -148,7 +148,7 @@ handle_call({publish, call, Mod, AMessage}, _From, State)->
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
-      sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State,  [AMessage], Channel, Mod); 
+      sync_send(State,  [AMessage], Channel, Mod); 
     _ ->
       State
   end,
@@ -159,7 +159,7 @@ handle_call({publish, cast, Mod, Messages}, _From, State)->
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
-      async_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind} = State, Messages, Channel, Mod); 
+      async_send(State, Messages, Channel, Mod); 
     _ ->
       State
   end,
