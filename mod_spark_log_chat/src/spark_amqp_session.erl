@@ -120,16 +120,9 @@ handle_call({tear_down, Pids}, From, State)->
   {reply, Reply, State};
 
 handle_call({list_active}, From, State)->
-  R1 = handle_call({list_all_active_conn, Group}, From, State),
-  R2 = handle_call({list_all_active_chan, Group}, From, State)->
-
-  AmqpParams = State#state.amqp_connection,
-  Reply = 
-  case pg2:get_closest_pid(ProcGroupName) of
-    {error, {no_such_group, G}} -> {error, {no_such_group, G}};
-    {error, {no_process, G0}} ->  {error, {no_process, G0}};
-    Pid -> Pid
-  end,
+  R1 = handle_call({list_all_active_conn}, From, State),
+  R2 = handle_call({list_all_active_chan}, From, State),
+  Reply = lists:concat([R1, R2]),
   {reply, Reply, State};
 
 handle_call({list_all_active_conn, Group}, From, State)->
@@ -221,7 +214,7 @@ sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = St
 
 async_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
-  Routing_key = State#QueueBind.routing_key,
+  Routing_key = State#state.QueueBind.routing_key,
   {Mod, Loaded} = State#state.message_module,
   
   R = ensure_load(Mod, Loaded),
