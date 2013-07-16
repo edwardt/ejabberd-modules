@@ -73,7 +73,7 @@ start_link()->
 
 start_link(Args) ->
   [{Path, File}] = Args,
-  gen_server:start_link({local, spark_amqp_session}, spark_amqp_session, [{Path, File}], []),
+  gen_server:start_link({local, spark_amqp_session}, spark_amqp_session, [{Path, File}], []).
 
 init()->
   init([{?ConfPath, ?ConfFile}]).
@@ -124,7 +124,7 @@ handle_call({tear_down, ProcGroupName, Pids}, From, State)->
 
 handle_call({list_active, ProcGroupName}, From, State)->
   Reply = 
-  case pg2:get_closest_pid(Group) of
+  case pg2:get_closest_pid(ProcGroupName) of
     {error, {no_such_group, G}} -> {error, {no_such_group, G}};
     {error, {no_process, G0}} ->  {error, {no_process, G0}};
     Pid -> Pid
@@ -203,7 +203,7 @@ sync_send(#state{ name = Name, exchange = Exchange } = State, Messages, Channel,
               Method = Fun(Message),
               Mod:ensure_binary(Message),
               amqp_channel:call(Method, Message)
-          end <- Messages),
+          end ,Messages),
   State#state{message_module = R}.
 
 async_send(#state{ name = Name, exchange = Exchange } = State,  Messages, Channel, Mod) ->
