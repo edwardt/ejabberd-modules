@@ -105,7 +105,7 @@ handle_call({setup}, _From, State)->
   Reply = amqp_channel(AmqpParams),
   {reply, Reply, State};
 
-handle_call({tear_down, Pids}, _From, State)->
+handle_call({tear_down, Pids}, From, State)->
   Reply = 
   case handle_call({list_all_active}, From, State) of
      {error, _} -> {ok, stopped};
