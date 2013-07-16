@@ -24,6 +24,8 @@
 -define(SERVER, ?MODULE).
 -define(COPY_TYPE, disc_copies).
 
+-type state() :: #state{}.
+
 start()->
    gen_server:call(?SERVER, start).
 

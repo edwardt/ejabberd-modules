@@ -1,7 +1,6 @@
 -module(mod_presence_srv).
 -behaviour(gen_server).
 
-
 -export([list_online/1,
 		list_online/2,
 		list_online_count/1,
@@ -25,6 +24,26 @@
 -define(SERVER, ?MODULE).
 -define(COPY_TYPE, disc_copies).
 -define(EPOCH, 63249771661). %Phantom start of time {{2004,04,21},{13,01,01}} in sec.
+-define(ConfPath,"conf").
+-define(ConfFile, "spark_user_presence.config").
+
+-record(state,{
+	refresh_interval = -1  % Need????????
+}).
+
+-type state() :: #state{}.
+
+start_link(Args)->
+  gen_server:start_link({local, ?SERVER}, ?MODULE, Args ,[]).
+
+init()->
+  init([{?ConfPath, ?ConfFile}]).
+
+init([{Path, File}])->
+  {ok, [ConfList]} = app_config_util:load_config(Path,File),
+  {ok, Interval} = proplists:get_value(refresh_interval, ConfList,-1),
+  refresh_every(Interval),
+  {ok, State#state{refresh_interval = Interval}}.
 
 start()->
    gen_server:call(?SERVER, start).
@@ -76,15 +95,19 @@ handle_call(stop, _From, State) ->
   {stop, normal, stopped, State};
 
 handle_call(_Request, _From, State) ->
-    Reply = {error, function_clause},
-    {reply, Reply, State}.
+  Reply = {error, function_clause},
+  {reply, Reply, State}.
 
 -spec handle_cast(tuple(), state()) -> {noreply, state()}.
 handle_cast(Info, State) ->
-	erlang:display(Info),
-    {noreply, State}.
+  erlang:display(Info),
+  {noreply, State}.
 
--spec handle_info(tuple(), state()) -> {ok, state()}.
+-spec handle_info(atom(), state()) -> {ok, state()}.
+handle_info(timeout, State) ->
+    proc_lib:hibernate(gen_server, enter_loop,
+[?MODULE, [], State]),
+    {noreply, State, ?HIBERNATE_TIMEOUT};
 handle_info(_Info, State) ->
   {ok, State}.
 
@@ -101,5 +124,10 @@ code_change(_OldVsn, State, _Extra) ->
 query_online()->
 
   {ok, UserList, Count}.
+
+update_every(Interval) when is_integer(Interval) ->
+
+update_every(Interval)
+
 
 
