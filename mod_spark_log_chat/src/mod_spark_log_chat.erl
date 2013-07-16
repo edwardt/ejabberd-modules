@@ -56,7 +56,7 @@ start_link(Host, Opts)->
 	R1 = gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]),
   ?INFO_MSG("gen_server started mod_spark_log_chat ~p~n", [R1]),
   Ret = ensure_dependency_started(),
-  R0 = gen_server:start_link({local, spark_amqp_session}, spark_amqp_session, [{?ConfPath, ?ConfFile}], []),
+  R0 = 7
   ?INFO_MSG("Started rabbit_farms ~p", [Ret]),
   ok = self_test([R0, R1]),
   R1.
