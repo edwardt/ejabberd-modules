@@ -39,22 +39,23 @@
 }).
 
 
--spec establish(atom()) -> {ok, pid()} | {error, badarg}.
+-spec establish() -> {ok, pid()} | {error, badarg}.
 establish()-> 
-  gen_server:call(?SERVER, setup);
-establish(_) -> {error, badarg}.
+  gen_server:call(?SERVER, setup).
 
+-spec tear_down() -> ok | {error, term()}.
 tear_down()-> 
-  gen_server:call(?SERVER, tear_down);
-tear_down(_) -> {error, badarg}.
+  gen_server:call(?SERVER, tear_down).
 
+-spec list_active() -> [pid()].
 list_active()-> 
-  gen_server:call(?SERVER, list_active);
-list_active(_) -> {error, badarg}.
+  gen_server:call(?SERVER, list_active).
 
+-spec ping() -> pong.
 ping()->
   gen_server :call(?SERVER, ping).
 
+-spec test() -> {ok, passed} | {error, failed}.
 test()->
   {ok, _Pid} = establish(),
   {ok, stopped} = tear_down().
@@ -130,7 +131,6 @@ handle_call({list_active}, From, State)->
 
 handle_call({list_all_active_conn, Group}, From, State)->
   AmqpParams = State#state.amqp_connection,
-  {AmqpParams, connection} 
   Reply = 
   case pg2:get_local_members({AmqpParams, connection} ) of
     {error, {no_such_group, G}} -> {error, {no_such_group, G}};
@@ -152,7 +152,7 @@ handle_call({publish, call, Mod, AMessage}, From, State)->
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
-      sync_send(#state{ name = Name, exchange = Exchange } = State,  [AMessage], Channel, Mod); 
+      sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State,  [AMessage], Channel, Mod); 
     _ ->
       State
   end,
@@ -163,7 +163,7 @@ handle_call({publish, cast, Mod, Messages}, From, State)->
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
-      async_send(#state{ name = Name, exchange = Exchange } = State, Messages, Channel, Mod); 
+      async_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind} = State, Messages, Channel, Mod); 
     _ ->
       State
   end,
@@ -201,28 +201,31 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
-sync_send(#state{ name = Name, exchange = Exchange } = State, AMessage, Channel, Mod) ->
+sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
-  Fun = publish_fun(call, Exchange, AMessage, ContentType, Mod),
+
+  Routing_key = State#QueueBind.routing_key,
   {Mod, Loaded} = State#state.message_module,
+
   R = ensure_load(Mod, Loaded),
   Ret =  lists:map(
-          fun(Message) ->
-              Method = Fun(Message),
-              Mod:ensure_binary(Message),
-              amqp_channel:call(Method, Message)
+          fun(Exchange, AMessage, ContentType, Mod) ->
+              Method = publish_fun(call, Exchange, Routing_key, AMessage, ContentType, Mod),
+              Mod:ensure_binary(AMessage),
+              amqp_channel:call(Method, AMessage)
           end ,Messages),
   State#state{message_module = R}.
 
-async_send(#state{ name = Name, exchange = Exchange } = State,  Messages, Channel, Mod) ->
+async_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
-  {Mod, Loaded} = #state.message_module,
+  Routing_key = State#QueueBind.routing_key,
+  {Mod, Loaded} = State#state.message_module,
+  
   R = ensure_load(Mod, Loaded),
-  Fun = publish_fun(cast, Exchange, Message, ContentType, Mod),
   Ret =  lists:map(
-          fun(Message) ->
-              Method = Fun(Message),             
-              amqp_channel:cast(Method, Message)
+          fun(AMessage) ->
+              Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),      
+              amqp_channel:cast(Method, AMessage)
           end, Messages),
   State#state{message_module = R}.
 
@@ -251,9 +254,9 @@ maybe_new_pid(Group, StartFun) ->
   end.
 
 
-publish_fun(CallType, Exchange, Message, ContentType, Mod) ->
+publish_fun(CallType, Exchange,Routing_key, Message, ContentType, Mod) ->
   Mod:ensure_binary(Message),
-  Routing_key = Exchange#exchange.routing_key,
+
   rabbit_farm_util:get_fun(CallType, 
       #'basic.publish'{ exchange   = Exchange,
                   routing_key = Routing_key},
