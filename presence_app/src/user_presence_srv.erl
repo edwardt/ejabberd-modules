@@ -24,7 +24,7 @@
 
 -define(SERVER, ?MODULE).
 -define(COPY_TYPE, disc_copies).
--define(EPOCH, 63249771661). %Phantom start of time {{2004,04,21},{13,01,01}} in sec.
+
 -define(ConfPath,"conf").
 -define(ConfFile, "spark_user_presence.config").
 
@@ -77,7 +77,7 @@ list_online_count(Type, Since) when is_function(Type) ->
 	gen_server:Type(?SERVER,{list_online_count, Since}).
 
 handle_call({list_online, UserId}, _From, State)->
-  OnlineUsers = users_with_active_sessions(UserId, ?EPOCH),
+  OnlineUsers = users_with_active_sessions(UserId),
   Reply = transform(OnlineUsers),
   {reply, Reply, State}.
 
@@ -148,4 +148,21 @@ create_user_webpresence()->
   end
 
 
+users_with_active_sessions(Jid) ->
+  users_with_active_sessions(Jid, 0).
 
+users_with_active_sessions(Jid, Since) ->
+  Ret = case mnesia:dirty_read({user_webpresence, online}) of
+  	 [] -> nothing;
+  	 [{user_webpresence, Jid , online, Last }] when Since >= Last
+  	   -> [Jid];
+	 [{user_webpresence, All_Jids , online, Last }] when Since >= Last
+  	   -> All_Jidsl;  
+  	 _ -> nothing
+  end.
+  
+
+transform(nothing) ->[],
+transform([]) ->[],
+transform(OnlineUsers) ->
+  
