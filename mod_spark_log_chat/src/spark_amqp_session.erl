@@ -100,12 +100,12 @@ setup(Name, AmqpConfList,ExchangeConfList,QueueConfList)->
     amqp_connection = AmqpParams
   }}.
   
-handle_call({setup}, From, State)->
+handle_call({setup}, _From, State)->
   AmqpParams = State#state.amqp_connection,
   Reply = amqp_channel(AmqpParams),
   {reply, Reply, State};
 
-handle_call({tear_down, Pids}, From, State)->
+handle_call({tear_down, Pids}, _From, State)->
   Reply = 
   case handle_call({list_all_active}, From, State) of
      {error, _} -> {ok, stopped};
@@ -119,13 +119,13 @@ handle_call({tear_down, Pids}, From, State)->
 
   {reply, Reply, State};
 
-handle_call({list_active}, From, State)->
+handle_call({list_active}, _From, State)->
   R1 = handle_call({list_all_active_conn}, From, State),
   R2 = handle_call({list_all_active_chan}, From, State),
   Reply = lists:concat([R1, R2]),
   {reply, Reply, State};
 
-handle_call({list_all_active_conn, Group}, From, State)->
+handle_call({list_all_active_conn, Group}, _From, State)->
   AmqpParams = State#state.amqp_connection,
   Reply = 
   case pg2:get_local_members({AmqpParams, connection} ) of
@@ -134,7 +134,7 @@ handle_call({list_all_active_conn, Group}, From, State)->
   end,
   {reply, Reply, State};
 
-handle_call({list_all_active_chan, Group}, From, State)->
+handle_call({list_all_active_chan, Group}, _From, State)->
   AmqpParams = State#state.amqp_connection,
   Reply = 
   case pg2:get_local_members({AmqpParams, channel} ) of
@@ -143,7 +143,7 @@ handle_call({list_all_active_chan, Group}, From, State)->
   end,
   {reply, Reply, State};
 
-handle_call({publish, call, Mod, AMessage}, From, State)->
+handle_call({publish, call, Mod, AMessage}, _From, State)->
   AmqpParams = State#state.amqp_connection,
   Reply =
   case amqp_channel(AmqpParams) of
@@ -154,7 +154,7 @@ handle_call({publish, call, Mod, AMessage}, From, State)->
   end,
   {reply, Reply, State};
 
-handle_call({publish, cast, Mod, Messages}, From, State)->
+handle_call({publish, cast, Mod, Messages}, _From, State)->
   AmqpParams = State#state.amqp_connection,
   Reply =
   case amqp_channel(AmqpParams) of
