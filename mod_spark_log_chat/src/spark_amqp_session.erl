@@ -58,6 +58,8 @@ ping()->
 -spec test() -> {ok, passed} | {error, failed}.
 test()->
   {ok, _Pid} = establish(),
+  publish(call, ?MODULE, test_msg()),
+  publish(cast, ?MODULE, test_msg()),
   {ok, stopped} = tear_down().
 
 publish(call, Mod, Message) ->
@@ -273,4 +275,7 @@ ensure_load(Mod, _) when is_atom(Mod)->
       E -> {error, E}
   end.
 
+test_msg()->
+  <sg1 = message_id(),
+  app_util:ensure_binary(Msg1).
 
