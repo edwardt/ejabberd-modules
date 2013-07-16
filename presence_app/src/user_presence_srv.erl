@@ -87,8 +87,9 @@ handle_call({list_all_count, Since}, _From, State)->
   {reply, Reply, State}.
 
 handle_call({list_online_count, Since}, _From, State)->
-  Reply = 
-  {reply, Reply, State}.
+  Reply= get_active_users_count(),
+  {ok, Reply, State};
+
 
 handle_call(ping, _From, State) ->
   {reply, {ok, State}, State};
@@ -124,8 +125,7 @@ terminate(_Reason, _State)->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
-query_online()->
-
-  {ok, UserList, Count}.
+get_active_users_count() ->
+  mnesia:table_info(session, size).
 
 

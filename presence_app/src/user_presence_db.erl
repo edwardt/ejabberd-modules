@@ -76,7 +76,8 @@ handle_call({sync_node, Name}, From, State) when is_atom(Name)->
   {ok, Reply, State};
 
 handle_call({list_change_since, TableName, Since}, From, State) when is_atom(TableName)->
-  
+  OnlineUsers = users_with_active_sessions(),
+  Reply = transform(OnlineUsers),
   {ok, Reply, State};
 
 handle_call(ping, _From, State) ->
@@ -125,3 +126,4 @@ sync_node(NodeName) ->
   [{Tb, mnesia:add_table_copy(Tb, node(), Type)} 
    || {Tb, [{NodeName, Type}]} <- [{T, mnesia:table_info(T, where_to_commit)}
    || T <- mnesia:system_info(tables)]].
+
