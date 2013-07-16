@@ -276,6 +276,6 @@ ensure_load(Mod, _) when is_atom(Mod)->
   end.
 
 test_msg()->
-  <sg1 = message_id(),
+  Msg1 = message_id(),
   app_util:ensure_binary(Msg1).
 
