@@ -37,7 +37,7 @@
     queue_declare,
     queue_bind ,
     params,
-    message_module, 
+    message_module 
 }).
 
 
@@ -55,7 +55,7 @@ list_active(ProcGroupName) when is_atom(ProcGroupName)->
 list_active(_) -> {error, badarg}.
 
 list_all_active() -> 
-  gen_server:call(?SERVER, list_all_active);
+  gen_server:call(?SERVER, list_all_active).
 
 ping()->
   gen_server :call(?SERVER, ping).
@@ -111,7 +111,7 @@ handle_call({tear_down, ProcGroupName, Pids}, From, State)->
                     amqp_connection:close(Pid) 
                   end,
                   Pids
-             ),
+             )
   end,
 
   {reply, Reply, State}.
@@ -141,7 +141,7 @@ handle_call({publish, call, Mod, AMessage}, From, State)->
       sync_send(#state{ name = Name, exchange = Exchange } = State, Level, [AMessage], Channel, Mod); 
     _ ->
       State
-  end.
+  end,
   {reply, Reply, State};
 
 handle_call({publish, cast, Mod, Messages}, From, State)->
@@ -152,7 +152,7 @@ handle_call({publish, cast, Mod, Messages}, From, State)->
       async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Mod); 
     _ ->
       State
-  end.
+  end,
   {reply, Reply, State}.  
 
 handle_call(ping, _From, State) ->
@@ -183,14 +183,14 @@ handle_info(_Info, State) ->
 terminate(_Reason, _State) ->
   ok.
 
--spec code_change(atom(), state(), list()) -> {ok, state()}
+-spec code_change(atom(), state(), list()) -> {ok, #state{}}.
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
 sync_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
   Fun = publish_fun(call, Exchange, RoutingKey, Message, ContentType, Mod)
-  {Mod, Loaded} = #state.message_module,
+  {Mod, Loaded} = State#state.message_module,
   R = ensure_load(Mod, Loaded),
   Ret =  lists:map(
           fun(Message) ->
@@ -213,7 +213,7 @@ async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, 
           end <- Messages),
   State#state{message_module = R}.
 
--spec (config_val(atom(), list(), any())) -> any().
+-spec config_val(atom(), list(), any()) -> any().
 config_val(C, Params, Default) -> proplists:get_value(Key, List, Default).
 
 amqp_channel(AmqpParams) ->
@@ -257,7 +257,7 @@ message_id()->
 -spec ensure_load(atom(), trye|false)-> {ok, loaded} | {error, term()}.
 ensure_load(Mod, true) -> {ok, loaded};
 ensure_load(Mod, _) when is_atom(Mod)-> 
-  case code:ensure_loaded(Mod) ->
+  case code:ensure_loaded(Mod) of
       {module, Mod} -> {ok, true};
       E -> {error, E}
   end.
