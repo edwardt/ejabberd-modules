@@ -56,8 +56,8 @@ ping()->
   gen_server :call(?SERVER, ping).
 
 test()->
-  {ok, _Pid} = establish(test),
-  {ok, stopped} = tear_down(test).
+  {ok, _Pid} = establish(),
+  {ok, stopped} = tear_down().
 
 publish(call, Mod, Message) ->
   gen_server:call(?SERVER, {publish, call, Mod, Message});
@@ -201,9 +201,9 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
-sync_send(#state{ name = Name, exchange = Exchange } = State, Messages, Channel, Mod) ->
+sync_send(#state{ name = Name, exchange = Exchange } = State, AMessage, Channel, Mod) ->
   ContentType = <<"text/binary">>,
-  Fun = publish_fun(call, Exchange, RoutingKey, Message, ContentType, Mod),
+  Fun = publish_fun(call, Exchange, AMessage, ContentType, Mod),
   {Mod, Loaded} = State#state.message_module,
   R = ensure_load(Mod, Loaded),
   Ret =  lists:map(
