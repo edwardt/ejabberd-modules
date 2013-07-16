@@ -5,10 +5,9 @@
 -include_lib("amqp_client/include/amqp_client.hrl").
 
 -export([
-         establish/1,
-         tear_down/1,
-         list_active/1,
-         list_all_active/0,
+         establish/0,
+         tear_down/0,
+         list_active/0,
          ping/0]).
 
 -export([publish/3]).
@@ -41,26 +40,23 @@
 
 
 -spec establish(atom()) -> {ok, pid()} | {error, badarg}.
-establish(ProcGroupName) when is_atom(ProcGroupName)-> 
-  gen_server:call(?SERVER, setup, ProcGroupName);
+establish()-> 
+  gen_server:call(?SERVER, setup);
 establish(_) -> {error, badarg}.
 
-tear_down(ProcGroupName) when is_atom(ProcGroupName)-> 
-  gen_server:call(?SERVER, tear_down, ProcGroupName);
+tear_down()-> 
+  gen_server:call(?SERVER, tear_down);
 tear_down(_) -> {error, badarg}.
 
-list_active(ProcGroupName) when is_atom(ProcGroupName)-> 
-  gen_server:call(?SERVER, list_active, ProcGroupName);
+list_active()-> 
+  gen_server:call(?SERVER, list_active);
 list_active(_) -> {error, badarg}.
-
-list_all_active() -> 
-  gen_server:call(?SERVER, list_all_active).
 
 ping()->
   gen_server :call(?SERVER, ping).
 
 test()->
-  {ok, Pid} = establish(test),
+  {ok, _Pid} = establish(test),
   {ok, stopped} = tear_down(test).
 
 publish(call, Mod, Message) ->
@@ -103,14 +99,14 @@ setup(Name, AmqpConfList,ExchangeConfList,QueueConfList)->
     amqp_connection = AmqpParams
   }}.
   
-handle_call({setup, ProcGroupName}, From, State)->
+handle_call({setup}, From, State)->
   AmqpParams = State#state.amqp_connection,
-  Reply = amqp_channel(ProcGroupName, AmqpParams),
+  Reply = amqp_channel(AmqpParams),
   {reply, Reply, State};
 
-handle_call({tear_down, ProcGroupName, Pids}, From, State)->
+handle_call({tear_down, Pids}, From, State)->
   Reply =
-  case handle_call({list_all_active, ProcGroupName}, From, State) of
+  case handle_call({list_all_active}, From, State) of
      {error, _} -> {ok, stopped};
      Pids -> lists:map(
                   fun(Pid) -> 
@@ -122,7 +118,8 @@ handle_call({tear_down, ProcGroupName, Pids}, From, State)->
 
   {reply, Reply, State};
 
-handle_call({list_active, ProcGroupName}, From, State)->
+handle_call({list_active}, From, State)->
+  AmqpParams = State#state.amqp_connection,
   Reply = 
   case pg2:get_closest_pid(ProcGroupName) of
     {error, {no_such_group, G}} -> {error, {no_such_group, G}};
@@ -131,9 +128,20 @@ handle_call({list_active, ProcGroupName}, From, State)->
   end,
   {reply, Reply, State};
 
-handle_call({list_all_active, Group}, From, State)->
+handle_call({list_all_active_conn, Group}, From, State)->
+  AmqpParams = State#state.amqp_connection,
+  {AmqpParams, connection} 
   Reply = 
-  case pg2:get_local_members(Group) of
+  case pg2:get_local_members({AmqpParams, connection} ) of
+    {error, {no_such_group, G}} -> {error, {no_such_group, G}};
+    Pid -> Pid
+  end,
+  {reply, Reply, State};
+
+handle_call({list_all_active_chan, Group}, From, State)->
+  AmqpParams = State#state.amqp_connection,
+  Reply = 
+  case pg2:get_local_members({AmqpParams, channel} ) of
     {error, {no_such_group, G}} -> {error, {no_such_group, G}};
     Pid -> Pid
   end,
@@ -217,9 +225,6 @@ async_send(#state{ name = Name, exchange = Exchange } = State,  Messages, Channe
               amqp_channel:cast(Method, Message)
           end, Messages),
   State#state{message_module = R}.
-
--spec config_val(atom(), list(), any()) -> any().
-config_val(Key, Params, Default) -> proplists:get_value(Key, Params, Default).
 
 amqp_channel(AmqpParams) ->
   case maybe_new_pid({AmqpParams, connection},
