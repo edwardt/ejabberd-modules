@@ -35,7 +35,7 @@
     exchange,
     queue_declare,
     queue_bind ,
-    params,
+    amqp_connection,
     message_module 
 }).
 
@@ -100,17 +100,17 @@ setup(Name, AmqpConfList,ExchangeConfList,QueueConfList)->
     exchange = ExchangeDeclare,
     queue_declare = QueueDeclare,
     queue_bind = QueueBind,
-    params = AmqpParams
+    amqp_connection = AmqpParams
   }}.
   
 handle_call({setup, ProcGroupName}, From, State)->
-  AmqpParams = State#state.params,
+  AmqpParams = State#state.amqp_connection,
   Reply = amqp_channel(ProcGroupName, AmqpParams),
   {reply, Reply, State};
 
 handle_call({tear_down, ProcGroupName, Pids}, From, State)->
   Reply =
-  case handle_call({list_all_active, Group}, From, State) of
+  case handle_call({list_all_active, ProcGroupName}, From, State) of
      {error, _} -> {ok, stopped};
      Pids -> lists:map(
                   fun(Pid) -> 
