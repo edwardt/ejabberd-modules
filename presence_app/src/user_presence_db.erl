@@ -103,12 +103,11 @@ handle_info(stop, _From, State)->
 terminate(Reason, _State) ->
    ok.
 
-handle_info(_Info State)- >
-  {ok, State}.
+code_change(_OldVsn, State, _Extra)->
+   {ok, State}.
 
 prepare_sync(Name) ->
   prepare_sync(Name, ?COPY_TYPE).  
-  
 prepare_sync(Name, Type) ->
   mnesia:stop(),
   mnesia:delete_schema([node()]),
