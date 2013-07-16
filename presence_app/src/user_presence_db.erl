@@ -65,12 +65,17 @@ handle_call({join_as_slave, Name}, From, State) when is_atom(Name)->
 
 handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
   prepare_sync(Name),
-  sync_node(Name),
+  sync_node_session(Name),
   Reply = post_sync(Name),
   {ok, Reply, State};
 
 handle_call({sync_node, Name}, From, State) when is_atom(Name)->
   Reply = sync_node(Name),
+  {ok, Reply, State};
+
+
+handle_call({sync_node_session, Name}, From, State) when is_atom(Name)->
+  Reply = sync_node_tables(Name,[session]),
   {ok, Reply, State};
 
 handle_call(ping, _From, State) ->
@@ -120,3 +125,8 @@ sync_node(NodeName) ->
    || {Tb, [{NodeName, Type}]} <- [{T, mnesia:table_info(T, where_to_commit)}
    || T <- mnesia:system_info(tables)]].
 
+
+sync_node_tables(NodeName, Tables) ->
+  [{Tb, mnesia:add_table_copy(Tb, node(), Type)} 
+   || {Tb, [{NodeName, Type}]} <- [{T, mnesia:table_info(T, where_to_commit)}
+   || T <- Tables]].

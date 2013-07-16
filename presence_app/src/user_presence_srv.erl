@@ -29,8 +29,16 @@
 -define(ConfFile, "spark_user_presence.config").
 
 -record(state,{
-	refresh_interval = -1  % Need????????
+	refresh_interval = -1, 
 	last_check
+}).
+
+-record(session, {
+	sid,
+	usr,
+	us,
+	priority,
+	info
 }).
 
 -type state() :: #state{}.
@@ -112,7 +120,7 @@ handle_cast(Info, State) ->
   {noreply, State}.
 
 handle_info({query_all_online}, State)->
-  
+  ok = set_user_webpresence(),
   erlang:send_after(State#state.refresh_interval,
   	 self(), {query_all_online}),
   {noreply, State}.
@@ -133,17 +141,39 @@ code_change(_OldVsn, State, _Extra) ->
 get_active_users_count() ->
   mnesia:table_info(session, size).
 
+set_user_webpresence(Rec, _)->
+ User = case mnesia:dirty_read()
+
+ end,
+ case mnesia:dirty_write({user_webpresence, Jid, online, Time}) of
+ 	pattern when guard ->
+ 		body
+ end.
+
+read_session_from_ejabberd()->
+  traverse_table_and_show(session).
+
+traverse_table_and_show(Table_name)->
+    Iterator =  set_user_webpresence(Rec, _),
+
+    case mnesia:is_transaction() of
+        true -> mnesia:foldl(Iterator,[],Table_name);
+        false -> 
+            Exec = fun({Fun,Tab}) -> mnesia:foldl(Fun, [],Tab) end,
+            mnesia:activity(transaction,Exec,[{Iterator,Table_name}],mnesia_frag)
+    end.
+
 create_user_webpresence()->
   case mnesia:create_schema([node()]) of
   	ok ->
-  		mnesia:start()
+  		mnesia:start(),
   		{atomic, ok} = mnesia:create_table(user_webpresence,
   							[{ram_copies, [node()]},
   							{type, set},
   							{attribute, record_info(fields, user_webpresence)}
   							]
   			),
-  		mnesia:add_table_index(user_webpresence, since);
+  		mnesia:add_table_index(user_webpresence, jid);
   	_ -> mnesia:start() 
   end
 
@@ -157,12 +187,12 @@ users_with_active_sessions(Jid, Since) ->
   	 [{user_webpresence, Jid , online, Last }] when Since >= Last
   	   -> [Jid];
 	 [{user_webpresence, All_Jids , online, Last }] when Since >= Last
-  	   -> All_Jidsl;  
+  	   -> All_Jids;  
   	 _ -> nothing
   end.
   
 
 transform(nothing) ->[],
 transform([]) ->[],
-transform(OnlineUsers) ->
-  
+transform(OnlineUsers.) ->
+  OnlineUsers.
