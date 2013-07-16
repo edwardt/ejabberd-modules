@@ -74,6 +74,9 @@ start_link(Args) ->
   [{Path, File}] = Args,
   gen_server:start_link({local, spark_amqp_session}, spark_amqp_session, [{Path, File}], []).
 
+stop()->
+  gen_server:call(?SERVER, {stop, normal}).
+
 init()->
   init([{?ConfPath, ?ConfFile}]).
 
@@ -184,8 +187,6 @@ handle_info(stop, _From, State)->
 handle_cast(Info, State) ->
   erlang:display(Info),
   {noreply, State}.
-
-
 
 -spec handle_info(atom, #state{}) -> {ok, #state{}}.
 handle_info(_Info, State) ->
