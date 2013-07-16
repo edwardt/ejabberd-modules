@@ -1,1 +1,2 @@
 -module(mod_presence_srv).
+-behaviour(gen_server).

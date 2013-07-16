@@ -1,1 +1,2 @@
 -module(mod_presence_config).
+-export([]).
