@@ -197,7 +197,7 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
-sync_send(#state{ name = Name, amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
+sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
 
   Routing_key = QueueBind#'queue_bind'.routing_key,
@@ -212,7 +212,7 @@ sync_send(#state{ name = Name, amqp_exchange = Exchange, amqp_queue_bind= QueueB
           end ,Messages),
   State#state{message_module = R}.
 
-async_send(#state{ name = Name, amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
+async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
   Routing_key = QueueBind#'queue_bind'.routing_key,
   {Mod, Loaded} = State#state.message_module,
