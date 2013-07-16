@@ -200,7 +200,7 @@ code_change(_OldVsn, State, _Extra) ->
 sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
   
-  Routing_key = QueueBind#queue_bind.routing_key,
+  Routing_key = QueueBind#'queue_bind'.routing_key,
   {Mod, Loaded} = State#state.message_module,
 
   R = ensure_load(Mod, Loaded),
@@ -208,20 +208,20 @@ sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = St
           fun(Exchange, AMessage, ContentType, Mod) ->
               Method = publish_fun(call, Exchange, Routing_key, AMessage, ContentType, Mod),
               Mod:ensure_binary(AMessage),
-              amqp_channel:call(Method, AMessage)
+              amqp_channel:call(Channel, Method, AMessage)
           end ,Messages),
   State#state{message_module = R}.
 
 async_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
-  Routing_key = QueueBind#queue_bind.routing_key,
+  Routing_key = QueueBind#'queue_bind'.routing_key,
   {Mod, Loaded} = State#state.message_module,
   
   R = ensure_load(Mod, Loaded),
   Ret =  lists:map(
           fun(AMessage) ->
               Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),      
-              amqp_channel:cast(Method, AMessage)
+              amqp_channel:cast(Channel, Method, AMessage)
           end, Messages),
   State#state{message_module = R}.
 
