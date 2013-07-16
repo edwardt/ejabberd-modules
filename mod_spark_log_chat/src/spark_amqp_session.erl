@@ -9,8 +9,7 @@
          tear_down/1,
          list_active/1,
          list_all_active/0,
-         ping/0,
-         test/0]).
+         ping/0]).
 
 -export([publish/3]).
 
@@ -145,7 +144,7 @@ handle_call({publish, call, Mod, AMessage}, From, State)->
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
-      sync_send(#state{ name = Name, exchange = Exchange } = State, Level, [AMessage], Channel, Mod); 
+      sync_send(#state{ name = Name, exchange = Exchange } = State,  [AMessage], Channel, Mod); 
     _ ->
       State
   end,
@@ -156,7 +155,7 @@ handle_call({publish, cast, Mod, Messages}, From, State)->
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
-      async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Mod); 
+      async_send(#state{ name = Name, exchange = Exchange } = State, Messages, Channel, Mod); 
     _ ->
       State
   end,
@@ -171,30 +170,30 @@ handle_call(stop, _From, State) ->
 handle_call(_Request, _From, State) ->
   {ok, ok, State}.
 
--spec handle_info(tuple(), pid(), state()) -> {ok, state()}.
+-spec handle_info(tuple(), pid(), #state{}) -> {ok, #state{}}.
 handle_info(stop, _From, State)->
   terminate(normal, State).
 
--spec handle_cast(tuple(), state()) -> {noreply, state()}.
+-spec handle_cast(tuple(), #state{}) -> {noreply, #state{}}.
 handle_cast(Info, State) ->
   erlang:display(Info),
   {noreply, State}.
 
 
 
--spec handle_info(atom, state()) -> {ok, state()}.
+-spec handle_info(atom, #state{}) -> {ok, #state{}}.
 handle_info(_Info, State) ->
   {ok, State}.
 
--spec terminate(atom(), state() ) ->ok.
+-spec terminate(atom(), #state{} ) ->ok.
 terminate(_Reason, _State) ->
   ok.
 
--spec code_change(atom(), state(), list()) -> {ok, #state{}}.
+-spec code_change(atom(), #state{}, list()) -> {ok, #state{}}.
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
-sync_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Mod) ->
+sync_send(#state{ name = Name, exchange = Exchange } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
   Fun = publish_fun(call, Exchange, RoutingKey, Message, ContentType, Mod),
   {Mod, Loaded} = State#state.message_module,
@@ -207,7 +206,7 @@ sync_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, C
           end <- Messages),
   State#state{message_module = R}.
 
-async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, Channel, Mod) ->
+async_send(#state{ name = Name, exchange = Exchange } = State,  Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
   {Mod, Loaded} = #state.message_module,
   R = ensure_load(Mod, Loaded),
@@ -220,7 +219,7 @@ async_send(#state{ name = Name, exchange = Exchange } = State, Level, Messages, 
   State#state{message_module = R}.
 
 -spec config_val(atom(), list(), any()) -> any().
-config_val(C, Params, Default) -> proplists:get_value(Key, List, Default).
+config_val(Key, Params, Default) -> proplists:get_value(Key, Params, Default).
 
 amqp_channel(AmqpParams) ->
   case maybe_new_pid({AmqpParams, connection},
@@ -249,9 +248,10 @@ maybe_new_pid(Group, StartFun) ->
 
 publish_fun(CallType, Exchange, Message, ContentType, Mod) ->
   Mod:ensure_binary(Message),
+  Routing_key = Exchange#exchange.routing_key,
   rabbit_farm_util:get_fun(CallType, 
       #'basic.publish'{ exchange   = Exchange,
-                  routing_key = Exchange.routing_key},
+                  routing_key = Routing_key},
       
       #amqp_msg{props = #'P_basic'{content_type = ContentType,
                   message_id=message_id()}, 
