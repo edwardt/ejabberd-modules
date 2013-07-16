@@ -5,6 +5,7 @@
 -include_lib("amqp_client/include/amqp_client.hrl").
 
 -export([
+         stop/0,
          establish/0,
          tear_down/0,
          list_active/0,
