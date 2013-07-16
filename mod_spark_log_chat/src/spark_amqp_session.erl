@@ -94,9 +94,9 @@ setup(Name, AmqpConfList,ExchangeConfList,QueueConfList)->
   {'queue.bind_ok'}  = amqp_channel:call(Channel, QueueBind),
   {ok, #state{ 
     name = Name, 
-    exchange = ExchangeDeclare,
-    queue_declare = QueueDeclare,
-    queue_bind = QueueBind,
+    amqp_exchange = ExchangeDeclare,
+    amqp_queue_declare = QueueDeclare,
+    amqp_queue_bind = QueueBind,
     amqp_connection = AmqpParams
   }}.
   
@@ -197,7 +197,7 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
-sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
+sync_send(#state{ name = Name, amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
 
   Routing_key = QueueBind#'queue_bind'.routing_key,
@@ -212,7 +212,7 @@ sync_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = St
           end ,Messages),
   State#state{message_module = R}.
 
-async_send(#state{ name = Name, exchange = Exchange, queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
+async_send(#state{ name = Name, amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
   Routing_key = QueueBind#'queue_bind'.routing_key,
   {Mod, Loaded} = State#state.message_module,
