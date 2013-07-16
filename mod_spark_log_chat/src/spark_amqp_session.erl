@@ -31,9 +31,9 @@
 
 -record(state, {
     name = <<"">>, 
-    exchange,
-    queue_declare,
-    queue_bind ,
+    amqp_exchange,
+    amqp_queue_declare,
+    amqp_queue_bind ,
     amqp_connection,
     message_module 
 }).
