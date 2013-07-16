@@ -7,6 +7,16 @@
                   kernel,
                   stdlib
                  ]},
+  {modules, [
+  			app_util,
+  			app_config_util,
+  			user_presence_config,
+  			user_presence_model,
+  			user_presence_db,
+  			user_presence_app,
+  			user_presence_sup,
+  			user_presence_srv
+  ]},              
   {mod, { user_presence_app, []}},
   {env, []}
  ]}.
