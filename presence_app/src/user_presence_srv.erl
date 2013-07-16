@@ -29,6 +29,7 @@
 
 -record(state,{
 	refresh_interval = -1  % Need????????
+	last_check
 }).
 
 -type state() :: #state{}.
@@ -42,8 +43,9 @@ init()->
 init([{Path, File}])->
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, Interval} = proplists:get_value(refresh_interval, ConfList,-1),
-  refresh_every(Interval),
-  {ok, State#state{refresh_interval = Interval}}.
+  Now = app_util:os_now(),
+  erlang:send_after(Interval, self(), {query_all_online}),
+  {ok, State#state{refresh_interval = Interval, last_check=Now}}.
 
 start()->
    gen_server:call(?SERVER, start).
@@ -103,11 +105,12 @@ handle_cast(Info, State) ->
   erlang:display(Info),
   {noreply, State}.
 
--spec handle_info(atom(), state()) -> {ok, state()}.
-handle_info(timeout, State) ->
-    proc_lib:hibernate(gen_server, enter_loop,
-[?MODULE, [], State]),
-    {noreply, State, ?HIBERNATE_TIMEOUT};
+handle_info({query_all_online}, State)->
+  
+  erlang:send_after(State#state.refresh_interval,
+  	 self(), {query_all_online}),
+  {noreply, State}.
+
 handle_info(_Info, State) ->
   {ok, State}.
 
@@ -124,10 +127,5 @@ code_change(_OldVsn, State, _Extra) ->
 query_online()->
 
   {ok, UserList, Count}.
-
-update_every(Interval) when is_integer(Interval) ->
-
-update_every(Interval)
-
 
 
