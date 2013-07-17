@@ -13,7 +13,7 @@
 -export([start/0, stop/0]).
 -export([start_link/1]).
 
--export([
+-export([init/1, init/0,
 		 handle_call/3,
 		 handle_cast/2,
 		 handle_info/2, 
