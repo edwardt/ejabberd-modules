@@ -62,6 +62,9 @@ join_as_master(Name)->
 sync_node(Name) ->
   gen_server:call(?SERVER, {sync_node, Name}).
 
+sync_node_session(Name) ->
+  gen_server:call(?SERVER, {sync_node_session, Name}).
+
 handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
   Reply = 
   case net_adm:ping(Name) of
