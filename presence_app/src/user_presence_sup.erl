@@ -40,6 +40,7 @@ init(Args) ->
 			lager, 
 			parse_trans,
 			json_rec,
+			inets,
 			mochiweb,
 			webmachine,
 			mnesia],
