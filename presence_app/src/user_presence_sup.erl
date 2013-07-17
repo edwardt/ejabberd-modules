@@ -30,7 +30,15 @@ start_link(Args) ->
 init()->
    init([]).
 init(Args) ->
-	Apps = [syntax_tools, compiler goldrush, lager, mnesia],
+	Apps = [syntax_tools, 
+			compiler, 
+			goldrush, 
+			lager, 
+			parse_trans,
+			json_rec,
+			mochiweb,
+			webmachine,
+			mnesia],
     error_logger:info_msg("Starting dependency apps ~p~n", Apps),
     lists:map(fun(App) -> 
     		ok = app_util:start_app(App)
