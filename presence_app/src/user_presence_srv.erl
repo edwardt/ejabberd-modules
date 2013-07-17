@@ -52,7 +52,7 @@ init()->
 init([{Path, File}])->
   error_logger:info_msg("Initiating ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
-  {ok, Interval} = proplists:get_value(refresh_interval, ConfList,-1),
+  Interval = proplists:get_value(refresh_interval, ConfList,-1),
   Now = app_util:os_now(),
   ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
