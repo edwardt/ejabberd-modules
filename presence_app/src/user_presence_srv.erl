@@ -55,7 +55,7 @@ init([{Path, File}])->
   Now = app_util:os_now(),
   ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
-  {ok, State#state{refresh_interval = Interval, last_check=Now}}.
+  {ok, #state{refresh_interval = Interval, last_check=Now}}.
 
 start()->
    gen_server:call(?SERVER, start).
@@ -87,17 +87,17 @@ list_online_count(Type, Since) when is_function(Type) ->
 handle_call({list_online, UserId}, _From, State)->
   OnlineUsers = users_with_active_sessions(UserId),
   Reply = transform(OnlineUsers),
-  {reply, Reply, State}.
+  {reply, Reply, State};
 
 handle_call({list_online, UserId, Since}, _From, State)->
   OnlineUsers = users_with_active_sessions(UserId, Since),
   Reply = transform(OnlineUsers),
-  {reply, Reply, State}.
+  {reply, Reply, State};
 
 handle_call({list_all_count, Since}, _From, State)->
   OnlineUsers = users_with_active_sessions(all, Since),
   Reply = transform(OnlineUsers),
-  {reply, Reply, State}.
+  {reply, Reply, State};
 
 handle_call({list_online_count, Since}, _From, State)->
   Reply= get_active_users_count(),
@@ -123,7 +123,7 @@ handle_info({query_all_online}, State)->
   ok = set_user_webpresence(),
   erlang:send_after(State#state.refresh_interval,
   	 self(), {query_all_online}),
-  {noreply, State}.
+  {noreply, State};
 
 handle_info(_Info, State) ->
   {ok, State}.
@@ -147,13 +147,13 @@ set_user_webpresence()->
       [{#session{us = '$1', _ = '_'},
     [],
     ['$1']}]),
-    lists:map(update_web_presence(U), User).
+    lists:map(fun(U) -> update_web_presence(U) end, Users).
 
 read_session_from_ejabberd()->
   traverse_table_and_show(session).
 
 traverse_table_and_show(Table_name)->
-    Iterator =  set_user_webpresence(Rec, _),
+    Iterator = set_user_webpresence(),
 
     case mnesia:is_transaction() of
         true -> mnesia:foldl(Iterator,[],Table_name);
@@ -177,8 +177,7 @@ create_user_webpresence()->
   			),
   		mnesia:add_table_index(user_webpresence, jid);
   	_ -> mnesia:start() 
-  end
-
+  end.
 
 users_with_active_sessions(Jid) ->
   users_with_active_sessions(Jid, 0).
@@ -196,7 +195,7 @@ users_with_active_sessions(Jid, Since) ->
 
 transform(nothing) ->[],
 transform([]) ->[],
-transform(OnlineUsers.) ->
+transform(OnlineUsers) ->
   OnlineUsers.
 
 dirty_get_us_list() ->
@@ -205,9 +204,12 @@ dirty_get_us_list() ->
       [{#session{us = '$1', _ = '_'},
     [],
     ['$1']}]),
-    lists:map(update_web_presence(U), User).
+    lists:map(fun(U)-> update_web_presence(U) end, Users).
 
 update_web_presence(User) ->
-  [MemberId, BrandId] = get_login_data(User).
+  [MemberId, BrandId] = get_login_data(User),
   mnesia:dirty_write({user_webpresence, MemberId, BrandId, online, Time}),
   ok.
+
+get_login_data(User)->
+   [].
