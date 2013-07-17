@@ -29,6 +29,10 @@
 
 -type state() :: #state{}.
 
+start_link() -> start_link([]).
+start_link(Args)->
+  gen_server:start_link({local, ?SERVER}, ?MODULE, Args ,[]).
+
 start()->
    gen_server:call(?SERVER, start).
 
@@ -37,7 +41,7 @@ stop()->
 
 init(_Args)->
   init().
-  
+
 init()->
   {ok, #state{}}.
 
