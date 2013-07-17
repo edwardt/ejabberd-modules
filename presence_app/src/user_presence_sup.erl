@@ -34,7 +34,7 @@ init(Args) ->
 	Apps = [syntax_tools, 
 			compiler, 
 			crypto,
-			public_keys,
+			public_key,
 			ssl,
 			goldrush, 
 			lager, 
