@@ -51,8 +51,8 @@ init(Args) ->
     	end, Apps),
 
 	Children = lists:flatten([
-    ?CHILD(user_presence_srv, worker),
-    ?CHILD(user_presence_db, worker)
+    ?CHILD(user_presence_srv, worker, Args),
+    ?CHILD(user_presence_db, worker, Args)
     ]),
     error_logger:info_msg("Starting apps ~p ~p ~n", [user_presence_srv, user_presence_db]),
     {ok,{{one_for_one,5,10}, Children}}.
