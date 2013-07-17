@@ -1,4 +1,4 @@
--module(mod_presence_srv).
+-module(user_presence_srv).
 -behaviour(gen_server).
 
 -export([list_online/1,
