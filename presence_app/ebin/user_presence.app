@@ -1,0 +1,10 @@
+{application,user_presence,
+             [{description,[]},
+              {vsn,"1"},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {modules,[app_config_util,app_util,user_presence_app,
+                        user_presence_db,user_presence_srv,user_presence_sup,
+                        user_webpresence_model]},
+              {mod,{user_presence_app,[]}},
+              {env,[]}]}.
