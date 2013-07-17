@@ -192,9 +192,8 @@ users_with_active_sessions(Jid, Since) ->
   	 _ -> nothing
   end.
   
-
-transform(nothing) ->[],
-transform([]) ->[],
+transform(nothing) ->[];
+transform([]) -> [];
 transform(OnlineUsers) ->
   OnlineUsers.
 
@@ -208,8 +207,13 @@ dirty_get_us_list() ->
 
 update_web_presence(User) ->
   [MemberId, BrandId] = get_login_data(User),
-  mnesia:dirty_write({user_webpresence, MemberId, BrandId, online, Time}),
+  Token = generate_token(),
+  mnesia:dirty_write({user_webpresence, MemberId, BrandId, online, Token}),
   ok.
 
 get_login_data(User)->
    [].
+
+generate_token() ->
+   R = app_util:os_now(),
+   calendar:datetime_to_gregorian_seconds(R).
