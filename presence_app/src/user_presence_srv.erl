@@ -141,14 +141,13 @@ code_change(_OldVsn, State, _Extra) ->
 get_active_users_count() ->
   mnesia:table_info(session, size).
 
-set_user_webpresence(Rec, _)->
- User = case mnesia:dirty_read()
-
- end,
- case mnesia:dirty_write({user_webpresence, Jid, online, Time}) of
- 	pattern when guard ->
- 		body
- end.
+set_user_webpresence()->
+   Users = mnesia:dirty_select(
+      session,
+      [{#session{us = '$1', _ = '_'},
+    [],
+    ['$1']}]),
+    lists:map(update_web_presence(U), User).
 
 read_session_from_ejabberd()->
   traverse_table_and_show(session).
@@ -160,7 +159,9 @@ traverse_table_and_show(Table_name)->
         true -> mnesia:foldl(Iterator,[],Table_name);
         false -> 
             Exec = fun({Fun,Tab}) -> mnesia:foldl(Fun, [],Tab) end,
-            mnesia:activity(transaction,Exec,[{Iterator,Table_name}],mnesia_frag)
+            mnesia:activity(transaction,
+            	Exec,[{Iterator,Table_name}],
+            	mnesia_frag)
     end.
 
 create_user_webpresence()->
@@ -170,7 +171,8 @@ create_user_webpresence()->
   		{atomic, ok} = mnesia:create_table(user_webpresence,
   							[{ram_copies, [node()]},
   							{type, set},
-  							{attribute, record_info(fields, user_webpresence)}
+  							{attribute, record_info(fields, user_webpresence)},
+  							{index, [jid]}
   							]
   			),
   		mnesia:add_table_index(user_webpresence, jid);
@@ -196,3 +198,16 @@ transform(nothing) ->[],
 transform([]) ->[],
 transform(OnlineUsers.) ->
   OnlineUsers.
+
+dirty_get_us_list() ->
+    Users = mnesia:dirty_select(
+      session,
+      [{#session{us = '$1', _ = '_'},
+    [],
+    ['$1']}]),
+    lists:map(update_web_presence(U), User).
+
+update_web_presence(User) ->
+  [MemberId, BrandId] = get_login_data(User).
+  mnesia:dirty_write({user_webpresence, MemberId, BrandId, online, Time}),
+  ok.

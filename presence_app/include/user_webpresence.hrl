@@ -7,9 +7,10 @@
 -type jid() :: #jid{}.
 
 -record(user_webpresence, {
-	jid :: jid(),
-	presence :: string(),
-	since :: integer()
+	memberid :: bitstring(),
+	brandid :: bitstring(),
+	presence :: bitstring(),
+	token :: pos_integer()
 }).
 
 -export_records([user_webpresence]).
