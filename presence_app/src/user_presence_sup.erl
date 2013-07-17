@@ -30,6 +30,7 @@ start_link(Args) ->
 init()->
    init([]).
 init(Args) ->
+     error_logger:info_msg("Starting dependency apps ~p~n", Args),
 	Apps = [syntax_tools, 
 			compiler, 
 			goldrush, 
@@ -39,9 +40,10 @@ init(Args) ->
 			mochiweb,
 			webmachine,
 			mnesia],
-    error_logger:info_msg("Starting dependency apps ~p~n", Apps),
+    error_logger:info_msg("List of dependency apps ~p~n", Apps),
     lists:map(fun(App) -> 
-    		ok = app_util:start_app(App)
+    		ok = app_util:start_app(App),
+    		error_logger:info_msg("Started App ~p~n", App),
     	end, Apps),
 
 	Children = lists:flatten([
