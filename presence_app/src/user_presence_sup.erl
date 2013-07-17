@@ -27,7 +27,7 @@ start_link(Args) ->
 %% Supervisor callbacks
 %% ===================================================================
 init()->
-   init(Args).
+   init([]).
 init(Args) ->
 	Children = lists:flatten([
     ?CHILD(user_presence_srv, worker),
