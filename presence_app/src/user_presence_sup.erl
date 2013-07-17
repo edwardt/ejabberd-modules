@@ -21,7 +21,7 @@
 start_link()->
 	start_link([{?ConfPath, ?ConfFile}]).
 start_link(Args) ->
-    error_logger:info_msg("Starting ~p supervisor with args ~p", lists:flatten(?MODULE, Args)),
+    error_logger:info_msg("Starting ~p supervisor with args ~p", [?MODULE, Args]),
     supervisor:start_link({local, ?SERVER}, ?MODULE, Args).
 
 %% ===================================================================
