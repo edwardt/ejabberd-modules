@@ -1,4 +1,4 @@
--module(mod_presence_db).
+-module(user_presence_db).
 -behaviour(gen_server).
 
 -export([reach_node/1,
