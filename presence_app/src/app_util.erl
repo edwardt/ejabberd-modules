@@ -58,7 +58,7 @@ timespan(A,B)->
   calendar:time_difference(A,B).
 
 -spec config_val(atom(), list(), any()) -> any().
-config_val(Key, List, Default) -> proplists:get_value(Key, List, Default).
+config_val(Key, List, Default) -> {ok, proplists:get_value(Key, List, Default)}.
 
 %% ===================================================================
 %% EUnit tests
