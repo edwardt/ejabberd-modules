@@ -30,9 +30,17 @@ start_link(Args) ->
 init()->
    init([]).
 init(Args) ->
+	Apps = [syntax_tools, compiler goldrush, lager, mnesia],
+    error_logger:info_msg("Starting dependency apps ~p~n", Apps),
+    lists:map(fun(App) -> 
+    		ok = app_util:start_app(App)
+    	end | Apps
+    	),
+
 	Children = lists:flatten([
     ?CHILD(user_presence_srv, worker),
     ?CHILD(user_presence_db, worker)
     ]),
+    error_logger:info_msg("Started apps ~p~n", [user_presence_srv, user_presence_db]),
     {ok,{{one_for_one,5,10}, Children}}.
 
