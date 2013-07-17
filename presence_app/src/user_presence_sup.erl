@@ -11,7 +11,7 @@
 %% Helper macro for declaring children of supervisor
 -define(CHILD(I, Type, Args), {I, {I, start_link, Args}, permanent, 5000, Type, [I]}).
 -define(ConfPath,"conf").
--define(ConfFile, "spark_amqp.config").
+-define(ConfFile, "spark_user_presence.config").
 -define(SERVER, ?MODULE).
 
 %% ===================================================================
