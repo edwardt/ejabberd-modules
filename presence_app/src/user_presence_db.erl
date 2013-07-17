@@ -25,6 +25,8 @@
 -define(SERVER, ?MODULE).
 -define(COPY_TYPE, disc_copies).
 
+-record(state,{}).
+
 -type state() :: #state{}.
 
 start()->
@@ -32,6 +34,12 @@ start()->
 
 stop()->
  	gen_server:call(?SERVER, stop).
+
+init(_Args)->
+  init().
+  
+init()->
+  {ok, #state{}}.
 
 ping()->
 	gen_server:call(?SERVER, ping).
@@ -70,12 +78,12 @@ handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
   {ok, Reply, State};
 
 handle_call({sync_node, Name}, From, State) when is_atom(Name)->
-  Reply = sync_node(Name),
+  Reply = sync_node_all_tables(Name),
   {ok, Reply, State};
 
 
 handle_call({sync_node_session, Name}, From, State) when is_atom(Name)->
-  Reply = sync_node_tables(Name,[session]),
+  Reply = sync_node_some_tables(Name,[session]),
   {ok, Reply, State};
 
 handle_call(ping, _From, State) ->
@@ -120,13 +128,13 @@ post_sync(Name) when is_atom(Name) ->
   app_util:stop_app(Name),
   app_util:start_app(Name).
 
-sync_node(NodeName) ->
+sync_node_all_tables(NodeName) ->
   [{Tb, mnesia:add_table_copy(Tb, node(), Type)} 
    || {Tb, [{NodeName, Type}]} <- [{T, mnesia:table_info(T, where_to_commit)}
    || T <- mnesia:system_info(tables)]].
 
 
-sync_node_tables(NodeName, Tables) ->
+sync_node_some_tables(NodeName, Tables) ->
   [{Tb, mnesia:add_table_copy(Tb, node(), Type)} 
    || {Tb, [{NodeName, Type}]} <- [{T, mnesia:table_info(T, where_to_commit)}
    || T <- Tables]].
