@@ -43,7 +43,7 @@ init(Args) ->
     error_logger:info_msg("List of dependency apps ~p~n", Apps),
     lists:map(fun(App) -> 
     		ok = app_util:start_app(App),
-    		error_logger:info_msg("Started App ~p~n", App),
+    		error_logger:info_msg("Started App ~p~n", App)
     	end, Apps),
 
 	Children = lists:flatten([
