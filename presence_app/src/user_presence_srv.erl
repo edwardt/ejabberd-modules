@@ -56,6 +56,7 @@ init([{Path, File}])->
   {ok, Interval} = app_config_util:config_val(refresh_interval, ConfList,-1),
   ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
+  erlang:send_after(Interval, self(), {ping}),
   End = app_util:os_now(),
   error_logger:info_msg("Done Initiation ~p with config ~p ~p", [?SERVER, Path, File]),
   error_logger:info_msg("Done Initiation ~p Start ~p End ~p", [?SERVER, Start, End]),
