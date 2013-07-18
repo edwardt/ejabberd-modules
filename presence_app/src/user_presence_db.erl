@@ -24,6 +24,7 @@
 %-define(USER_TABLE, ).
 -define(SERVER, ?MODULE).
 -define(COPY_TYPE, disc_copies).
+-define(TAB_TIMEOUT, 1000).
 
 -record(state,{}).
 
@@ -136,12 +137,14 @@ post_sync(Name) when is_atom(Name) ->
   app_util:start_app(Name).
 
 sync_node_all_tables(NodeName) ->
-  [{Tb, mnesia:add_table_copy(Tb, node(), Type)} 
-   || {Tb, [{NodeName, Type}]} <- [{T, mnesia:table_info(T, where_to_commit)}
-   || T <- mnesia:system_info(tables)]].
-
+  sync_node_some_tables(NodeName, mnesia:system_info(tables)).
 
 sync_node_some_tables(NodeName, Tables) ->
-  [{Tb, mnesia:add_table_copy(Tb, node(), Type)} 
+  [{Tb, fun(Tb, Type) -> 
+              {atomic, ok} = mnesia:add_table_copy(Tb, node(), Type),
+              error_logger:info_msg("Added table ~p",[Tb])
+        end} 
    || {Tb, [{NodeName, Type}]} <- [{T, mnesia:table_info(T, where_to_commit)}
-   || T <- Tables]].
+   || T <- Tables]],
+  ok = mnesia:wait_for_tables(Tables, ?TAB_TIMEOUT), ok.
+
