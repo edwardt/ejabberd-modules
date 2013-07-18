@@ -2,7 +2,7 @@
 -behaviour(gen_server).
 
 -export([reach_node/1,
-		 join/1,
+		 join/1, join/2,
 		 join_as_master/1,
 		 sync_node/1
 		]).
@@ -21,12 +21,15 @@
 
 -include_lib("user_webpresence.hrl").
 
-%-define(USER_TABLE, ).
 -define(SERVER, ?MODULE).
 -define(COPY_TYPE, disc_copies).
 -define(TAB_TIMEOUT, 1000).
+-define(ConfPath,"conf").
+-define(ConfFile, "spark_ejabberd_cluster.config").
 
--record(state,{}).
+-record(state,{
+        cluster_node
+}).
 
 -type state() :: #state{}.
 
@@ -41,10 +44,14 @@ stop()->
  	gen_server:call(?SERVER, stop).
 
 init(_Args)->
-  init().
+  init([{?ConfPath, ?ConfFile}]).
 
-init()->
-  {ok, #state{}}.
+init([{Path, File}])->
+  Start = app_util:os_now(),
+  error_logger:info_msg("Initiating ~p with config ~p ~p", [?SERVER, Path, File]),
+  {ok, [ConfList]} = app_config_util:load_config(Path,File),
+  {ok, Cluster} = app_config_util:config_val(cluster_node, ConfList,undefined),
+  {ok, #state{cluster_node = Cluster}}.
 
 ping()->
 	gen_server:call(?SERVER, ping).
@@ -54,10 +61,24 @@ reach_node(Name) ->
 
 join(Name) -> join_as_slave(Name).
 
+join(Name, Tab) -> join_as_slave(Name, Tab).
+
 join_as_slave(Name) ->
+  {ok, reachable} = reach_node(Name),
   gen_server:call(?SERVER, {join_as_slave, Name}).
 
+join_as_slave(Name, Tabs) ->
+  {ok, reachable} = reach_node(Name),
+  gen_server:call(?SERVER, {join_as_slave, Name, Tabs}).  
+
 join_as_master(Name)->
+  {ok, reachable} = reach_node(Name),
+
+  gen_server:call(?SERVER, {join_as_master, Name}).
+
+join_as_master(Name, Tab)->
+  {ok, reachable} = reach_node(Name),
+
   gen_server:call(?SERVER, {join_as_master, Name}).
 
 sync_node(Name) ->
@@ -79,20 +100,34 @@ handle_call({join_as_slave, Name}, From, State) when is_atom(Name)->
   Reply = post_sync(Name),
   {ok, Reply, State};
 
-handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
-  prepare_sync(Name),
-  sync_node_session(Name),
+handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
+  prepare_sync(TargetName, Tabs, ?COPY_TYPE),
   Reply = post_sync(Name),
   {ok, Reply, State};
 
-handle_call({sync_node, Name}, From, State) when is_atom(Name)->
+handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
+  prepare_sync(Name),
+  Reply = post_sync(Name),
+  {ok, Reply, State};
+
+
+handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
+  prepare_sync(Name),
+ % sync_node_session(Name),
+  sync_node_all(Name),
+  Reply = post_sync(Name),
+  {ok, Reply, State};
+
+handle_call({sync_node_all, Name}, From, State) when is_atom(Name)->
   Reply = sync_node_all_tables(Name),
   {ok, Reply, State};
 
-
-handle_call({sync_node_session, Name}, From, State) when is_atom(Name)->
-  Reply = sync_node_some_tables(Name,[session]),
+handle_call({sync_node_some_tables, Name, Tabs}, From, State) when is_atom(Name)->
+  Reply = sync_node_some_tables(Name, Tabs),
   {ok, Reply, State};
+
+handle_call({sync_node_session_table, Name}, From, State) when is_atom(Name)->
+  handle_call({sync_node_some_tables, Name, [session]}, From, State).
 
 handle_call(ping, _From, State) ->
   {reply, {ok, 'pong'}, State};
@@ -123,13 +158,25 @@ terminate(Reason, _State) ->
 code_change(_OldVsn, State, _Extra)->
    {ok, State}.
 
-prepare_sync(Name) ->
-  prepare_sync(Name, ?COPY_TYPE).  
-prepare_sync(Name, Type) ->
+prepare_sync(TargetName) ->
+  prepare_sync(TargetName, ?COPY_TYPE).  
+
+prepare_sync(TargetName, Tabs, Type) -> 
   mnesia:stop(),
   mnesia:delete_schema([node()]),
   mnesia:start(),
-  mnesia:change_config(extra_db_nodes,[Name]),
+  mnesia:change_config(extra_db_nodes,[TargetName]),
+  lists:map(
+    fun(Tab)-> 
+      mnesia:change_table_copy_type(Tab, node(), Type)
+    end
+    , Tabs).
+ 
+prepare_sync(TargetName, Type) ->
+  mnesia:stop(),
+  mnesia:delete_schema([node()]),
+  mnesia:start(),
+  mnesia:change_config(extra_db_nodes,[TargetName]),
   mnesia:change_table_copy_type(schema, node(), Type).
 
 post_sync(Name) when is_atom(Name) ->

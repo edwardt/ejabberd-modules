@@ -29,8 +29,9 @@
 -define(ConfFile, "spark_user_presence.config").
 
 -record(state,{
-	refresh_interval = -1, 
-	last_check
+        cluster_node,
+	      refresh_interval = -1, 
+	      last_check
 }).
 
 -record(session, {
@@ -45,7 +46,7 @@
 
 start_link(Args)->
   gen_server:start_link({local, ?SERVER}, ?MODULE, Args ,[]).
-
+   
 init()->
   init([{?ConfPath, ?ConfFile}]).
 
@@ -54,12 +55,16 @@ init([{Path, File}])->
   error_logger:info_msg("Initiating ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, Interval} = app_config_util:config_val(refresh_interval, ConfList,-1),
+  {ok, Cluster} = app_config_util:config_val(cluster_node, ConfList,undefined),
   ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
+
   End = app_util:os_now(),
   error_logger:info_msg("Done Initiation ~p with config ~p ~p", [?SERVER, Path, File]),
   error_logger:info_msg("Done Initiation ~p Start ~p End ~p", [?SERVER, Start, End]),
-  {ok, #state{refresh_interval = Interval, last_check=End}}.
+  {ok, #state{cluster_info = Cluster, 
+       refresh_interval = Interval,
+       last_check=End}}.
 
 start()->
    gen_server:call(?SERVER, start).
@@ -69,6 +74,9 @@ stop()->
 
 ping()->
 	gen_server:call(?SERVER, ping).
+
+sync_session_from_cluster()->
+  gen_server:call(?SERVER, sync_session_from_cluster).
 
 list_online(UserId) ->
 	gen_server:call(?SERVER,{list_online, UserId}).
@@ -107,6 +115,9 @@ handle_call({list_online_count, Since}, _From, State)->
   Reply= get_active_users_count(),
   {ok, Reply, State};
 
+handle_call(sync_session_from_cluster, _From, State)->
+  Reply= user_presence_db:join_as_slave(State#state.cluster_info, [session]), 
+  {ok, Reply, State};
 
 handle_call(ping, _From, State) ->
   {reply, pong, State};
@@ -129,6 +140,8 @@ handle_info({query_all_online}, State)->
   	 self(), {query_all_online}),
   {noreply, State};
 
+handle_info({heartbeat}, State)-> 
+  {noreply, ok};
 handle_info(_Info, State) ->
   {noreply, State}.
 
