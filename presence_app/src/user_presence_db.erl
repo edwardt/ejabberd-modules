@@ -22,7 +22,7 @@
 -include_lib("user_webpresence.hrl").
 
 -define(SERVER, ?MODULE).
--define(COPY_TYPE, disc_copies).
+-define(COPY_TYPE, ram_copies).
 -define(TAB_TIMEOUT, 1000).
 -define(ConfPath,"conf").
 -define(ConfFile, "spark_ejabberd_cluster.config").
