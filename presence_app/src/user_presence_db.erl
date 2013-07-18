@@ -99,13 +99,13 @@ handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
   {reply, Reply, State};
 
 handle_call({join_as_slave, Name}, From, State) when is_atom(Name)->
-  prepare_sync(Name),
-  Reply = post_sync(Name),
+  Reply = prepare_sync(Name),
+  %Reply = post_sync(Name),
   {reply, Reply, State#state{user_tables= [Name]}};
 
 handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
-  prepare_sync(Name, Tabs, ?COPY_TYPE),
-  Reply = post_sync(Name),
+  Reply = prepare_sync(Name, Tabs, ?COPY_TYPE),
+  %Reply = post_sync(Name),
   {reply, Reply, State};
 
 handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
@@ -117,15 +117,15 @@ handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
 handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
   prepare_sync(Name),
  % sync_node_session(Name),
-  sync_node_all_tables(Name),
-  Reply = post_sync(Name),
+  Reply = sync_node_all_tables(Name),
+  %Reply = post_sync(Name),
   {reply, Reply, State};
 
 handle_call({join_as_master, Name, Tabs}, From, State) when is_atom(Name)->
   prepare_sync(Name),
  % sync_node_session(Name),
-  sync_node_some_tables(Name, Tabs),
-  Reply = post_sync(Name),
+  Reply = sync_node_some_tables(Name, Tabs),
+  % Reply = post_sync(Name),
   {reply, Reply, State};  
 
 handle_call({sync_node_all, Name}, From, State) when is_atom(Name)->
@@ -147,8 +147,8 @@ handle_call(stop, _From, State) ->
   {reply, normal, stopped, State};
 
 handle_call(_Request, _From, State) ->
-    Reply = {error, function_clause},
-    {reply, Reply, State}.
+  Reply = {error, function_clause},
+  {reply, Reply, State}.
 
 handle_cast(Info, State) ->
   erlang:display(Info),
@@ -191,7 +191,9 @@ prepare_sync(TargetName, Tabs, Type) ->
 
 post_sync(Name) when is_atom(Name) ->
   app_util:stop_app(Name),
-  app_util:start_app(Name).
+  R = app_util:start_app(Name),
+  error_logger:info_msg("Done post_sync",[]),
+  R.
 
 sync_node_all_tables(NodeName) ->
   sync_node_some_tables(NodeName, mnesia:system_info(tables)).
