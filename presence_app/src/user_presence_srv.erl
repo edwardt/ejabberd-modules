@@ -50,7 +50,7 @@ init()->
   init([{?ConfPath, ?ConfFile}]).
 
 init([{Path, File}])->
-  Now = app_util:os_now(),
+  Start = app_util:os_now(),
   error_logger:info_msg("Initiating ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, Interval} = app_config_util:config_val(refresh_interval, ConfList,-1),
@@ -59,7 +59,7 @@ init([{Path, File}])->
   End = app_util:os_now(),
   error_logger:info_msg("Done Initiation ~p with config ~p ~p", [?SERVER, Path, File]),
   error_logger:info_msg("Done Initiation ~p Start ~p End ~p", [?SERVER, Start, End]),
-  {ok, #state{refresh_interval = Interval, last_check=Now}}.
+  {ok, #state{refresh_interval = Interval, last_check=End}}.
 
 start()->
    gen_server:call(?SERVER, start).
@@ -170,7 +170,7 @@ traverse_table_and_show(Table_name)->
     traverse_table_and_show(Iterator, Table_name).
 
 create_user_webpresence()->
-  Now = app_util:os_now(),
+  Start = app_util:os_now(),
   Ret = case mnesia:create_schema([node()]) of
   	ok ->
   		ok = app_util:start_app(mnesia),
@@ -204,11 +204,12 @@ user_with_active_session(Jid, Since) ->
   end.
 all_users_with_active_session(Since) ->
    all_users_with_active_session(session, Since).
+
 all_users_with_active_session(Table, Since) ->
-  FilterFor = fun()->
+  FilterFor = fun(Table)->
     qlc:eval(
       [X || X <- mnesia:table(Table), X#user_webpresence.token > Since]
-    ))
+    )
   end.
   
 transform(nothing) ->[];
