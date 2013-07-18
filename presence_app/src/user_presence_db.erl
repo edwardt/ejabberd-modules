@@ -55,7 +55,7 @@ init([{Path, File}])->
   {ok, #state{cluster_node = Cluster}};
 
 init(_Args)->
-  init([{?ConfPath, ?ConfFile}]);
+  init([{?ConfPath, ?ConfFile}]).
 
 ping()->
 	gen_server:call(?SERVER, ping).
