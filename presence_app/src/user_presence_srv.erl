@@ -58,7 +58,7 @@ init([{Path, File}])->
   {ok, Cluster} = app_config_util:config_val(cluster_node, ConfList,undefined),
   ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
-  erlang:send_after(Interval, self(), {list_all_online Start}),
+  erlang:send_after(Interval, self(), {list_all_online, Start}),
 
   End = app_util:os_now(),
   error_logger:info_msg("Done Initiation ~p with config ~p ~p", [?SERVER, Path, File]),
