@@ -110,7 +110,7 @@ handle_call({list_online_count, Since}, _From, State)->
 
 
 handle_call(ping, _From, State) ->
-  {reply, {ok, State}, State};
+  {reply, pong, State};
 
 handle_call(stop, _From, State) ->
   {stop, normal, stopped, State};
