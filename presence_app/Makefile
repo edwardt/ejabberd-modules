@@ -1,10 +1,17 @@
 
 
-all: compile
+all: depends builddeps compile
 
 depends:
 	./rebar -vvv get-deps
 	./rebar -vvv update-deps
+
+builddeps:
+	@(cd ./deps/edown/; make all)
+	@(cd ./deps/goldrush; make all)
+	@(cd ./deps/lager; make all)
+	@(cd ./deps/mochiweb; make all)
+
 
 compile:
 	./rebar -vvv compile
