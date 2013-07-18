@@ -44,7 +44,7 @@ stop()->
  	gen_server:call(?SERVER, stop).
 
 init()->
-  init([{?ConfPath, ?ConfFile}]);
+  init([{?ConfPath, ?ConfFile}]).
 
 init([{Path, File}])->
   Start = app_util:os_now(),
