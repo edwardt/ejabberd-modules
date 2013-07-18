@@ -174,7 +174,7 @@ prepare_sync(TargetName) ->
   prepare_sync(TargetName,[schema], ?COPY_TYPE).  
 
 prepare_sync(TargetName, Type) ->
-  prepare_sync(TargetName, Tabs,?COPY_TYPE).
+  prepare_sync(TargetName, ?COPY_TYPE).
 
 prepare_sync(TargetName, Tabs, Type) -> 
   error_logger:info_msg("Stopping mnesia delete schema ~p",[TargetName, Type]),
