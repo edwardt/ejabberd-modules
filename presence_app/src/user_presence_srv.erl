@@ -47,8 +47,8 @@
 start_link(Args)->
   gen_server:start_link({local, ?SERVER}, ?MODULE, Args ,[]).
    
-init()->
-  init([{?ConfPath, ?ConfFile}]).
+init()-> ok.
+%  init([{?ConfPath, ?ConfFile}]).
 
 init([{Path, File}])->
   Start = app_util:os_now(),

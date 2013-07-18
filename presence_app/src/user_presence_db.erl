@@ -12,7 +12,7 @@
 -export([start/0, stop/0]).
 -export([start_link/1]).
 
--export([init/1,
+-export([init/1, init/0,
 		handle_call/3,
 		handle_cast/2,
 		handle_info/2,
@@ -38,12 +38,12 @@ start_link(Args)->
   gen_server:start_link({local, ?SERVER}, ?MODULE, Args ,[]).
 
 start()->
-   gen_server:call(?SERVER, start).
+  start_link().
 
 stop()->
  	gen_server:call(?SERVER, stop).
 
-init(_Args)->
+init()->
   init([{?ConfPath, ?ConfFile}]);
 
 init([{Path, File}])->
@@ -51,7 +51,11 @@ init([{Path, File}])->
   error_logger:info_msg("Initiating ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, Cluster} = app_config_util:config_val(cluster_node, ConfList,undefined),
-  {ok, #state{cluster_node = Cluster}}.
+  {ok, #state{cluster_node = Cluster}};
+
+init(_Args)->
+  init([{?ConfPath, ?ConfFile}]);
+
 
 ping()->
 	gen_server:call(?SERVER, ping).
