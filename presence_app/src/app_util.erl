@@ -29,6 +29,7 @@ start_app({E, {Reason, App}}) ->
 start_app(_)-> {error, badarg}.
 
 stop_app(ok)-> ok;
+stop_app(stopped)->ok;
 stop_app({error,{not_started,App}})
 		when is_atom(App)-> ok;
 stop_app({error, {Reason, App}}) 

@@ -189,7 +189,7 @@ create_user_webpresence()->
       R;
   	{error,{S, {already_exists, S}}} -> 
         error_logger:info_msg("Failure to create_schema: ~p", [{S, {already_exists, S}}]),
-        ok = should_delete_schema(Schema),
+        %ok = should_delete_schema(Schema),
         ok = app_util:start_app(mnesia);
     Else ->
         error_logger:info_msg("Failure to create_schema: ~p", [Else]),
@@ -201,9 +201,10 @@ create_user_webpresence()->
 
 should_delete_schema(Schema) ->
   error_logger:info_msg("Delete schema ~p", [Schema]),
-  ok = app_util:stop_app(mnesia),
-  ok = mnesia:delete_schema([Schema]),
-  error_logger:info_msg("Deleted schema ~p ", [Schema]),
+  %mnesia:stop(),
+  app_util:stop_app(mnesia),
+   ok = mnesia:delete_schema([Schema]),
+  % error_logger:info_msg("Deleted schema ~p ", [Ret]),
   ok.
 
 user_with_active_session(Jid) ->
