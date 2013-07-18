@@ -186,13 +186,21 @@ create_user_webpresence()->
   		R = mnesia:add_table_index(user_webpresence, memberid),
       error_logger:info_msg("Created table user_webpresence table with {atomic, ok} index for user_presence table status ~p", [R]),
       R;
-  	Else -> 
+  	{error,{_, {already_exits, _}}} -> 
+        error_logger:info_msg("Failure to create_schema: ~p", [already_exits]),
+        should_delete_schema(node()),
+        app_util:start_app(mnesia);
+    Else ->
         error_logger:info_msg("Failure to create_schema: ~p", [Else]),
         app_util:start_app(mnesia)
   end,
   End = app_util:os_now(),
   error_logger:info_msg("Create user_presence table ~p Start ~p End ~p", [?SERVER, Start, End]),
   Ret.
+
+should_delete_schema(Schema) when is_atom(Schema) ->
+  ok = app_util:stop_app(mnesia),
+  ok = mnesia:delete_schema(Schema).
 
 user_with_active_session(Jid) ->
   user_with_active_session(Jid, 0).
