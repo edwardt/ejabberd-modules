@@ -164,8 +164,8 @@ handle_info(stop, _From, State)->
 
 -spec terminate(atom(), state()) -> ok.
 terminate(Reason, State) ->
-   
-   ok.
+  error_logger:info_msg("user_presence_db at ~p terminated",[node()]), 
+  ok.
 
 code_change(_OldVsn, State, _Extra)->
    {ok, State}.
