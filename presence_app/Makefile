@@ -1,6 +1,6 @@
 
 
-all: compile
+all: depends builddeps compile
 
 depends:
 	./rebar -vvv get-deps
