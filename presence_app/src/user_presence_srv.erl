@@ -184,7 +184,7 @@ create_user_webpresence()->
   							]
   			), 
   		R = mnesia:add_table_index(user_webpresence, memberid),
-      error_logger:info_msg("Created index for user_presence table", []),
+      error_logger:info_msg("Created table user_webpresence table with {atomic, ok} index for user_presence table status ~p", [R]),
       R;
   	_ -> app_util:start_app(mnesia)
   end,
