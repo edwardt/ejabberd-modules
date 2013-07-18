@@ -130,7 +130,7 @@ handle_info({query_all_online}, State)->
   	 self(), {query_all_online}),
   {noreply, State};
 
-handle_info({heartbeat}, State)
+handle_info({heartbeat}, State)-> 
   {noreply, ok};
 handle_info(_Info, State) ->
   {noreply, State}.
