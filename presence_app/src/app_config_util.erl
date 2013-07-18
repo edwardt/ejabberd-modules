@@ -33,4 +33,4 @@ cwd()->
   {ok, lists:concat([Cwd,"/",?CONFPATH])}.
 
 -spec config_val(atom(), list(), any()) -> any().
-config_val(Key, Params, Default) -> proplists:get_value(Key, Params, Default).
+config_val(Key, Params, Default) -> {ok, proplists:get_value(Key, Params, Default)}.
