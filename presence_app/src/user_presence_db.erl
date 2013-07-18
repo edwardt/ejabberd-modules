@@ -173,23 +173,21 @@ code_change(_OldVsn, State, _Extra)->
 prepare_sync(TargetName) ->
   prepare_sync(TargetName,[schema], ?COPY_TYPE).  
 
+prepare_sync(TargetName, Type) ->
+  prepare_sync(TargetName, Tabs,?COPY_TYPE).
+
 prepare_sync(TargetName, Tabs, Type) -> 
+  error_logger:info_msg("Stopping mnesia delete schema ~p",[TargetName, Type]),
   mnesia:stop(),
   mnesia:delete_schema([node()]),
   mnesia:start(),
   mnesia:change_config(extra_db_nodes,[TargetName]),
+  error_logger:info_msg("Added ~p as part of extra db nodes. Type ~p ",[TargetName, Type]),
   lists:map(
     fun(Tab)-> 
       mnesia:change_table_copy_type(Tab, node(), Type)
     end
     , Tabs).
- 
-prepare_sync(TargetName, Type) ->
-  mnesia:stop(),
-  mnesia:delete_schema([node()]),
-  mnesia:start(),
-  mnesia:change_config(extra_db_nodes,[TargetName]),
-  mnesia:change_table_copy_type(schema, node(), Type).
 
 post_sync(Name) when is_atom(Name) ->
   app_util:stop_app(Name),
