@@ -56,7 +56,7 @@ init([{Path, File}])->
   {ok, Interval} = app_config_util:config_val(refresh_interval, ConfList,-1),
   ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
-  erlang:send_after(Interval, self(), {ping}),
+  erlang:send_after(Interval, self(), {heartbeat}),
   End = app_util:os_now(),
   error_logger:info_msg("Done Initiation ~p with config ~p ~p", [?SERVER, Path, File]),
   error_logger:info_msg("Done Initiation ~p Start ~p End ~p", [?SERVER, Start, End]),
@@ -130,8 +130,10 @@ handle_info({query_all_online}, State)->
   	 self(), {query_all_online}),
   {noreply, State};
 
+handle_info({heartbeat}, State)
+  {noreply, ok};
 handle_info(_Info, State) ->
-  {ok, State}.
+  {noreply, State}.
 
 -spec handle_info(tuple(), pid(), state()) -> {ok, state()}.
 handle_info(stop, _From, State)->
