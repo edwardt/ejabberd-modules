@@ -143,7 +143,7 @@ handle_info({query_all_online}, State)->
   	 self(), {query_all_online}),
   {noreply, State};
 
-handle_info({list_all_online}, State)->
+handle_info({list_all_online, Start}, State)->
   Reply = get_active_users_count(),
   error_logger:info_msg("Total members online ~p",[Reply]),
   erlang:send_after(State#state.refresh_interval,
