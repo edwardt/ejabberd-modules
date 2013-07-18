@@ -44,7 +44,7 @@ init(Args) ->
 			mochiweb,
 			webmachine,
 			mnesia],
-    error_logger:info_msg("List of dependency apps ~p~n", Apps),
+    %error_logger:info_msg("List of dependency apps ~s~n", Apps),
     lists:map(fun(App) -> 
     		ok = app_util:start_app(App),
     		error_logger:info_msg("Started App ~p~n", [App])
