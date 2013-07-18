@@ -201,8 +201,8 @@ create_user_webpresence()->
 
 should_delete_schema(Schema) ->
   error_logger:info_msg("Delete schema ~p", [Schema]),
-  %mnesia:stop(),
-  app_util:stop_app(mnesia),
+  catch(mnesia:stop()),
+  %app_util:stop_app(mnesia),
    ok = mnesia:delete_schema([Schema]),
   % error_logger:info_msg("Deleted schema ~p ", [Ret]),
   ok.
