@@ -3,7 +3,8 @@
 
 -export([reach_node/1,
 		 join/1, join/2,
-		 join_as_master/1,
+		 join_as_slave/0,
+     join_as_master/1,
 		 sync_node/1
 		]).
 
@@ -67,6 +68,9 @@ join(Name) -> join_as_slave(Name).
 
 join(Name, Tab) -> join_as_slave(Name, Tab).
 
+join_as_slave()-> 
+  gen_server:call(?SERVER, {join_as_slave}).
+
 join_as_slave(Name) ->
   {ok, reachable} = reach_node(Name),
   gen_server:call(?SERVER, {join_as_slave, Name}).
@@ -98,14 +102,18 @@ handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
   end,
   {reply, Reply, State};
 
+handle_call({join_as_slave}, From, State) ->
+  Name = State#state.cluster_node,
+  {ok, reachable} = net_adm:ping(Name),
+  Reply = prepare_sync(Name),
+  {reply, Reply, State#state{user_tables= [Name]}};
+
 handle_call({join_as_slave, Name}, From, State) when is_atom(Name)->
   Reply = prepare_sync(Name),
-  %Reply = post_sync(Name),
   {reply, Reply, State#state{user_tables= [Name]}};
 
 handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
   Reply = prepare_sync(Name, Tabs, ?COPY_TYPE),
-  %Reply = post_sync(Name),
   {reply, Reply, State};
 
 handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
@@ -116,16 +124,12 @@ handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
 
 handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
   prepare_sync(Name),
- % sync_node_session(Name),
   Reply = sync_node_all_tables(Name),
-  %Reply = post_sync(Name),
   {reply, Reply, State};
 
 handle_call({join_as_master, Name, Tabs}, From, State) when is_atom(Name)->
   prepare_sync(Name),
- % sync_node_session(Name),
   Reply = sync_node_some_tables(Name, Tabs),
-  % Reply = post_sync(Name),
   {reply, Reply, State};  
 
 handle_call({sync_node_all, Name}, From, State) when is_atom(Name)->
