@@ -58,6 +58,7 @@ init([{Path, File}])->
   {ok, Cluster} = app_config_util:config_val(cluster_node, ConfList,undefined),
   ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
+  erlang:send_after(Interval, self(), {list_all_online Start}),
 
   End = app_util:os_now(),
   error_logger:info_msg("Done Initiation ~p with config ~p ~p", [?SERVER, Path, File]),
@@ -135,13 +136,20 @@ handle_cast(Info, State) ->
   {noreply, State}.
 
 handle_info({query_all_online}, State)->
-  ok = set_user_webpresence(),
+  Reply = set_user_webpresence(),
+  Reply1 = lists:flatten(Reply),
+  error_logger:info_msg("List of members online ~p",[Reply1]),
   erlang:send_after(State#state.refresh_interval,
   	 self(), {query_all_online}),
   {noreply, State};
 
-handle_info({heartbeat}, State)-> 
-  {noreply, ok};
+handle_info({list_all_online}, State)->
+  Reply = get_active_users_count(),
+  error_logger:info_msg("Total members online ~p",[Reply]),
+  erlang:send_after(State#state.refresh_interval,
+     self(), {list_all_online}),
+  {noreply, State};
+
 handle_info(_Info, State) ->
   {noreply, State}.
 
