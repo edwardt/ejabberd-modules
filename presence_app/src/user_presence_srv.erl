@@ -62,7 +62,7 @@ init([{Path, File}])->
   End = app_util:os_now(),
   error_logger:info_msg("Done Initiation ~p with config ~p ~p", [?SERVER, Path, File]),
   error_logger:info_msg("Done Initiation ~p Start ~p End ~p", [?SERVER, Start, End]),
-  {ok, #state{cluster_info = Cluster, 
+  {ok, #state{cluster_node = Cluster, 
        refresh_interval = Interval,
        last_check=End}}.
 
@@ -116,7 +116,7 @@ handle_call({list_online_count, Since}, _From, State)->
   {ok, Reply, State};
 
 handle_call(sync_session_from_cluster, _From, State)->
-  Reply= user_presence_db:join_as_slave(State#state.cluster_info, [session]), 
+  Reply= user_presence_db:join_as_slave(State#state.cluster_node, [session]), 
   {ok, Reply, State};
 
 handle_call(ping, _From, State) ->
