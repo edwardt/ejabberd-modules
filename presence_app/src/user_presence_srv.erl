@@ -147,8 +147,9 @@ handle_info({query_all_online}, State)->
 handle_info({list_all_online, Start}, State)->
   Reply = get_active_users_count(),
   error_logger:info_msg("Total members online ~p",[Reply]),
+  Now = app_util:os_now(),
   erlang:send_after(State#state.refresh_interval,
-     self(), {list_all_online}),
+     self(), {list_all_online, Now}),
   {noreply, State};
 
 handle_info(_Info, State) ->
