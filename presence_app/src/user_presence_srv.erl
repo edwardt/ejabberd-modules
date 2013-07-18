@@ -50,14 +50,15 @@ init()->
   init([{?ConfPath, ?ConfFile}]).
 
 init([{Path, File}])->
+  Now = app_util:os_now(),
   error_logger:info_msg("Initiating ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, Interval} = app_config_util:config_val(refresh_interval, ConfList,-1),
-  Now = app_util:os_now(),
   ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
+  End = app_util:os_now(),
   error_logger:info_msg("Done Initiation ~p with config ~p ~p", [?SERVER, Path, File]),
-
+  error_logger:info_msg("Done Initiation ~p Start ~p End ~p", [?SERVER, Start, End]),
   {ok, #state{refresh_interval = Interval, last_check=Now}}.
 
 start()->
@@ -88,17 +89,17 @@ list_online_count(Type, Since) when is_function(Type) ->
 	gen_server:Type(?SERVER,{list_online_count, Since}).
 
 handle_call({list_online, UserId}, _From, State)->
-  OnlineUsers = users_with_active_sessions(UserId),
+  OnlineUsers = user_with_active_session(UserId),
   Reply = transform(OnlineUsers),
   {reply, Reply, State};
 
 handle_call({list_online, UserId, Since}, _From, State)->
-  OnlineUsers = users_with_active_sessions(UserId, Since),
+  OnlineUsers = user_with_active_session(UserId, Since),
   Reply = transform(OnlineUsers),
   {reply, Reply, State};
 
 handle_call({list_all_count, Since}, _From, State)->
-  OnlineUsers = users_with_active_sessions(all, Since),
+  OnlineUsers = all_users_with_active_session(Since),
   Reply = transform(OnlineUsers),
   {reply, Reply, State};
 
@@ -155,44 +156,59 @@ set_user_webpresence()->
 read_session_from_ejabberd()->
   traverse_table_and_show(session).
 
-traverse_table_and_show(Table_name)->
-    Iterator = set_user_webpresence(),
-
-    case mnesia:is_transaction() of
+traverse_table_and_show(Iterator, Table_name) when is_function(Iterator) ->
+     case mnesia:is_transaction() of
         true -> mnesia:foldl(Iterator,[],Table_name);
         false -> 
             Exec = fun({Fun,Tab}) -> mnesia:foldl(Fun, [],Tab) end,
             mnesia:activity(transaction,
-            	Exec,[{Iterator,Table_name}],
-            	mnesia_frag)
-    end.
+              Exec,[{Iterator,Table_name}],
+              mnesia_frag)
+    end.   
+traverse_table_and_show(Table_name)->
+    Iterator = set_user_webpresence(),
+    traverse_table_and_show(Iterator, Table_name).
 
 create_user_webpresence()->
-  case mnesia:create_schema([node()]) of
+  Now = app_util:os_now(),
+  Ret = case mnesia:create_schema([node()]) of
   	ok ->
-  		mnesia:start(),
+  		ok = app_util:start_app(mnesia),
+      error_logger:info_msg("Create user_presence table", []),
+
   		{atomic, ok} = mnesia:create_table(user_webpresence,
   							[{ram_copies, [node()]},
   							{type, set},
   							{attribute, record_info(fields, user_webpresence)},
-  							{index, [jid]}
+  							{index, [memberid]}
   							]
-  			),
-  		mnesia:add_table_index(user_webpresence, jid);
-  	_ -> mnesia:start() 
-  end.
+  			), 
+  		R = mnesia:add_table_index(user_webpresence, memberid),
+      error_logger:info_msg("Created index for user_presence table", []),
+      R;
+  	_ -> app_util:start_app(mnesia)
+  end,
+  End = app_util:os_now(),
+  error_logger:info_msg("Create user_presence table ~p Start ~p End ~p", [?SERVER, Start, End]),
+  Ret.
 
-users_with_active_sessions(Jid) ->
-  users_with_active_sessions(Jid, 0).
+user_with_active_session(Jid) ->
+  user_with_active_session(Jid, 0).
 
-users_with_active_sessions(Jid, Since) ->
-  Ret = case mnesia:dirty_read({user_webpresence, online}) of
+user_with_active_session(Jid, Since) ->
+  Ret = case mnesia:dirty_read({user_webpresence, Jid}) of
   	 [] -> nothing;
-  	 [{user_webpresence, Jid , online, Last }] when Since >= Last
-  	   -> [Jid];
-	 [{user_webpresence, All_Jids , online, Last }] when Since >= Last
-  	   -> All_Jids;  
-  	 _ -> nothing
+  	 [{user_webpresence, Jid , _, online, Last }] when Since >= Last
+  	   -> {Jid, online};
+  	 _ -> {Jid, not_found}
+  end.
+all_users_with_active_session(Since) ->
+   all_users_with_active_session(session, Since).
+all_users_with_active_session(Table, Since) ->
+  FilterFor = fun()->
+    qlc:eval(
+      [X || X <- mnesia:table(Table), X#user_webpresence.token > Since]
+    ))
   end.
   
 transform(nothing) ->[];
