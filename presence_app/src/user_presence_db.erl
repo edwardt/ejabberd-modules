@@ -44,7 +44,7 @@ stop()->
  	gen_server:call(?SERVER, stop).
 
 init(_Args)->
-  init([{?ConfPath, ?ConfFile}]).
+  init([{?ConfPath, ?ConfFile}]);
 
 init([{Path, File}])->
   Start = app_util:os_now(),
@@ -101,7 +101,7 @@ handle_call({join_as_slave, Name}, From, State) when is_atom(Name)->
   {ok, Reply, State};
 
 handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
-  prepare_sync(TargetName, Tabs, ?COPY_TYPE),
+  prepare_sync(Name, Tabs, ?COPY_TYPE),
   Reply = post_sync(Name),
   {ok, Reply, State};
 
@@ -114,7 +114,7 @@ handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
 handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
   prepare_sync(Name),
  % sync_node_session(Name),
-  sync_node_all(Name),
+  sync_node_all_tables(Name),
   Reply = post_sync(Name),
   {ok, Reply, State};
 
@@ -127,7 +127,7 @@ handle_call({sync_node_some_tables, Name, Tabs}, From, State) when is_atom(Name)
   {ok, Reply, State};
 
 handle_call({sync_node_session_table, Name}, From, State) when is_atom(Name)->
-  handle_call({sync_node_some_tables, Name, [session]}, From, State).
+  handle_call({sync_node_some_tables, Name, [session]}, From, State);
 
 handle_call(ping, _From, State) ->
   {reply, {ok, 'pong'}, State};
