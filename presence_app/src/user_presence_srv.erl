@@ -136,7 +136,8 @@ handle_cast(Info, State) ->
   {noreply, State}.
 
 handle_info({query_all_online}, State)->
-  Reply = set_user_webpresence(),
+  %Reply = set_user_webpresence(),
+  Reply = get_users_with_active_session(),
   Reply1 = lists:flatten(Reply),
   error_logger:info_msg("List of members online ~p",[Reply1]),
   erlang:send_after(State#state.refresh_interval,
@@ -166,13 +167,16 @@ code_change(_OldVsn, State, _Extra) ->
 get_active_users_count() ->
   mnesia:table_info(session, size).
 
-set_user_webpresence()->
-   Users = mnesia:dirty_select(
+get_users_with_active_session() ->
+  mnesia:dirty_select(
       session,
       [{#session{us = '$1', _ = '_'},
     [],
-    ['$1']}]),
-    lists:map(fun(U) -> update_web_presence(U) end, Users).
+    ['$1']}]).
+
+set_user_webpresence()->
+   Users = get_users_with_active_session(), 
+   lists:map(fun(U) -> update_web_presence(U) end, Users).
 
 read_session_from_ejabberd()->
   traverse_table_and_show(session).
