@@ -202,7 +202,7 @@ create_user_webpresence()->
 should_delete_schema(Schema) when is_atom(Schema) ->
   error_logger:info_msg("Delete schema ~p", [Schema]),
   ok = app_util:stop_app(mnesia),
-  ok = mnesia:delete_schema(Schema),
+  ok = mnesia:delete_schema([Schema]),
   error_logger:info_msg("Deleted schema ~p ", [Schema]),
   ok.
 
