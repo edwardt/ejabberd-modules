@@ -186,7 +186,9 @@ create_user_webpresence()->
   		R = mnesia:add_table_index(user_webpresence, memberid),
       error_logger:info_msg("Created table user_webpresence table with {atomic, ok} index for user_presence table status ~p", [R]),
       R;
-  	_ -> app_util:start_app(mnesia)
+  	Else -> 
+        error_logger:info_msg("Failure to create_schema: ~p", [Else]),
+        app_util:start_app(mnesia)
   end,
   End = app_util:os_now(),
   error_logger:info_msg("Create user_presence table ~p Start ~p End ~p", [?SERVER, Start, End]),
