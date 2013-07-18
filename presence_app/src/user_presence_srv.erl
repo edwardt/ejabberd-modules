@@ -199,7 +199,7 @@ create_user_webpresence()->
   error_logger:info_msg("Create user_presence table ~p Start ~p End ~p", [?SERVER, Start, End]),
   Ret.
 
-should_delete_schema(Schema) when is_atom(Schema) ->
+should_delete_schema(Schema) ->
   error_logger:info_msg("Delete schema ~p", [Schema]),
   ok = app_util:stop_app(mnesia),
   ok = mnesia:delete_schema([Schema]),
