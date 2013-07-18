@@ -268,7 +268,7 @@ update_web_presence(User) ->
   ok.
 
 get_login_data(User)->
-   [].
+   [<<"">>,<<"">>].
 
 generate_token() ->
    R = app_util:os_now(),
