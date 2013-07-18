@@ -171,7 +171,8 @@ traverse_table_and_show(Table_name)->
 
 create_user_webpresence()->
   Start = app_util:os_now(),
-  Ret = case mnesia:create_schema([node()]) of
+  Schema = node(),
+  Ret = case mnesia:create_schema([Schema]) of
   	ok ->
   		ok = app_util:start_app(mnesia),
       error_logger:info_msg("Create user_presence table", []),
@@ -188,19 +189,22 @@ create_user_webpresence()->
       R;
   	{error,{_, {already_exits, _}}} -> 
         error_logger:info_msg("Failure to create_schema: ~p", [already_exits]),
-        should_delete_schema(node()),
-        app_util:start_app(mnesia);
+        ok = should_delete_schema(Schema),
+        ok = app_util:start_app(mnesia);
     Else ->
         error_logger:info_msg("Failure to create_schema: ~p", [Else]),
-        app_util:start_app(mnesia)
+        ok = app_util:start_app(mnesia)
   end,
   End = app_util:os_now(),
   error_logger:info_msg("Create user_presence table ~p Start ~p End ~p", [?SERVER, Start, End]),
   Ret.
 
 should_delete_schema(Schema) when is_atom(Schema) ->
+  error_logger:info_msg("Delete schema ~p", [Schema]),
   ok = app_util:stop_app(mnesia),
-  ok = mnesia:delete_schema(Schema).
+  ok = mnesia:delete_schema(Schema)
+  error_logger:info_msg("Deleted schema ~p ", [node()]),
+  ok.
 
 user_with_active_session(Jid) ->
   user_with_active_session(Jid, 0).
