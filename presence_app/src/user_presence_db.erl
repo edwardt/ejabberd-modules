@@ -28,7 +28,8 @@
 -define(ConfFile, "spark_ejabberd_cluster.config").
 
 -record(state,{
-        cluster_node
+        cluster_node,
+        user_tables = []
 }).
 
 -type state() :: #state{}.
@@ -56,7 +57,6 @@ init([{Path, File}])->
 init(_Args)->
   init([{?ConfPath, ?ConfFile}]);
 
-
 ping()->
 	gen_server:call(?SERVER, ping).
 
@@ -77,13 +77,12 @@ join_as_slave(Name, Tabs) ->
 
 join_as_master(Name)->
   {ok, reachable} = reach_node(Name),
-
   gen_server:call(?SERVER, {join_as_master, Name}).
 
 join_as_master(Name, Tab)->
   {ok, reachable} = reach_node(Name),
 
-  gen_server:call(?SERVER, {join_as_master, Name}).
+  gen_server:call(?SERVER, {join_as_master, Name, Tab}).
 
 sync_node(Name) ->
   gen_server:call(?SERVER, {sync_node, Name}).
@@ -97,22 +96,22 @@ handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
   	'pong' -> {ok, reachable};
   	_ -> {error, unreachable}
   end,
-  {ok, Reply, State};
+  {reply, Reply, State};
 
 handle_call({join_as_slave, Name}, From, State) when is_atom(Name)->
   prepare_sync(Name),
   Reply = post_sync(Name),
-  {ok, Reply, State};
+  {reply, Reply, State#state{user_tables= [Name]}};
 
 handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
   prepare_sync(Name, Tabs, ?COPY_TYPE),
   Reply = post_sync(Name),
-  {ok, Reply, State};
+  {reply, Reply, State};
 
 handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
   prepare_sync(Name),
   Reply = post_sync(Name),
-  {ok, Reply, State};
+  {reply, Reply, State};
 
 
 handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
@@ -120,15 +119,22 @@ handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
  % sync_node_session(Name),
   sync_node_all_tables(Name),
   Reply = post_sync(Name),
-  {ok, Reply, State};
+  {reply, Reply, State};
+
+handle_call({join_as_master, Name, Tabs}, From, State) when is_atom(Name)->
+  prepare_sync(Name),
+ % sync_node_session(Name),
+  sync_node_some_tables(Name, Tabs),
+  Reply = post_sync(Name),
+  {reply, Reply, State};  
 
 handle_call({sync_node_all, Name}, From, State) when is_atom(Name)->
   Reply = sync_node_all_tables(Name),
-  {ok, Reply, State};
+  {reply, Reply, State};
 
 handle_call({sync_node_some_tables, Name, Tabs}, From, State) when is_atom(Name)->
   Reply = sync_node_some_tables(Name, Tabs),
-  {ok, Reply, State};
+  {reply, Reply, State};
 
 handle_call({sync_node_session_table, Name}, From, State) when is_atom(Name)->
   handle_call({sync_node_some_tables, Name, [session]}, From, State);
@@ -137,7 +143,8 @@ handle_call(ping, _From, State) ->
   {reply, {ok, 'pong'}, State};
 
 handle_call(stop, _From, State) ->
-  {stop, normal, stopped, State};
+  Reply = terminate(normal, State),
+  {reply, normal, stopped, State};
 
 handle_call(_Request, _From, State) ->
     Reply = {error, function_clause},
@@ -156,14 +163,15 @@ handle_info(stop, _From, State)->
   terminate(normal, State).
 
 -spec terminate(atom(), state()) -> ok.
-terminate(Reason, _State) ->
+terminate(Reason, State) ->
+   
    ok.
 
 code_change(_OldVsn, State, _Extra)->
    {ok, State}.
 
 prepare_sync(TargetName) ->
-  prepare_sync(TargetName, ?COPY_TYPE).  
+  prepare_sync(TargetName,[schema], ?COPY_TYPE).  
 
 prepare_sync(TargetName, Tabs, Type) -> 
   mnesia:stop(),
