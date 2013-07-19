@@ -1,6 +1,6 @@
-*log*
+*.log
 *.dump
-*/log/*
+log
 *.*~
 .*~
 .eunit
