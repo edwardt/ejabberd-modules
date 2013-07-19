@@ -55,7 +55,7 @@ init(Args)->
   error_logger:info_msg("Initiating db ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   error_logger:info_msg("~p config values ~p", [?SERVER, ConfList]),
-  {ok, Cluster} = app_config_util:config_val(cluster_info, ConfList,undefined),
+  {ok, Cluster} = app_config_util:config_val(cluster_head, ConfList,undefined),
     error_logger:info_msg("~p Going to talk to ~p", [?SERVER, Cluster]),
   {ok, #state{cluster_node = Cluster}};
 
@@ -89,7 +89,6 @@ join_as_master(Name)->
 
 join_as_master(Name, Tab)->
   {ok, reachable} = reach_node(Name),
-
   gen_server:call(?SERVER, {join_as_master, Name, Tab}).
 
 sync_node(Name) ->
@@ -99,16 +98,12 @@ sync_node_session(Name) ->
   gen_server:call(?SERVER, {sync_node_session, Name}).
 
 handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
-  Reply = 
-  case net_adm:ping(Name) of
-  	'pong' -> {ok, reachable};
-  	_ -> {error, unreachable}
-  end,
+  Reply = is_node_reachable(Name),
   {reply, Reply, State};
 
 handle_call({join_as_slave}, From, State) ->
   Name = State#state.cluster_node,
-  'pong' = net_adm:ping(Name),
+  {ok, reachable} = is_node_reachable(Name),
   Reply = prepare_sync(Name),
   {reply, Reply, State#state{user_tables= [Name]}};
 
@@ -214,4 +209,8 @@ sync_node_some_tables(NodeName, Tables) ->
    || {Tb, [{NodeName, Type}]} <- [{T, mnesia:table_info(T, where_to_commit)}
    || T <- Tables]],
   ok = mnesia:wait_for_tables(Tables, ?TAB_TIMEOUT), ok.
-
+  
+is_node_reachable(Name) when is_atom(Name) ->
+   is_node_reachable(net_adm:ping(Name));
+is_node_reachable('pong') -> {ok, reachable};
+is_node_reachable(_) -> {error, unreachable}.
