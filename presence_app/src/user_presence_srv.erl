@@ -29,7 +29,7 @@
 -define(ConfFile, "spark_user_presence.config").
 
 -record(state,{
-        cluster_node,
+        cluster_head,
 	      refresh_interval = -1, 
 	      last_check
 }).
@@ -56,7 +56,7 @@ init([{Path, File}])->
   error_logger:info_msg("Initiating ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, Interval} = app_config_util:config_val(refresh_interval, ConfList,-1),
-  {ok, Cluster} = app_config_util:config_val(cluster_node, ConfList,undefined),
+  {ok, Cluster} = app_config_util:config_val(cluster_head, ConfList,undefined),
   ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
   erlang:send_after(Interval, self(), {list_all_online, Start}),
@@ -64,7 +64,7 @@ init([{Path, File}])->
   End = app_util:os_now(),
   error_logger:info_msg("Done Initiation ~p with config ~p ~p", [?SERVER, Path, File]),
   error_logger:info_msg("Done Initiation ~p Start ~p End ~p", [?SERVER, Start, End]),
-  {ok, #state{cluster_node = Cluster, 
+  {ok, #state{cluster_head = Cluster, 
        refresh_interval = Interval,
        last_check=End}}.
 
@@ -118,7 +118,7 @@ handle_call({list_online_count, Since}, _From, State)->
   {ok, Reply, State};
 
 handle_call(sync_session_from_cluster, _From, State)->
-  Reply= user_presence_db:join_as_slave(State#state.cluster_node, [session]), 
+  Reply= user_presence_db:join_as_slave(State#state.cluster_head, [session]), 
   {ok, Reply, State};
 
 handle_call(ping, _From, State) ->
@@ -138,6 +138,7 @@ handle_cast(Info, State) ->
 
 handle_info({query_all_online}, State)->
   %Reply = set_user_webpresence(),
+  {ok, reachable} = user_presence_db:join_as_slave(Name),
   Reply = get_users_with_active_session(),
   Reply1 = lists:flatten(Reply),
   error_logger:info_msg("List of members online ~p",[Reply1]),

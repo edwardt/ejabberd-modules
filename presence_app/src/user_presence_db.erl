@@ -38,7 +38,7 @@
 start_link() -> start_link([]).
 start_link(Args)->
   R = gen_server:start_link({local, ?SERVER}, ?MODULE, Args ,[]),
-  erlang:send_after(Interval, self(), {join_as_slave}),
+ % erlang:send_after(Interval, self(), {join_as_slave}),
   R.
 
 start()->
