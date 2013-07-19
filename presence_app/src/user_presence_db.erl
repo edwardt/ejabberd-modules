@@ -50,9 +50,11 @@ init()->
 
 init([{Path, File}])->
   Start = app_util:os_now(),
-  error_logger:info_msg("Initiating ~p with config ~p ~p", [?SERVER, Path, File]),
+  error_logger:info_msg("Initiating db ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
-  {ok, Cluster} = app_config_util:config_val(cluster_node, ConfList,undefined),
+  error_logger:info_msg("~p config values ~p", [?SERVER, ConfList]),
+  {ok, Cluster} = app_config_util:config_val(cluster_info, ConfList,undefined),
+    error_logger:info_msg("~p Going to talk to ~p", [?SERVER, Cluster]),
   {ok, #state{cluster_node = Cluster}};
 
 init(_Args)->

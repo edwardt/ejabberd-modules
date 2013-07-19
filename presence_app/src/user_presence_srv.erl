@@ -52,6 +52,7 @@ init()-> ok.
 
 init([{Path, File}])->
   Start = app_util:os_now(),
+ 
   error_logger:info_msg("Initiating ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, Interval} = app_config_util:config_val(refresh_interval, ConfList,-1),
