@@ -140,8 +140,9 @@ handle_info({query_all_online}, State)->
   %Reply = set_user_webpresence(),
   Cluster = State#state.cluster_head,
   case user_presence_db:reach_node(Cluster) of
-       {ok, reachable} -> sync_with_cluster(Cluster);
-       {error, unreachable} -> error_logger:error_msg("Cluster unreachable ~p",[Cluster])
+       {ok, reachable} -> error_logger:info_msg("Cluster reachable ~p",[Cluster]),
+			 sync_with_cluster(Cluster);
+       {error, unreachable} -> error_logger:info_msg("Cluster unreachable ~p",[Cluster])
   end, 
   erlang:send_after(State#state.refresh_interval,
   	 self(), {query_all_online}),
@@ -168,13 +169,28 @@ terminate(_Reason, _State)->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
+is_not_fresh_connect(Table)-> 
+   check_table_exists(Table).
 
-sync_with_cluster(Cluster)->
-  user_presence_db:join(Cluster,[session]),
+sync_with_cluster(Cluster) ->
+  sync_with_cluster(session, Cluster).
+sync_with_cluster(Table, Cluster) when is_atom(Cluster) ->
+  case is_not_fresh_connect(Table) of
+	false ->   
+	     error_logger:info_msg("There is no master",[]),  
+             user_presence_db:join(Cluster,[session]);
+	true -> 
+	     error_logger:info_msg("There is a master",[]) 
+    
+  end,
+
   Reply = get_users_with_active_session(),
   Reply1 = lists:flatten(Reply),
   error_logger:info_msg("List of members online ~p from cluster ~p",[Reply1, Cluster]).
 
+check_table_exists(Table)->
+  Tabs = mnesia:system_info(tables),
+  lists:member(Table, Tabs).
 
 get_active_users_count() ->
   mnesia:table_info(session, size).
@@ -240,7 +256,7 @@ should_delete_schema(Schema) ->
   error_logger:info_msg("Delete schema ~p", [Schema]),
   catch(mnesia:stop()),
   %app_util:stop_app(mnesia),
-   ok = mnesia:delete_schema([Schema]),
+  ok = mnesia:delete_schema([Schema]),
   % error_logger:info_msg("Deleted schema ~p ", [Ret]),
   ok.
 
