@@ -48,8 +48,10 @@ stop()->
 init()->
   init([{?ConfPath, ?ConfFile}]).
 
-init([{Path, File}])->
+init(Args)->
+  error_logger:info_msg("Initiating user_presence_db ~p with config ~p ~p", [?SERVER, Args]),
   Start = app_util:os_now(),
+  [{Path, File}] = Args,
   error_logger:info_msg("Initiating db ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   error_logger:info_msg("~p config values ~p", [?SERVER, ConfList]),
@@ -106,7 +108,7 @@ handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
 
 handle_call({join_as_slave}, From, State) ->
   Name = State#state.cluster_node,
-  {ok, reachable} = net_adm:ping(Name),
+  'pong' = net_adm:ping(Name),
   Reply = prepare_sync(Name),
   {reply, Reply, State#state{user_tables= [Name]}};
 

@@ -1,10 +1,10 @@
-2013-07-18 20:48:29 =ERROR REPORT====
+2013-07-18 21:16:28 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,48,24}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,16,23}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:48:29 =CRASH REPORT====
+2013-07-18 21:16:28 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.126.0>
@@ -22,19 +22,19 @@
     stack_size: 24
     reductions: 828
   neighbours:
-2013-07-18 20:48:29 =SUPERVISOR REPORT====
+2013-07-18 21:16:28 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.126.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 20:48:34 =ERROR REPORT====
+2013-07-18 21:16:33 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,48,29}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,16,28}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:48:34 =CRASH REPORT====
+2013-07-18 21:16:33 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.131.0>
@@ -52,19 +52,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 20:48:34 =SUPERVISOR REPORT====
+2013-07-18 21:16:33 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.131.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 20:48:39 =ERROR REPORT====
+2013-07-18 21:16:38 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,48,34}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,16,33}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:48:39 =CRASH REPORT====
+2013-07-18 21:16:38 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.133.0>
@@ -82,19 +82,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 20:48:39 =SUPERVISOR REPORT====
+2013-07-18 21:16:38 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.133.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 20:48:44 =ERROR REPORT====
+2013-07-18 21:16:43 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,48,39}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,16,38}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:48:44 =CRASH REPORT====
+2013-07-18 21:16:43 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.135.0>
@@ -112,19 +112,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 20:48:44 =SUPERVISOR REPORT====
+2013-07-18 21:16:43 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.135.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 20:48:49 =ERROR REPORT====
+2013-07-18 21:16:48 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,48,44}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,16,43}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:48:49 =CRASH REPORT====
+2013-07-18 21:16:48 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.137.0>
@@ -142,19 +142,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 20:48:49 =SUPERVISOR REPORT====
+2013-07-18 21:16:48 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.137.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 20:48:54 =ERROR REPORT====
+2013-07-18 21:16:53 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,48,49}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,16,48}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:48:54 =CRASH REPORT====
+2013-07-18 21:16:53 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.139.0>
@@ -172,403 +172,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 20:48:54 =SUPERVISOR REPORT====
+2013-07-18 21:16:53 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.139.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 20:56:27 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_db:init/1
-    pid: <0.128.0>
-    registered_name: []
-    exception exit: {{badmatch,[{"conf","spark_user_presence.config"}]},[{user_presence_db,init,1},{gen_server,init_it,6},{proc_lib,init_p_do_apply,3}]}
-      in function  gen_server:init_it/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 377
-    stack_size: 24
-    reductions: 128
-  neighbours:
-2013-07-18 20:56:27 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    start_error
-     Reason:     {{badmatch,[{"conf","spark_user_presence.config"}]},[{user_presence_db,init,1},{gen_server,init_it,6},{proc_lib,init_p_do_apply,3}]}
-     Offender:   [{pid,undefined},{name,user_presence_db},{mfargs,{user_presence_db,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 20:57:49 =ERROR REPORT====
+2013-07-18 21:16:58 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,57,44}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,16,53}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:57:49 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.126.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 828
-  neighbours:
-2013-07-18 20:57:49 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.126.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 20:57:54 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,57,49}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:57:54 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.131.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 20:57:54 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.131.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 20:57:59 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,57,54}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:57:59 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.133.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 20:57:59 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.133.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 20:59:47 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,59,42}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:59:47 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.126.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 828
-  neighbours:
-2013-07-18 20:59:47 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.126.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 20:59:52 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,59,47}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:59:52 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.131.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 20:59:52 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.131.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 20:59:57 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{0,59,52}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 20:59:57 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.133.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 20:59:57 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.133.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:03:15 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,3,10}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:03:15 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.126.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 828
-  neighbours:
-2013-07-18 21:03:15 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.126.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:03:20 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,3,15}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:03:20 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.131.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:03:20 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.131.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:03:25 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,3,20}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:03:25 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.133.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:03:25 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.133.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:03:30 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,3,25}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:03:30 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.135.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:03:30 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.135.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:03:35 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,3,30}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:03:35 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.137.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:03:35 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.137.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:03:40 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,3,35}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:03:40 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.139.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:03:40 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.139.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:03:45 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,3,40}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:03:45 =CRASH REPORT====
+2013-07-18 21:16:58 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.141.0>
@@ -586,79 +202,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:03:45 =SUPERVISOR REPORT====
+2013-07-18 21:16:58 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.141.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:03:50 =ERROR REPORT====
+2013-07-18 21:17:03 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,3,45}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,16,58}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:03:50 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.143.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:03:50 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.143.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:03:55 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,3,50}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:03:55 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.145.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:03:55 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.145.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:04:00 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,3,55}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:00 =CRASH REPORT====
+2013-07-18 21:17:03 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.147.0>
@@ -676,19 +232,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:04:00 =SUPERVISOR REPORT====
+2013-07-18 21:17:03 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.147.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:05 =ERROR REPORT====
+2013-07-18 21:17:08 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,0}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,3}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:05 =CRASH REPORT====
+2013-07-18 21:17:08 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.149.0>
@@ -706,19 +262,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:04:05 =SUPERVISOR REPORT====
+2013-07-18 21:17:08 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.149.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:10 =ERROR REPORT====
+2013-07-18 21:17:13 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,5}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,8}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:10 =CRASH REPORT====
+2013-07-18 21:17:13 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.151.0>
@@ -736,19 +292,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:04:10 =SUPERVISOR REPORT====
+2013-07-18 21:17:13 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.151.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:15 =ERROR REPORT====
+2013-07-18 21:17:18 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,10}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,13}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:15 =CRASH REPORT====
+2013-07-18 21:17:18 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.153.0>
@@ -766,19 +322,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:04:15 =SUPERVISOR REPORT====
+2013-07-18 21:17:18 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.153.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:20 =ERROR REPORT====
+2013-07-18 21:17:23 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,15}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,18}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:20 =CRASH REPORT====
+2013-07-18 21:17:23 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.155.0>
@@ -796,19 +352,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:04:20 =SUPERVISOR REPORT====
+2013-07-18 21:17:23 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.155.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:25 =ERROR REPORT====
+2013-07-18 21:17:28 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,20}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,23}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:25 =CRASH REPORT====
+2013-07-18 21:17:28 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.157.0>
@@ -826,49 +382,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:04:25 =SUPERVISOR REPORT====
+2013-07-18 21:17:28 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.157.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:26 =ERROR REPORT====
-** Generic server user_presence_db terminating 
-** Last message in was {join_as_slave}
-** When Server state == {state,undefined,[]}
-** Reason for termination == 
-** {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-2013-07-18 21:04:26 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_db:init/1
-    pid: <0.128.0>
-    registered_name: user_presence_db
-    exception exit: {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 377
-    stack_size: 24
-    reductions: 658
-  neighbours:
-2013-07-18 21:04:26 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-     Offender:   [{pid,<0.128.0>},{name,user_presence_db},{mfargs,{user_presence_db,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:04:30 =ERROR REPORT====
+2013-07-18 21:17:33 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,25}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,28}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:30 =CRASH REPORT====
+2013-07-18 21:17:33 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.159.0>
@@ -886,24 +412,24 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:04:30 =SUPERVISOR REPORT====
+2013-07-18 21:17:33 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.159.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:31 =ERROR REPORT====
+2013-07-18 21:17:35 =ERROR REPORT====
 ** Generic server user_presence_db terminating 
 ** Last message in was {join_as_slave}
-** When Server state == {state,undefined,[]}
+** When Server state == {state,ejabberd@lastgejabberd302,[]}
 ** Reason for termination == 
-** {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-2013-07-18 21:04:31 =CRASH REPORT====
+** {{badmatch,pong},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+2013-07-18 21:17:35 =CRASH REPORT====
   crasher:
     initial call: user_presence_db:init/1
-    pid: <0.161.0>
+    pid: <0.128.0>
     registered_name: user_presence_db
-    exception exit: {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+    exception exit: {{badmatch,pong},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
       in function  gen_server:terminate/6
       in call from proc_lib:init_p_do_apply/3
     ancestors: [user_presence_sup,<0.49.0>]
@@ -914,24 +440,24 @@
     status: running
     heap_size: 377
     stack_size: 24
-    reductions: 649
+    reductions: 647
   neighbours:
-2013-07-18 21:04:31 =SUPERVISOR REPORT====
+2013-07-18 21:17:35 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
-     Reason:     {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-     Offender:   [{pid,<0.161.0>},{name,user_presence_db},{mfargs,{user_presence_db,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Reason:     {{badmatch,pong},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+     Offender:   [{pid,<0.128.0>},{name,user_presence_db},{mfargs,{user_presence_db,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:35 =ERROR REPORT====
+2013-07-18 21:17:38 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,30}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,33}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:35 =CRASH REPORT====
+2013-07-18 21:17:38 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.165.0>
+    pid: <0.162.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -946,24 +472,24 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:04:35 =SUPERVISOR REPORT====
+2013-07-18 21:17:38 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.165.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.162.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:37 =ERROR REPORT====
+2013-07-18 21:17:40 =ERROR REPORT====
 ** Generic server user_presence_db terminating 
 ** Last message in was {join_as_slave}
-** When Server state == {state,undefined,[]}
+** When Server state == {state,ejabberd@lastgejabberd302,[]}
 ** Reason for termination == 
-** {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-2013-07-18 21:04:37 =CRASH REPORT====
+** {{badmatch,pong},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+2013-07-18 21:17:40 =CRASH REPORT====
   crasher:
     initial call: user_presence_db:init/1
-    pid: <0.167.0>
+    pid: <0.164.0>
     registered_name: user_presence_db
-    exception exit: {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+    exception exit: {{badmatch,pong},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
       in function  gen_server:terminate/6
       in call from proc_lib:init_p_do_apply/3
     ancestors: [user_presence_sup,<0.49.0>]
@@ -974,24 +500,24 @@
     status: running
     heap_size: 377
     stack_size: 24
-    reductions: 649
+    reductions: 639
   neighbours:
-2013-07-18 21:04:37 =SUPERVISOR REPORT====
+2013-07-18 21:17:40 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
-     Reason:     {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-     Offender:   [{pid,<0.167.0>},{name,user_presence_db},{mfargs,{user_presence_db,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Reason:     {{badmatch,pong},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+     Offender:   [{pid,<0.164.0>},{name,user_presence_db},{mfargs,{user_presence_db,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:40 =ERROR REPORT====
+2013-07-18 21:17:43 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,35}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,38}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:40 =CRASH REPORT====
+2013-07-18 21:17:43 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.171.0>
+    pid: <0.168.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1006,174 +532,24 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:04:40 =SUPERVISOR REPORT====
+2013-07-18 21:17:43 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.171.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.168.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:04:45 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,40}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:45 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.177.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:04:45 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.177.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:04:50 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,45}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:50 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.179.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:04:50 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.179.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:04:55 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,50}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:04:55 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.185.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:04:55 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.185.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:05:00 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,4,55}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:00 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.187.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:05:00 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.187.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:05:05 =ERROR REPORT====
-** Generic server user_presence_srv terminating 
-** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,0}}}
-** Reason for termination == 
-** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:05 =CRASH REPORT====
-  crasher:
-    initial call: user_presence_srv:init/1
-    pid: <0.189.0>
-    registered_name: user_presence_srv
-    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-      in function  gen_server:terminate/6
-      in call from proc_lib:init_p_do_apply/3
-    ancestors: [user_presence_sup,<0.49.0>]
-    messages: []
-    links: [<0.50.0>]
-    dictionary: []
-    trap_exit: false
-    status: running
-    heap_size: 610
-    stack_size: 24
-    reductions: 820
-  neighbours:
-2013-07-18 21:05:05 =SUPERVISOR REPORT====
-     Supervisor: {local,user_presence_sup}
-     Context:    child_terminated
-     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.189.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
-
-2013-07-18 21:05:08 =ERROR REPORT====
+2013-07-18 21:17:45 =ERROR REPORT====
 ** Generic server user_presence_db terminating 
 ** Last message in was {join_as_slave}
-** When Server state == {state,undefined,[]}
+** When Server state == {state,ejabberd@lastgejabberd302,[]}
 ** Reason for termination == 
-** {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-2013-07-18 21:05:08 =CRASH REPORT====
+** {{badmatch,pong},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+2013-07-18 21:17:45 =CRASH REPORT====
   crasher:
     initial call: user_presence_db:init/1
-    pid: <0.173.0>
+    pid: <0.170.0>
     registered_name: user_presence_db
-    exception exit: {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+    exception exit: {{badmatch,pong},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
       in function  gen_server:terminate/6
       in call from proc_lib:init_p_do_apply/3
     ancestors: [user_presence_sup,<0.49.0>]
@@ -1184,21 +560,231 @@
     status: running
     heap_size: 377
     stack_size: 24
-    reductions: 649
+    reductions: 639
   neighbours:
-2013-07-18 21:05:08 =SUPERVISOR REPORT====
+2013-07-18 21:17:45 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
-     Reason:     {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-     Offender:   [{pid,<0.173.0>},{name,user_presence_db},{mfargs,{user_presence_db,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Reason:     {{badmatch,pong},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+     Offender:   [{pid,<0.170.0>},{name,user_presence_db},{mfargs,{user_presence_db,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:10 =ERROR REPORT====
+2013-07-18 21:17:48 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,5}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,43}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:10 =CRASH REPORT====
+2013-07-18 21:17:48 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.174.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:17:48 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.174.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:17:53 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,48}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:17:53 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.180.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:17:53 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.180.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:17:58 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,53}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:17:58 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.182.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:17:58 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.182.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:18:03 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,17,58}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:18:04 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.184.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:18:04 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.184.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:18:09 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,4}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:18:09 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.186.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:18:09 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.186.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:18:14 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,9}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:18:14 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.188.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:18:14 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.188.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:18:19 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,14}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:18:19 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.190.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:18:19 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.190.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:18:24 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,19}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:18:24 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.192.0>
@@ -1216,24 +802,24 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:05:10 =SUPERVISOR REPORT====
+2013-07-18 21:18:24 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.192.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:14 =ERROR REPORT====
-** Generic server user_presence_db terminating 
-** Last message in was {join_as_slave}
-** When Server state == {state,undefined,[]}
+2013-07-18 21:18:29 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,24}}}
 ** Reason for termination == 
-** {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-2013-07-18 21:05:14 =CRASH REPORT====
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:18:29 =CRASH REPORT====
   crasher:
-    initial call: user_presence_db:init/1
+    initial call: user_presence_srv:init/1
     pid: <0.194.0>
-    registered_name: user_presence_db
-    exception exit: {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
       in call from proc_lib:init_p_do_apply/3
     ancestors: [user_presence_sup,<0.49.0>]
@@ -1242,23 +828,53 @@
     dictionary: []
     trap_exit: false
     status: running
-    heap_size: 377
+    heap_size: 610
     stack_size: 24
-    reductions: 649
+    reductions: 820
   neighbours:
-2013-07-18 21:05:14 =SUPERVISOR REPORT====
+2013-07-18 21:18:29 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
-     Reason:     {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-     Offender:   [{pid,<0.194.0>},{name,user_presence_db},{mfargs,{user_presence_db,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.194.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:15 =ERROR REPORT====
+2013-07-18 21:18:34 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,10}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,29}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:15 =CRASH REPORT====
+2013-07-18 21:18:34 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.196.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:18:34 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.196.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:18:39 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,34}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:18:39 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.198.0>
@@ -1276,24 +892,24 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:05:15 =SUPERVISOR REPORT====
+2013-07-18 21:18:39 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.198.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:16 =ERROR REPORT====
-** Generic server user_presence_db terminating 
-** Last message in was {join_as_slave}
-** When Server state == {state,undefined,[]}
+2013-07-18 21:18:44 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,39}}}
 ** Reason for termination == 
-** {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-2013-07-18 21:05:16 =CRASH REPORT====
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:18:44 =CRASH REPORT====
   crasher:
-    initial call: user_presence_db:init/1
+    initial call: user_presence_srv:init/1
     pid: <0.200.0>
-    registered_name: user_presence_db
-    exception exit: {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
       in call from proc_lib:init_p_do_apply/3
     ancestors: [user_presence_sup,<0.49.0>]
@@ -1302,23 +918,53 @@
     dictionary: []
     trap_exit: false
     status: running
-    heap_size: 377
+    heap_size: 610
     stack_size: 24
-    reductions: 649
+    reductions: 820
   neighbours:
-2013-07-18 21:05:16 =SUPERVISOR REPORT====
+2013-07-18 21:18:44 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
-     Reason:     {{badmatch,pang},[{user_presence_db,handle_call,3},{gen_server,handle_msg,5},{proc_lib,init_p_do_apply,3}]}
-     Offender:   [{pid,<0.200.0>},{name,user_presence_db},{mfargs,{user_presence_db,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.200.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:20 =ERROR REPORT====
+2013-07-18 21:18:49 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,15}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,44}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:20 =CRASH REPORT====
+2013-07-18 21:18:49 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.202.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:18:49 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.202.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:18:54 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,49}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:18:54 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.204.0>
@@ -1336,19 +982,79 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:05:20 =SUPERVISOR REPORT====
+2013-07-18 21:18:54 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.204.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:25 =ERROR REPORT====
+2013-07-18 21:18:59 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,20}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,54}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:25 =CRASH REPORT====
+2013-07-18 21:18:59 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.206.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:18:59 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.206.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:19:04 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,18,59}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:19:04 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.208.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:19:04 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.208.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:19:09 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,19,4}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:19:09 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.210.0>
@@ -1366,19 +1072,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:05:25 =SUPERVISOR REPORT====
+2013-07-18 21:19:09 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.210.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:30 =ERROR REPORT====
+2013-07-18 21:19:14 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,25}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,19,9}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:30 =CRASH REPORT====
+2013-07-18 21:19:14 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.212.0>
@@ -1396,19 +1102,19 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:05:30 =SUPERVISOR REPORT====
+2013-07-18 21:19:14 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.212.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:35 =ERROR REPORT====
+2013-07-18 21:19:19 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,30}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,19,14}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:35 =CRASH REPORT====
+2013-07-18 21:19:19 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
     pid: <0.214.0>
@@ -1426,22 +1132,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:05:35 =SUPERVISOR REPORT====
+2013-07-18 21:19:19 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
      Offender:   [{pid,<0.214.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:40 =ERROR REPORT====
+2013-07-18 21:19:51 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,35}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,19,46}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:40 =CRASH REPORT====
+2013-07-18 21:19:51 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.216.0>
+    pid: <0.126.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1454,24 +1160,24 @@
     status: running
     heap_size: 610
     stack_size: 24
-    reductions: 820
+    reductions: 828
   neighbours:
-2013-07-18 21:05:40 =SUPERVISOR REPORT====
+2013-07-18 21:19:51 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.216.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.126.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:45 =ERROR REPORT====
+2013-07-18 21:19:56 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,40}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,19,51}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:45 =CRASH REPORT====
+2013-07-18 21:19:56 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.218.0>
+    pid: <0.131.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1486,22 +1192,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:05:45 =SUPERVISOR REPORT====
+2013-07-18 21:19:56 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.218.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.131.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:50 =ERROR REPORT====
+2013-07-18 21:20:01 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,45}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,19,56}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:50 =CRASH REPORT====
+2013-07-18 21:20:01 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.220.0>
+    pid: <0.133.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1516,22 +1222,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:05:50 =SUPERVISOR REPORT====
+2013-07-18 21:20:02 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.220.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.133.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:05:55 =ERROR REPORT====
+2013-07-18 21:20:07 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,50}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,20,2}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:05:55 =CRASH REPORT====
+2013-07-18 21:20:07 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.222.0>
+    pid: <0.139.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1546,22 +1252,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:05:55 =SUPERVISOR REPORT====
+2013-07-18 21:20:07 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.222.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.139.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:00 =ERROR REPORT====
+2013-07-18 21:20:12 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,5,55}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,20,7}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:00 =CRASH REPORT====
+2013-07-18 21:20:12 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.224.0>
+    pid: <0.141.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1576,22 +1282,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:06:00 =SUPERVISOR REPORT====
+2013-07-18 21:20:12 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.224.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.141.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:05 =ERROR REPORT====
+2013-07-18 21:20:17 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,6,0}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,20,12}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:05 =CRASH REPORT====
+2013-07-18 21:20:17 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.227.0>
+    pid: <0.143.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1606,22 +1312,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:06:05 =SUPERVISOR REPORT====
+2013-07-18 21:20:17 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.227.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.143.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:10 =ERROR REPORT====
+2013-07-18 21:20:22 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,6,5}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,20,17}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:10 =CRASH REPORT====
+2013-07-18 21:20:22 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.229.0>
+    pid: <0.145.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1636,22 +1342,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:06:10 =SUPERVISOR REPORT====
+2013-07-18 21:20:22 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.229.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.145.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:15 =ERROR REPORT====
+2013-07-18 21:20:27 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,6,10}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,20,22}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:15 =CRASH REPORT====
+2013-07-18 21:20:27 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.232.0>
+    pid: <0.147.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1666,22 +1372,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:06:15 =SUPERVISOR REPORT====
+2013-07-18 21:20:27 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.232.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.147.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:20 =ERROR REPORT====
+2013-07-18 21:26:38 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,6,15}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,26,33}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:20 =CRASH REPORT====
+2013-07-18 21:26:38 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.234.0>
+    pid: <0.126.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1694,24 +1400,24 @@
     status: running
     heap_size: 610
     stack_size: 24
-    reductions: 820
+    reductions: 828
   neighbours:
-2013-07-18 21:06:20 =SUPERVISOR REPORT====
+2013-07-18 21:26:38 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.234.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.126.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:25 =ERROR REPORT====
+2013-07-18 21:26:43 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,6,20}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,26,38}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:25 =CRASH REPORT====
+2013-07-18 21:26:43 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.236.0>
+    pid: <0.131.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1726,22 +1432,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:06:25 =SUPERVISOR REPORT====
+2013-07-18 21:26:43 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.236.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.131.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:30 =ERROR REPORT====
+2013-07-18 21:26:48 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,6,25}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,26,43}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:30 =CRASH REPORT====
+2013-07-18 21:26:48 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.238.0>
+    pid: <0.133.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1756,22 +1462,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:06:30 =SUPERVISOR REPORT====
+2013-07-18 21:26:48 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.238.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.133.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:35 =ERROR REPORT====
+2013-07-18 21:26:53 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,6,30}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,26,48}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:35 =CRASH REPORT====
+2013-07-18 21:26:53 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.240.0>
+    pid: <0.135.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1786,22 +1492,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:06:35 =SUPERVISOR REPORT====
+2013-07-18 21:26:53 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.240.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.135.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:40 =ERROR REPORT====
+2013-07-18 21:26:58 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,6,35}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,26,53}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:40 =CRASH REPORT====
+2013-07-18 21:26:58 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.243.0>
+    pid: <0.141.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1816,22 +1522,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:06:40 =SUPERVISOR REPORT====
+2013-07-18 21:26:58 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.243.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.141.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:45 =ERROR REPORT====
+2013-07-18 21:27:03 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,6,40}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,26,58}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:45 =CRASH REPORT====
+2013-07-18 21:27:03 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.247.0>
+    pid: <0.143.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1846,22 +1552,22 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:06:45 =SUPERVISOR REPORT====
+2013-07-18 21:27:03 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.247.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.143.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
-2013-07-18 21:06:50 =ERROR REPORT====
+2013-07-18 21:27:08 =ERROR REPORT====
 ** Generic server user_presence_srv terminating 
 ** Last message in was {query_all_online}
-** When Server state == {state,undefined,5000,{{2013,7,19},{1,6,45}}}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,27,3}}}
 ** Reason for termination == 
 ** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-2013-07-18 21:06:50 =CRASH REPORT====
+2013-07-18 21:27:08 =CRASH REPORT====
   crasher:
     initial call: user_presence_srv:init/1
-    pid: <0.249.0>
+    pid: <0.145.0>
     registered_name: user_presence_srv
     exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
       in function  gen_server:terminate/6
@@ -1876,9 +1582,279 @@
     stack_size: 24
     reductions: 820
   neighbours:
-2013-07-18 21:06:50 =SUPERVISOR REPORT====
+2013-07-18 21:27:08 =SUPERVISOR REPORT====
      Supervisor: {local,user_presence_sup}
      Context:    child_terminated
      Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
-     Offender:   [{pid,<0.249.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+     Offender:   [{pid,<0.145.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:27:13 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,27,8}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:27:13 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.147.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:27:13 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.147.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:27:18 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,27,13}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:27:18 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.150.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:27:18 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.150.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:27:23 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,27,18}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:27:23 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.152.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.49.0>]
+    messages: []
+    links: [<0.50.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:27:23 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.152.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:27:41 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,27,36}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:27:41 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.161.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.159.0>]
+    messages: []
+    links: [<0.160.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:27:41 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.161.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:27:46 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,27,41}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:27:46 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.166.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.159.0>]
+    messages: []
+    links: [<0.160.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:27:46 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.166.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:27:51 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,27,46}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:27:51 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.168.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.159.0>]
+    messages: []
+    links: [<0.160.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:27:51 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.168.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:27:56 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,27,51}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:27:56 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.170.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.159.0>]
+    messages: []
+    links: [<0.160.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:27:56 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.170.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:28:01 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,27,56}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:28:01 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.172.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.159.0>]
+    messages: []
+    links: [<0.160.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:28:01 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.172.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
+
+2013-07-18 21:28:06 =ERROR REPORT====
+** Generic server user_presence_srv terminating 
+** Last message in was {query_all_online}
+** When Server state == {state,undefined,5000,{{2013,7,19},{1,28,1}}}
+** Reason for termination == 
+** {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+2013-07-18 21:28:06 =CRASH REPORT====
+  crasher:
+    initial call: user_presence_srv:init/1
+    pid: <0.174.0>
+    registered_name: user_presence_srv
+    exception exit: {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+      in function  gen_server:terminate/6
+      in call from proc_lib:init_p_do_apply/3
+    ancestors: [user_presence_sup,<0.159.0>]
+    messages: []
+    links: [<0.160.0>]
+    dictionary: []
+    trap_exit: false
+    status: running
+    heap_size: 610
+    stack_size: 24
+    reductions: 820
+  neighbours:
+2013-07-18 21:28:06 =SUPERVISOR REPORT====
+     Supervisor: {local,user_presence_sup}
+     Context:    child_terminated
+     Reason:     {aborted,{no_exists,[session,[{{session,'_','_','$1','_','_'},[],['$1']}]]}}
+     Offender:   [{pid,<0.174.0>},{name,user_presence_srv},{mfargs,{user_presence_srv,start_link,[[{"conf","spark_user_presence.config"}]]}},{restart_type,permanent},{shutdown,5000},{child_type,worker}]
 
