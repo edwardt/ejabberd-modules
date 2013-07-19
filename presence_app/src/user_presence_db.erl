@@ -29,7 +29,7 @@
 -define(ConfFile, "spark_ejabberd_cluster.config").
 
 -record(state,{
-        cluster_node,
+        cluster_head,
         user_tables = []
 }).
 
@@ -37,7 +37,9 @@
 
 start_link() -> start_link([]).
 start_link(Args)->
-  gen_server:start_link({local, ?SERVER}, ?MODULE, Args ,[]).
+  R = gen_server:start_link({local, ?SERVER}, ?MODULE, Args ,[]),
+  erlang:send_after(Interval, self(), {join_as_slave}),
+  R.
 
 start()->
   start_link().
@@ -56,8 +58,8 @@ init(Args)->
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   error_logger:info_msg("~p config values ~p", [?SERVER, ConfList]),
   {ok, Cluster} = app_config_util:config_val(cluster_head, ConfList,undefined),
-    error_logger:info_msg("~p Going to talk to ~p", [?SERVER, Cluster]),
-  {ok, #state{cluster_node = Cluster}};
+  error_logger:info_msg("~p Going to talk to ~p", [?SERVER, Cluster]),
+  {ok, #state{cluster_head = Cluster}};
 
 init(_Args)->
   init([{?ConfPath, ?ConfFile}]).
@@ -102,7 +104,7 @@ handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
   {reply, Reply, State};
 
 handle_call({join_as_slave}, From, State) ->
-  Name = State#state.cluster_node,
+  Name = State#state.cluster_head,
   {ok, reachable} = is_node_reachable(Name),
   Reply = prepare_sync(Name),
   {reply, Reply, State#state{user_tables= [Name]}};
