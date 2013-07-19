@@ -138,7 +138,7 @@ handle_cast(Info, State) ->
 
 handle_info({query_all_online}, State)->
   %Reply = set_user_webpresence(),
-  {ok, reachable} = user_presence_db:join_as_slave(State#state.cluster_head),
+  {ok, reachable} = user_presence_db:join(State#state.cluster_head,[session]),
   Reply = get_users_with_active_session(),
   Reply1 = lists:flatten(Reply),
   error_logger:info_msg("List of members online ~p",[Reply1]),

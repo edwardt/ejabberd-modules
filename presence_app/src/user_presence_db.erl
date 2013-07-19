@@ -1,7 +1,7 @@
 -module(user_presence_db).
 -behaviour(gen_server).
 
--export([reach_node/1,
+-export([reach_node/1, get_cluster_head/0,
 		 join/1, join/2,
 		 join_as_slave/0,
      join_as_master/1,
@@ -51,7 +51,7 @@ init()->
   init([{?ConfPath, ?ConfFile}]).
 
 init(Args)->
-  error_logger:info_msg("Initiating user_presence_db ~p with config ~p ~p", [?SERVER, Args]),
+  error_logger:info_msg("Initiating user_presence_db ~p with config ~p", [?SERVER, Args]),
   Start = app_util:os_now(),
   [{Path, File}] = Args,
   error_logger:info_msg("Initiating db ~p with config ~p ~p", [?SERVER, Path, File]),
@@ -66,6 +66,9 @@ init(_Args)->
 
 ping()->
 	gen_server:call(?SERVER, ping).
+
+get_cluster_head()->
+   gen_server:call(?SERVER, get_cluster_head).
 
 reach_node(Name) ->
   gen_server:call(?SERVER, {reach_node, Name}).
@@ -98,6 +101,10 @@ sync_node(Name) ->
 
 sync_node_session(Name) ->
   gen_server:call(?SERVER, {sync_node_session, Name}).
+
+handle_call(get_cluster_head, From, State) ->
+  Reply = State#state.cluster_head,
+  {reply, Reply, State};
 
 handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
   Reply = is_node_reachable(Name),
