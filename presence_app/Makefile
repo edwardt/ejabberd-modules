@@ -1,10 +1,19 @@
 
 
-all: compile
+all: depends builddeps compile
 
 depends:
 	./rebar -vvv get-deps
 	./rebar -vvv update-deps
+
+builddeps:
+	@(cd ./deps/edown/; make all)
+	@(cd ./deps/goldrush; make all)
+	@(cd ./deps/lager; make all)
+	@(cd ./deps/parse_trans; make all)
+	@(cd ./deps/mochiweb; make all)
+ 	@(cd ./deps/webmachine; make all)
+
 
 compile:
 	./rebar -vvv compile
@@ -15,6 +24,8 @@ generate:
 	\rm -rf ejabberd_auth_spark_v_10
 	tar -cvf ebeam.tar.gz ./ebeam
 	tar -cvf conf.tar.gz ./conf
+
+
 
 
 clean:
