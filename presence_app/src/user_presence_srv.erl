@@ -138,10 +138,11 @@ handle_cast(Info, State) ->
 
 handle_info({query_all_online}, State)->
   %Reply = set_user_webpresence(),
-  {ok, reachable} = user_presence_db:join(State#state.cluster_head,[session]),
-  Reply = get_users_with_active_session(),
-  Reply1 = lists:flatten(Reply),
-  error_logger:info_msg("List of members online ~p",[Reply1]),
+  Cluster = State#state.cluster_head,
+  case user_presence_db:reach_node(Cluster) of
+       {ok, reachable} -> sync_with_cluster(Cluster);
+       {error, unreachable} -> error_logger:error_msg("Cluster unreachable ~p",[Cluster])
+  end, 
   erlang:send_after(State#state.refresh_interval,
   	 self(), {query_all_online}),
   {noreply, State};
@@ -166,6 +167,14 @@ terminate(_Reason, _State)->
 
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
+
+
+sync_with_cluster(Cluster)->
+  user_presence_db:join(Cluster,[session]),
+  Reply = get_users_with_active_session(),
+  Reply1 = lists:flatten(Reply),
+  error_logger:info_msg("List of members online ~p from cluster ~p",[Reply1, Cluster]).
+
 
 get_active_users_count() ->
   mnesia:table_info(session, size).

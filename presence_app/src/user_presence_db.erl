@@ -106,6 +106,7 @@ handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
   Reply = is_node_reachable(Name),
   {reply, Reply, State};
 
+
 handle_call({join_as_slave}, From, State) ->
   NodeName = State#state.cluster_head,
   {ok, reachable} = is_node_reachable(NodeName),
@@ -247,9 +248,9 @@ sync_node_some_tables(NodeName, Tables) ->
    || {Tb, [{NodeName, Type}]} <- [{T, mnesia:table_info(T, where_to_commit)}
    || T <- Tables]],
   ok = mnesia:wait_for_tables(Tables, ?TAB_TIMEOUT), ok.
-  
+ 
+is_node_reachable('pong') -> {ok, reachable}; 
+is_node_reachable('pang') -> {error, unreachable};
 is_node_reachable(Name) when is_atom(Name) ->
    error_logger:info_msg("Going to ping node ~p",[Name]),
-   is_node_reachable(net_adm:ping(Name));
-is_node_reachable('pong') -> {ok, reachable};
-is_node_reachable(_) -> {error, unreachable}.
+   is_node_reachable(net_adm:ping(Name)).
