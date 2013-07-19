@@ -30,7 +30,7 @@
 
 -record(state,{
         cluster_head,
-        user_tables = []
+        reachable = 0
 }).
 
 -type state() :: #state{}.
@@ -81,19 +81,15 @@ join_as_slave()->
   gen_server:call(?SERVER, {join_as_slave}).
 
 join_as_slave(Name) ->
-  {ok, reachable} = reach_node(Name),
   gen_server:call(?SERVER, {join_as_slave, Name}).
 
 join_as_slave(Name, Tabs) ->
-  {ok, reachable} = reach_node(Name),
   gen_server:call(?SERVER, {join_as_slave, Name, Tabs}).  
 
 join_as_master(Name)->
-  {ok, reachable} = reach_node(Name),
   gen_server:call(?SERVER, {join_as_master, Name}).
 
 join_as_master(Name, Tab)->
-  {ok, reachable} = reach_node(Name),
   gen_server:call(?SERVER, {join_as_master, Name, Tab}).
 
 sync_node(Name) ->
@@ -111,34 +107,67 @@ handle_call({reach_node, Name}, From, State) when is_atom(Name) ->
   {reply, Reply, State};
 
 handle_call({join_as_slave}, From, State) ->
-  Name = State#state.cluster_head,
-  {ok, reachable} = is_node_reachable(Name),
-  Reply = prepare_sync(Name),
-  {reply, Reply, State#state{user_tables= [Name]}};
+  NodeName = State#state.cluster_head,
+  {ok, reachable} = is_node_reachable(NodeName),
+  Reply = prepare_sync(NodeName),
+  NewState = #state{cluster_head = NodeName, 
+	            reachable = State#state.reachable +1},
+
+  {reply, Reply, NewState}; 
+
 
 handle_call({join_as_slave, Name}, From, State) when is_atom(Name)->
+
+  {ok, reachable} = is_node_reachable(Name),
   Reply = prepare_sync(Name),
-  {reply, Reply, State#state{user_tables= [Name]}};
+  NewState = #state{cluster_head = Name, 
+	            reachable = State#state.reachable +1},
+
+  {reply, Reply, NewState}; 
+
 
 handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
+
+  {ok, reachable} = is_node_reachable(Name),
   Reply = prepare_sync(Name, Tabs, ?COPY_TYPE),
-  {reply, Reply, State};
+  NewState = #state{cluster_head = Name, 
+	            reachable = State#state.reachable +1},
+
+  {reply, Reply, NewState}; 
+
 
 handle_call({join_as_slave, Name, Tabs}, From, State) when is_atom(Name)->
+
+  {ok, reachable} = is_node_reachable(Name),
   prepare_sync(Name),
   Reply = post_sync(Name),
-  {reply, Reply, State};
+  NewState = #state{cluster_head = Name, 
+	            reachable = State#state.reachable +1},
+
+  {reply, Reply, NewState}; 
+
 
 
 handle_call({join_as_master, Name}, From, State) when is_atom(Name)->
+
+  {ok, reachable} = is_node_reachable(Name),
   prepare_sync(Name),
   Reply = sync_node_all_tables(Name),
-  {reply, Reply, State};
+  NewState = #state{cluster_head = Name, 
+	            reachable = State#state.reachable +1},
+
+  {reply, Reply, NewState}; 
+
 
 handle_call({join_as_master, Name, Tabs}, From, State) when is_atom(Name)->
+
+  {ok, reachable} = is_node_reachable(Name),
   prepare_sync(Name),
   Reply = sync_node_some_tables(Name, Tabs),
-  {reply, Reply, State};  
+  NewState = #state{cluster_head = Name, 
+	            reachable = State#state.reachable +1},
+
+  {reply, Reply, NewState}; 
 
 handle_call({sync_node_all, Name}, From, State) when is_atom(Name)->
   Reply = sync_node_all_tables(Name),
@@ -220,6 +249,7 @@ sync_node_some_tables(NodeName, Tables) ->
   ok = mnesia:wait_for_tables(Tables, ?TAB_TIMEOUT), ok.
   
 is_node_reachable(Name) when is_atom(Name) ->
+   error_logger:info_msg("Going to ping node ~p",[Name]),
    is_node_reachable(net_adm:ping(Name));
 is_node_reachable('pong') -> {ok, reachable};
 is_node_reachable(_) -> {error, unreachable}.
