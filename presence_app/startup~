@@ -1,9 +1,0 @@
-code:add_path("ebin").
-code:add_path("deps/edown/ebin").
-code:add_path("deps/goldrush/ebin").
-code:add_path("deps/json_rec/ebin").
-code:add_path("deps/lager/ebin").
-code:add_path("deps/mochiweb/ebin").
-code:add_path("deps/parse_trans/ebin").
-code:add_path("deps/webmachine/ebin").
-application:start(user_presence).
