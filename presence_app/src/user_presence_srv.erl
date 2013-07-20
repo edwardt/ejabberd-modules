@@ -49,9 +49,9 @@ start_link(Args)->
   gen_server:start_link({local, ?SERVER}, ?MODULE, Args ,[]).
    
 init()-> ok.
-%  init([{?ConfPath, ?ConfFile}]).
+%  init({?ConfPath, ?ConfFile}).
 
-init([{Path, File}])->
+init({Path, File})->
   Start = app_util:os_now(),
  
   error_logger:info_msg("Initiating ~p with config ~p ~p", [?SERVER, Path, File]),

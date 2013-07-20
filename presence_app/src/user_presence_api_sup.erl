@@ -8,18 +8,26 @@
 -behaviour(supervisor).
 
 %% External exports
--export([start_link/0, upgrade/0]).
+-export([start_link/0, start_link/1, upgrade/0]).
 
 %% supervisor callbacks
 -export([init/1]).
 
 -define (APPNAME, 'user_presence_app').
+<<<<<<< HEAD
 -define(CHILD(I, Type, Args), {I, {I, start_link, Args}, permanent, 5000, Type, [I]}).
+=======
+-define(ConfPath,"conf").
+-define(ConfFile, "spark_user_presence.config").
+-define(SERVER, ?MODULE).
+>>>>>>> fc876921bc4da15af775160c0c7ea94634b6905e
 
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
-start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+start_link() -> start_link([{?ConfPath, ?ConfFile}]).
+start_link(Args) ->
+    error_logger:info_msg("Starting ~p supervisor with args ~p", [?MODULE, Args]),
+    supervisor:start_link({local, ?SERVER}, ?MODULE, [Args]).
 
 %% @spec upgrade() -> ok
 %% @doc Add processes if necessary.
@@ -42,7 +50,7 @@ upgrade() ->
 
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
-init([]) -> init([{"conf"},{"user_presence_api.config"}]);
+init() -> init([]).
 init(Args) ->
     WebConfig = config(Args),
     Web = {webmachine_mochiweb,
@@ -57,12 +65,14 @@ init(Args) ->
 
 %%
 %% @doc return the priv dir
-priv_dir(Mod) when is_atom(Mod)->
-    priv_dir(code:priv_dir(Mod));
-priv_dir({error, bad_name}) ->
-    Ebin = filename:dirname(code:which(Mod)),
-    filename:join(filename:dirname(Ebin), "priv").
-priv_dir(Mod) -> Mod.
+priv_dir(Mod) ->
+    case code:priv_dir(Mod) of
+        {error, bad_name} ->
+            Ebin = filename:dirname(code:which(Mod)),
+            filename:join(filename:dirname(Ebin), "priv");
+        PrivDir ->
+            PrivDir
+    end.
 
 config(Args)->
     [{Path, File}] = Args,
@@ -92,7 +102,7 @@ get_all_interface_ip() ->
            get_interface_ip(L)   
         end,List).
 
-get_interface_ip(Inteface) when is_list(Inteface) ->
-  {ok, [addr, Ip]} = inet:ifget(L,[addr]),
+get_interface_ip(Interface) when is_list(Interface) ->
+  {ok, [addr, Ip]} = inet:ifget(Interface,[addr]),
   inet_parse:ntoa(Ip). 
 
