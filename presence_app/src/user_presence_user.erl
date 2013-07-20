@@ -84,7 +84,7 @@ is_user_online(Id)->
 
 handle_call({online_user, Id}, From, State) ->
   Reply = user_presence_srv:list_online(Id),
-  {reply, Reply, State}.
+  {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->
   Reply = {error, function_clause},

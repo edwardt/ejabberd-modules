@@ -82,8 +82,7 @@ list_online_count(Since)->
 
 handle_call({list_online_count, Since}, From, State) ->
   Reply = user_presence_srv:list_online_count(Since),
-  {reply, Reply, State}.
-
+  {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->
   Reply = {error, function_clause},
