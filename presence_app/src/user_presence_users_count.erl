@@ -102,7 +102,6 @@ terminate(_Reason, _State)->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.  
 
--spec signal_malformed_request(wm_reqdata(), any())-> {{halt, 400}, wm_reqdata(), any()}
 signal_malformed_request(RD, Ctx) ->
  	{{halt, 400}, RD, Ctx}.
 
