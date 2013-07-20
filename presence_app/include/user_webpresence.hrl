@@ -8,5 +8,5 @@
 	token :: pos_integer()
 }).
 
--export_records([user_webpresence]).
+
 -endif.

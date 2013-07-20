@@ -1,12 +1,14 @@
 -module(user_webpresence_model).
-
--include_lib("user_webpresence.hrl").
 -behaviour(json_rec_model).
+-include_lib("user_webpresence.hrl").
 
 -compile({parse_transform, exprecs}).
 -export([new/1, 
 	 	 rec/1,
 	  	 ensure_binary/1]).
+
+-export_records([user_webpresence]).
+
 -spec new( bitstring() )-> #user_webpresence{} | undefined.
 new(#user_webpresence{} = Val) -> '#new-user_webpresence'();
 new(_) -> undefined.

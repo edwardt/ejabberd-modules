@@ -25,7 +25,7 @@
 
 
 -include_lib("webmachine/include/webmachine.hrl").
--include_lib("online_user_json.hrl").
+-include_lib("web_pres.hrl").
 
 -define(APP_JSON, "application/json").
 -define(SERVER, ?MODULE).
@@ -53,10 +53,10 @@ process_post(ReqData, Ctx) ->
 
 to_json(ReqData, Ctx) ->
     is_user_online(wrq:path_info(id, ReqData)),
-    gen_server:call(?SERVER, {online_user, ReqData}).
+    gen_server:call(?SERVER, {web_pres, ReqData}).
 
 from_json(RD, Ctx, {error, no_data}) ->
-	signal_malformed(RD, Ctx).
+   signal_malformed_request(RD, Ctx).
 
 from_json(ReqData, Ctx) ->
     case wrq:path_info(id, ReqData) of
@@ -71,18 +71,18 @@ from_json(ReqData, Ctx) ->
     end.
 
 is_user_online(undefined)->
-  Resp = #online_user_json{jaberid = <<"">>, 
+  Resp = #web_pres{jaberid = <<"">>, 
          presence = <<"offline">>,
          token = get_token()},
   ReqData2 = wrq:set_resp_body(Resp, ReqData),
   {JsonDoc, ReqData2, Ctx};
 
 is_user_online(Id)->
-  Reply = gen_server:call(?SERVER, {online_user, Id}),
+  Reply = gen_server:call(?SERVER, {web_pres, Id}),
   ReqData2 = wrq:set_resp_body(Reply, ReqData),
   {JsonDoc, ReqData2, Ctx}.
 
-handle_call({online_user, Id}, From, State) ->
+handle_call({web_pres, Id}, From, State) ->
   Reply = user_presence_srv:list_online(Id),
   {reply, Reply, State};
 

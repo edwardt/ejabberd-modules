@@ -25,7 +25,7 @@
 
 
 -include_lib("webmachine/include/webmachine.hrl").
--include_lib("online_user_json.hrl").
+%-include_lib("web_pres.hrl").
 
 -define(APP_JSON, "application/json").
 -record(ctx, {db}).
@@ -52,7 +52,7 @@ process_post(ReqData, Ctx) ->
 
 to_json(ReqData, Ctx) ->
     is_user_online(wrq:path_info(id, ReqData)),
-    gen_server:call(?SERVER, {list_online_user, ReqData}).
+    gen_server:call(?SERVER, {list_web_pres, ReqData}).
 
 from_json(RD, Ctx, {error, no_data}) ->
    signal_malformed_request(RD, Ctx).
@@ -70,7 +70,7 @@ from_json(ReqData, Ctx) ->
     end.
 
 list_user_online(undefined)->
-  Resp = #online_user_json{jaberid = <<"">>, 
+  Resp = #web_pres{jaberid = <<"">>, 
          presence = <<"offline">>,
          token = get_token()},
   ReqData2 = wrq:set_resp_body(Resp, ReqData),
