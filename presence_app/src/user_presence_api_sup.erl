@@ -52,12 +52,14 @@ init(Args) ->
 
 %%
 %% @doc return the priv dir
-priv_dir(Mod) when is_atom(Mod)->
-    priv_dir(code:priv_dir(Mod));
-priv_dir({error, bad_name}) ->
-    Ebin = filename:dirname(code:which(Mod)),
-    filename:join(filename:dirname(Ebin), "priv").
-priv_dir(Mod) -> Mod.
+priv_dir(Mod) ->
+    case code:priv_dir(Mod) of
+        {error, bad_name} ->
+            Ebin = filename:dirname(code:which(Mod)),
+            filename:join(filename:dirname(Ebin), "priv");
+        PrivDir ->
+            PrivDir
+    end.
 
 config(Args)->
     [{Path, File}] = Args,
