@@ -1,10 +1,9 @@
-%% @author author <author@example.com>
+%% @author author 
 %% @copyright YYYY author.
 
 %% @doc Supervisor for the user_presence_api application.
 
 -module(user_presence_api_sup).
--author('author <author@example.com>').
 
 -behaviour(supervisor).
 
@@ -13,6 +12,8 @@
 
 %% supervisor callbacks
 -export([init/1]).
+
+-define (AppName, 'user_presence_app').
 
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
@@ -40,20 +41,9 @@ upgrade() ->
 
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
-init([]) ->
-    Ip = case os:getenv("WEBMACHINE_IP") of false -> "0.0.0.0"; Any -> Any end,
-    {ok, App} = application:get_application(?MODULE),
-    {ok, Dispatch} = file:consult(filename:join([priv_dir(App),
-                                                 "dispatch.conf"])),
-    Port = case os:getenv("WEBMACHINE_PORT") of
-            false -> 8000;
-            AnyPort -> AnyPort
-          end,
-    WebConfig = [
-                 {ip, Ip},
-                 {port, Port},
-                 {log_dir, "priv/log"},
-                 {dispatch, Dispatch}],
+init([]) -> init([{"conf"},{"user_presence_api.config"}]);
+init(Args) ->
+    WebConfig = config(Args),
     Web = {webmachine_mochiweb,
            {webmachine_mochiweb, start, [WebConfig]},
            permanent, 5000, worker, [mochiweb_socket_server]},
@@ -62,11 +52,42 @@ init([]) ->
 
 %%
 %% @doc return the priv dir
-priv_dir(Mod) ->
-    case code:priv_dir(Mod) of
-        {error, bad_name} ->
-            Ebin = filename:dirname(code:which(Mod)),
-            filename:join(filename:dirname(Ebin), "priv");
-        PrivDir ->
-            PrivDir
-    end.
+priv_dir(Mod) when is_atom(Mod)->
+    priv_dir(code:priv_dir(Mod));
+priv_dir({error, bad_name}) ->
+    Ebin = filename:dirname(code:which(Mod)),
+    filename:join(filename:dirname(Ebin), "priv").
+priv_dir(Mod) -> Mod.
+
+config(Args)->
+    [{Path, File}] = Args,
+    {ok, [ConfList]} = load_config(ConfDir,File),
+    {ok, Interface} = app_config_util:config_val(webmachine_inteface, ConfList,"eth0"),
+    {ok, PublicIp} = try_get_ip(),
+    {ok, Ip} = app_config_util:config_val(webmachine_ip, ConfList,"0.0.0.0"),
+    {ok, Port} = app_config_util:config_val(webmachine_port, ConfList, 8000),
+    {ok, Dispatch} = file:consult(filename:join([priv_dir(AppName),
+                                                 "dispatch.conf"])),
+    [{ip, Ip},
+     {port, Port},
+     {log_dir, "priv/log"},
+     {dispatch, Dispatch}].
+
+try_get_ip()->
+  Ips = get_all_interface_ip().
+  lists:dropwhile(fun(Ip) -> not_local(Ip) end,Ips).
+
+%TODO get a better filter
+not_local("127.0.0.1") -> false;
+not_local(_) -> true.
+
+get_all_interface_ip() ->
+  {ok, List} = inet:getiflist(),  
+  Ips = lists:map(fun (L)-> 
+           get_interface_ip(Inteface)   
+        end,List).
+
+get_interface_ip(Inteface) when is_list(Inteface) ->
+  {ok, [addr, Ip]} = inet:ifget(L,[addr]),
+  inet_parse:ntoa(Ip). 
+
