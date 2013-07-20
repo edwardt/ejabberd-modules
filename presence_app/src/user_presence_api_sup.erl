@@ -14,6 +14,7 @@
 -export([init/1]).
 
 -define (APPNAME, 'user_presence_app').
+-define(CHILD(I, Type, Args), {I, {I, start_link, Args}, permanent, 5000, Type, [I]}).
 
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
@@ -45,9 +46,13 @@ init([]) -> init([{"conf"},{"user_presence_api.config"}]);
 init(Args) ->
     WebConfig = config(Args),
     Web = {webmachine_mochiweb,
-           {webmachine_mochiweb, start, [WebConfig]},
+          {webmachine_mochiweb, start, [WebConfig]},
            permanent, 5000, worker, [mochiweb_socket_server]},
-    Processes = [Web],
+    User = ?CHILD(user_presence_user, worker, Args),
+    Users = ?CHILD(user_presence_users, worker, Args),
+    Processes = [Web, 
+                 User,
+                 Users],
     {ok, { {one_for_one, 10, 10}, Processes} }.
 
 %%
