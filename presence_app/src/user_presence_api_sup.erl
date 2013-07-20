@@ -8,17 +8,22 @@
 -behaviour(supervisor).
 
 %% External exports
--export([start_link/0, upgrade/0]).
+-export([start_link/0, start_link/1, upgrade/0]).
 
 %% supervisor callbacks
 -export([init/1]).
 
 -define (APPNAME, 'user_presence_app').
+-define(ConfPath,"conf").
+-define(ConfFile, "spark_user_presence.config").
+-define(SERVER, ?MODULE).
 
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
-start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+start_link() -> start_link([{?ConfPath, ?ConfFile}]).
+start_link(Args) ->
+    error_logger:info_msg("Starting ~p supervisor with args ~p", [?MODULE, Args]),
+    supervisor:start_link({local, ?SERVER}, ?MODULE, [Args]).
 
 %% @spec upgrade() -> ok
 %% @doc Add processes if necessary.
@@ -41,7 +46,7 @@ upgrade() ->
 
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
-init([]) -> init([{"conf"},{"user_presence_api.config"}]);
+init() -> init([]).
 init(Args) ->
     WebConfig = config(Args),
     Web = {webmachine_mochiweb,

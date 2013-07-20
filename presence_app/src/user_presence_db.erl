@@ -48,12 +48,12 @@ stop()->
  	gen_server:call(?SERVER, stop).
 
 init()->
-  init([{?ConfPath, ?ConfFile}]).
+  init({?ConfPath, ?ConfFile}).
 
 init(Args)->
   error_logger:info_msg("Initiating user_presence_db ~p with config ~p", [?SERVER, Args]),
   Start = app_util:os_now(),
-  [{Path, File}] = Args,
+  {Path, File} = Args,
   error_logger:info_msg("Initiating db ~p with config ~p ~p", [?SERVER, Path, File]),
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   error_logger:info_msg("~p config values ~p", [?SERVER, ConfList]),
