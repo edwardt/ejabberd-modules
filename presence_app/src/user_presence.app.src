@@ -10,8 +10,11 @@
   {modules, [
   			app_util,
   			app_config_util,
-			user_webpresence_model,
+			  user_webpresence_model,
   			user_presence_db,
+        user_presence_api,
+        user_presence_api_resource,
+        user_presence_api_sup,
   			user_presence_app,
   			user_presence_sup,
   			user_presence_srv
