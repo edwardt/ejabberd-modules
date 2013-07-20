@@ -2,14 +2,14 @@
 %% @copyright YYYY author.
 %% @doc Example webmachine_resource.
 
--module(user_presence_api_resource).
--behaviour(gen_server),
+-module(user_presence_users).
+-behaviour(gen_server).
 
 -export([init/1,
          allowed_methods/2,
          content_types_provided/2,
          content_types_accepted/2,
-         finish_request/2,
+
          from_json/2,
 		 to_json/2]).
 
@@ -25,10 +25,13 @@
 
 
 -include_lib("webmachine/include/webmachine.hrl").
+-include_lib("online_user_json.hrl").
+
 -define(APP_JSON, "application/json").
 -record(ctx, {db}).
 
 init([]) -> 
+  	error_logger:info_msg("Initialize ~p",[?SERVER]),
 	{{trace, "traces"}, Config}.
 
 allowed_methods(ReqData, Ctx) ->
@@ -40,10 +43,6 @@ content_types_accepted(ReqData, Ctx) ->
 content_types_provided(ReqData, Ctx) ->
     {[{?APP_JSON, to_json}], ReqData, Ctx}.
 
-finish_request(ReqData, Ctx) ->
-    ece_db_sup:terminate_child(Ctx#ctx.db),
-    {true, ReqData, Ctx}.
-
 process_post(ReqData, Ctx) ->
     [{JsonDoc, _}] = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
     {struct, Doc} = mochijson2:decode(JsonDoc),
@@ -52,14 +51,8 @@ process_post(ReqData, Ctx) ->
     {true, ReqData2, Ctx}.
 
 to_json(ReqData, Ctx) ->
-    case wrq:path_info(id, ReqData) of
-        undefined ->
-            All = ece_db:all(Ctx#ctx.db),
-            {All, ReqData, Ctx};
-        ID ->
-            JsonDoc = ece_db:find(Ctx#ctx.db, ID),
-            {JsonDoc, ReqData, Ctx}
-    end.
+    is_user_online(wrq:path_info(id, ReqData)),
+    gen_server:call(?SERVER, {list_online_user, ReqData}).
 
 from_json(RD, Ctx, {error, no_data}) ->
 	signal_malformed(RD, Ctx).
@@ -76,12 +69,26 @@ from_json(ReqData, Ctx) ->
             {true, ReqData2, Ctx}
     end.
 
+list_online_count(undefined)->
+  Resp = #online_user_json{ count = 0,
+         token = get_token()},
+  ReqData2 = wrq:set_resp_body(Resp, ReqData),
+  {JsonDoc, ReqData2, Ctx};
+
+list_online_count(Since)->
+  Reply = gen_server:call(?SERVER, {list_online_count, Since}),
+  ReqData2 = wrq:set_resp_body(Reply, ReqData),
+  {JsonDoc, ReqData2, Ctx}.
+
+handle_call({list_online_count, Since}, From, State)
+  Reply = user_presence_srv:list_online_count(Since),
+  {reply, Reply, State}.
+
 
 handle_call(_Request, _From, State) ->
   Reply = {error, function_clause},
   {reply, Reply, State}.
 
--spec handle_cast(tuple(), state()) -> {noreply, state()}.
 handle_cast(Info, State) ->
   erlang:display(Info),
   {noreply, State}.
@@ -95,8 +102,9 @@ terminate(_Reason, _State)->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.  
 
-
-
 -spec signal_malformed_request(wm_reqdata(), any())-> {{halt, 400}, wm_reqdata(), any()}
 signal_malformed_request(RD, Ctx) ->
-	{{halt, 400}, RD, Ctx};
+ 	{{halt, 400}, RD, Ctx}.
+
+get_token() ->
+	user_presence_srv:generate_token().

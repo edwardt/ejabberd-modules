@@ -6,7 +6,8 @@
 		list_online_count/1,
 		list_online_count/2,
 		list_all_online/1,
-		list_all_online/2]).
+		list_all_online/2,
+        generate_token/0]).
 
 -export([ping/0]).
 

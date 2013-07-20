@@ -1,0 +1,18 @@
+%%-*- mode: erlang -*-
+{application, user_presence_api,
+ [
+  {description, "user_presence_api"},
+  {vsn, "1"},
+  {modules, []},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  inets,
+                  crypto,
+                  mochiweb,
+                  webmachine
+                 ]},
+  {mod, { user_presence_api_app, []}},
+  {env, []}
+ ]}.
