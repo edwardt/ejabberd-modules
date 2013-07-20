@@ -13,6 +13,7 @@
 			  user_webpresence_model,
   			user_presence_db,
         user_presence_api,
+        user_presence_api_app,
         user_presence_api_resource,
         user_presence_api_sup,
   			user_presence_app,
