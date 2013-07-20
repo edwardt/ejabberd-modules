@@ -13,7 +13,7 @@
 %% supervisor callbacks
 -export([init/1]).
 
--define (AppName, 'user_presence_app').
+-define (APPNAME, 'user_presence_app').
 
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
@@ -61,12 +61,12 @@ priv_dir(Mod) -> Mod.
 
 config(Args)->
     [{Path, File}] = Args,
-    {ok, [ConfList]} = load_config(ConfDir,File),
+    {ok, [ConfList]} = app_config_util:load_config(Path,File),
     {ok, Interface} = app_config_util:config_val(webmachine_inteface, ConfList,"eth0"),
     {ok, PublicIp} = try_get_ip(),
     {ok, Ip} = app_config_util:config_val(webmachine_ip, ConfList,"0.0.0.0"),
     {ok, Port} = app_config_util:config_val(webmachine_port, ConfList, 8000),
-    {ok, Dispatch} = file:consult(filename:join([priv_dir(AppName),
+    {ok, Dispatch} = file:consult(filename:join([priv_dir(?APPNAME),
                                                  "dispatch.conf"])),
     [{ip, Ip},
      {port, Port},
@@ -74,7 +74,7 @@ config(Args)->
      {dispatch, Dispatch}].
 
 try_get_ip()->
-  Ips = get_all_interface_ip().
+  Ips = get_all_interface_ip(),
   lists:dropwhile(fun(Ip) -> not_local(Ip) end,Ips).
 
 %TODO get a better filter
@@ -84,7 +84,7 @@ not_local(_) -> true.
 get_all_interface_ip() ->
   {ok, List} = inet:getiflist(),  
   Ips = lists:map(fun (L)-> 
-           get_interface_ip(Inteface)   
+           get_interface_ip(L)   
         end,List).
 
 get_interface_ip(Inteface) when is_list(Inteface) ->
