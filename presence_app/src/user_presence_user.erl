@@ -82,7 +82,7 @@ is_user_online(Id)->
   ReqData2 = wrq:set_resp_body(Reply, ReqData),
   {JsonDoc, ReqData2, Ctx}.
 
-handle_call({online_user, Id}, From, State)
+handle_call({online_user, Id}, From, State) ->
   Reply = user_presence_srv:list_online(Id),
   {reply, Reply, State}.
 
