@@ -55,7 +55,7 @@ to_json(ReqData, Ctx) ->
     gen_server:call(?SERVER, {list_online_user, ReqData}).
 
 from_json(RD, Ctx, {error, no_data}) ->
-	signal_malformed(RD, Ctx).
+   signal_malformed_request(RD, Ctx).
 
 from_json(ReqData, Ctx) ->
     case wrq:path_info(id, ReqData) of
