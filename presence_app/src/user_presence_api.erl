@@ -18,9 +18,9 @@ ensure_started(App) ->
 %% @spec start_link() -> {ok,Pid::pid()}
 %% @doc Starts the app for inclusion in a supervisor tree
 start_link() ->
-    ensure_started(inets),
-    ensure_started(crypto),
-    ensure_started(mochiweb),
+    application:ensure_started(inets),
+    application:ensure_started(crypto),
+    application:ensure_started(mochiweb),
     application:set_env(webmachine, webmachine_logger_module, 
                         webmachine_logger),
     ensure_started(webmachine),
@@ -29,9 +29,9 @@ start_link() ->
 %% @spec start() -> ok
 %% @doc Start the user_presence_api server.
 start() ->
-    ensure_started(inets),
-    ensure_started(crypto),
-    ensure_started(mochiweb),
+    application:ensure_started(inets),
+    application:ensure_started(crypto),
+    application:ensure_started(mochiweb),
     application:set_env(webmachine, webmachine_logger_module, 
                         webmachine_logger),
     ensure_started(webmachine),

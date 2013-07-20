@@ -12,7 +12,7 @@
 -define(ConfFile, "spark_user_presence.config").
 
 start()->
-    app_util:start_app(?SERVER, ).
+    app_util:start_app(?SERVER).
 
 stop()->
 	app_util:stop_app(?SERVER).

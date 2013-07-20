@@ -89,7 +89,7 @@ get_all_interface_ip() ->
            get_interface_ip(L)   
         end,List).
 
-get_interface_ip(Inteface) when is_list(Inteface) ->
-  {ok, [addr, Ip]} = inet:ifget(L,[addr]),
+get_interface_ip(Interface) when is_list(Interface) ->
+  {ok, [addr, Ip]} = inet:ifget(Interface,[addr]),
   inet_parse:ntoa(Ip). 
 
