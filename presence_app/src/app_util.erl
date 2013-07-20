@@ -2,6 +2,7 @@
 
 -export([start_app/1,
 		 stop_app/1]).
+-export([start_apps/1]).
 
 -export([ensure_binary/1]).
 
@@ -27,6 +28,13 @@ start_app({error, {Reason, App}})
 start_app({E, {Reason, App}}) ->
 	{E, {Reason, App}};
 start_app(_)-> {error, badarg}.
+
+start_apps([])-> ok;
+start_apps(Apps) when is_list(Apps) ->
+    lists:map(fun(App) -> 
+   		ok = start_app(App)
+   	end, Apps);
+start_apps(_) -> {error, badarg}.
 
 stop_app(ok)-> ok;
 stop_app(stopped)->ok;

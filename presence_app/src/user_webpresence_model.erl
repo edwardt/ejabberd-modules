@@ -8,12 +8,11 @@
 	 	 rec/1,
 	  	 ensure_binary/1]).
 -spec new( bitstring() )-> #user_webpresence{} | undefined.
-new(#user_webpresence{} = Val)->
-   '#new-user_webpresence'();
-new(_)-> undefined.
+new(#user_webpresence{} = Val) -> '#new-user_webpresence'();
+new(_) -> undefined.
 
-rec(#user_webpresence{} =Value) ->  Value;
-rec(_)-> undefined.
+rec(#user_webpresence{} =Value) -> Value;
+rec(_) -> undefined.
 
 -spec ensure_binary(atom() | any()) -> binary().
 ensure_binary(#user_webpresence{} = Value) ->

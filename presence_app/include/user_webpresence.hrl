@@ -1,5 +1,5 @@
 -ifndef(USER_WEBPRESENCE_HRL).
--define(USER_WEBPRESENCE_HRLL, true).
+-define(USER_WEBPRESENCE_HRL, true).
 
 -record(user_webpresence, {
 	memberid :: bitstring(),

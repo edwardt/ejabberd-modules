@@ -18,8 +18,7 @@
 %% API functions
 %% ===================================================================
 
-start_link()->
-	start_link([{?ConfPath, ?ConfFile}]).
+start_link() -> start_link([{?ConfPath, ?ConfFile}]).
 start_link(Args) ->
     error_logger:info_msg("Starting ~p supervisor with args ~p", [?MODULE, Args]),
     supervisor:start_link({local, ?SERVER}, ?MODULE, [Args]).
@@ -27,8 +26,7 @@ start_link(Args) ->
 %% ===================================================================
 %% Supervisor callbacks
 %% ===================================================================
-init()->
-   init([]).
+init() -> init([]).
 init(Args) ->
     error_logger:info_msg("Starting dependency apps ~p~n", Args),
 	Apps = [syntax_tools, 
@@ -44,15 +42,11 @@ init(Args) ->
 			mochiweb,
 			webmachine,
 			mnesia],
- 
-    lists:map(fun(App) -> 
-    		ok = app_util:start_app(App)
-    %		error_logger:info_msg("Started App ~p~n", [App])
-    	end, Apps),
-
+ 	app_util:start_apps(Apps),
+ 	
 	Children = lists:flatten([
-    ?CHILD(user_presence_srv, worker, Args),
-    ?CHILD(user_presence_db, worker, Args)
+    	?CHILD(user_presence_srv, worker, Args),
+    	?CHILD(user_presence_db, worker, Args)
     ]),
     error_logger:info_msg("Starting apps ~p ~p ~n", [user_presence_srv, user_presence_db]),
     {ok,{{one_for_one,5,10}, Children}}.
