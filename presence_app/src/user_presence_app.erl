@@ -8,9 +8,11 @@
 -export([start/2, stop/1]).
 
 -define(SERVER, ?MODULE).
+-define(ConfPath,"conf").
+-define(ConfFile, "spark_user_presence.config").
 
 start()->
-    app_util:start_app(?SERVER).
+    app_util:start_app(?SERVER, ).
 
 stop()->
 	app_util:stop_app(?SERVER).
@@ -20,7 +22,9 @@ stop()->
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    user_presence_sup:start_link().
+	Args = {?ConfPath, ?ConfFile},
+	user_presence_api_sup:start_link(Args),
+    user_presence_sup:start_link(Args).
 
 stop(_State) ->
     ok.
