@@ -51,8 +51,8 @@ process_post(ReqData, Ctx) ->
     {true, ReqData2, Ctx}.
 
 to_json(ReqData, Ctx) ->
-    is_user_online(wrq:path_info(id, ReqData)),
-    gen_server:call(?SERVER, {list_web_pres, ReqData}).
+    is_user_online(wrq:path_info(id, ReqData)).
+    gen_server:call(?SERVER, {list_online_user, ReqData}).
 
 from_json(RD, Ctx, {error, no_data}) ->
    signal_malformed_request(RD, Ctx).
@@ -81,7 +81,7 @@ list_user_online(Since)->
   ReqData2 = wrq:set_resp_body(Reply, ReqData),
   {JsonDoc, ReqData2, Ctx}.
 
-handle_call({list_user_online, Since}, From, State) ->
+handle_call({list_user_online, Since}, From, State)
   Reply = user_presence_srv:list_all_online(Since),
   {reply, Reply, State};
 

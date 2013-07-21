@@ -51,7 +51,7 @@ init() -> init([]).
 init(Args) ->
     WebConfig = config(Args),
     Web = {webmachine_mochiweb,
-           {webmachine_mochiweb, start, [WebConfig]},
+          {webmachine_mochiweb, start, [WebConfig]},
            permanent, 5000, worker, [mochiweb_socket_server]},
     User = ?CHILD(user_presence_user, worker, Args),
     Users = ?CHILD(user_presence_users, worker, Args),
