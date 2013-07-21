@@ -1,34 +1,27 @@
-mod_openid 
+mod_spark_log_chat 
 Transform the Jabber Server in an openid provider.
 (http://openid.net/)
 
-Author: Olivier Goffart <ogoffart@kde.org>
+Author: 
 
 Motivation:
-There are already severals existing openid provider that uses the JabberId as id. 
-( http://openid.xmpp.za.net/ http://xmppid.net/ )
-But none of them are open source.
-The idea is that having the openid server in the same place as the jabber server reduce 
-the size of the security chain we have to trust.   
-Instead of trusting both the jabber server and the openid provider, we can trust only 
-the Jabber server.
-
+This is a custom plugin that logs all the chat messages from users and publish such to rabbitmq server, as "topic". This can be sued just for chat archiving or do some "screening" or some other workflow afterwards; for example other consumers can subscribe from those topics, do some processing then republish to other topics or jsut send those to other service to consume.
 
 Status:
-Currently, the implementation just ask for the jabber password. 
-Some security function are also lacking.
-The plan was to use something similair to XEP-0070
+This is custom plugin outside of XEP standard.
 
 How it works:
 Add in your ejabberd.cfg
-{listen, [  ...
-          {5280, ejabberd_http,    [http_poll, web_admin, {request_handlers , [{["openid"],mod_openid }]}]} ,
+{mod_spark_log_chat,  [
+		   {format, text},
+		   {idMap,[ {..custom data ..}
+		    ]}
+		]},
 
-Then your open id is    http://server.org:5280/openid/user@server.org
-Hopelifully it should be possible to have more nice-looking urls.
+TODO:
+* it is better to completely seperate custom workflow and custom code into seperate "pluggable module". Chat message extraction and publishing can be reused.
+
+* write common_test for this.
 
 
-Future:
-I have no plan to continue working on it.  Feel free to take over.
-I'd be happy to reply to questions.
 

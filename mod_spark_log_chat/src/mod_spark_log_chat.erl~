@@ -39,6 +39,7 @@
 
 -record(state, {
 	idMap =[],
+	table = undefined,
 	format = ?DEFAULT_FORMAT
 }).
 
@@ -63,21 +64,17 @@ ensure_dependency_started()->
 		crypto,
 		public_key,
 		gen_server2,
-		ssl,
+		ssl, 
+		ets,
 		goldrush, 
 		rabbit_common,
 		amqp_client,
 		inets, 
 		restc],
   app_util:start_apps(Apps),
-  ok = lager:start().
+  ok = lager:start(),
+  ?INFO_MSG("Starting depedenecies", []).
 
--spec self_test(list())-> ok | {error, term()}.
-self_test(Args)->
-  ?INFO_MSG("Start self_test procedure ", []),
-  
-  R = rabbit_farms:publish(call, <<"self_test from mod_spark_chat_log">>),
-  R.
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
@@ -104,12 +101,31 @@ start_vhs(Host, [{_VHost, _Opts}| Tail]) ->
 start_vh(Host, Opts) ->
     Format = gen_mod:get_opt(format, Opts, ?DEFAULT_FORMAT),
     IdMap = gen_mod:get_opt(idMap, Opts, []),
+    populate_table(IdMap),    
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
     #state{
         format = Format,
    	    idMap = IdMap
     	}.
+
+populate_table(IdMap)->
+   ?INFO_MSG("Store idMap ~p into ets table", [IdMap]),
+   Tab = ets:new(id_map, [named_table]),
+   lists:map(fun(L)-> true = ets:insert(Tab,L) end,IdMap).
+
+lookup_brandid(Jid)->
+   UserName = jlib:jid_to_string(Jid),
+   CommunityId = get_community_id(UserName),
+   [{_,_,B}] = ets:match_object(id_map,{'$1',CommunityId,'$2'}),
+   ?INFO_MSG("Found BrandId ~p", [B]),
+   B. 
+
+get_community_id(UserName)-> 
+   case re:split(UserName,"-")	of
+	[MemberId, CommunityId]->  CommunityId;
+	[] -> UserName	
+   end.
 
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
 init([Host, Opts])->
@@ -250,10 +266,11 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
     }.
 
 -spec get_memberId(jid(), [tuple()]) ->[string()].
-get_memberId(Jid, IdMap)->
-   UserName = jlib:jid_to_string(Jid),
-   [MemberId, BrandId] = get_login_data(UserName, IdMap),
-   [MemberId, BrandId].
+get_memberId(Jid, _IdMap)->
+    lookup_brandid(Jid).
+%   UserName = jlib:jid_to_string(Jid),
+%   [MemberId, BrandId] = get_login_data(UserName, IdMap),
+%   [MemberId, BrandId].
 
 -spec get_im_transform_format(any())->atom().
 get_im_transform_format(_)->

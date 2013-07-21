@@ -89,6 +89,7 @@ init([{Path, File}]) ->
   {ok, Name} = app_config_util:get_value(amqp_name,ConfList, <<"spark_im_chat">>),
   setup(Name, AmqpConfList, ExchangeConfList, QueueConfList).
 
+
 setup(Name, AmqpConfList,ExchangeConfList,QueueConfList)->
   AmqpParams = spark_rabbit_config:get_connection_setting(AmqpConfList), 
   ExchangeDeclare = spark_rabbit_config:get_exchange_setting(ExchangeConfList),
