@@ -9,11 +9,8 @@
          allowed_methods/2,
          content_types_provided/2,
          content_types_accepted/2,
+         to_json/2]).
 
-         from_json/2,
-		     to_json/2]).
-
--export([start/0, stop/0]).
 -export([start_link/1]).
 
 -export([init/1, init/0,
@@ -25,15 +22,26 @@
 
 
 -include_lib("webmachine/include/webmachine.hrl").
--include_lib("web_pres.hrl").
+-include_lib("user_webpresence.hrl").
 
 -define(APP_JSON, "application/json").
 -define(SERVER, ?MODULE).
--record(ctx, {db}).
+-record(ctx, {
+	client
+}).
 
-init([]) -> 
+init() -> 
     error_logger:info_msg("Initialize ~p",[?SERVER]),
-	 {{trace, "traces"}, Config}.
+    {{trace, "traces"}, #ctx{}}.
+
+init(Config)->
+    error_logger:info_msg("Initialize ~p",[?SERVER]), 
+    {{trace, "traces"}, Config}.
+
+start_link() -> start_link([]).
+start_link(Args)->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, Args ,[]).
+
 
 allowed_methods(ReqData, Ctx) ->
     {['HEAD', 'GET', 'OPTIONS'], ReqData, Ctx}.
@@ -44,34 +52,13 @@ content_types_accepted(ReqData, Ctx) ->
 content_types_provided(ReqData, Ctx) ->
     {[{?APP_JSON, to_json}], ReqData, Ctx}.
 
-process_post(ReqData, Ctx) ->
-    [{JsonDoc, _}] = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
-    {struct, Doc} = mochijson2:decode(JsonDoc),
-    NewDoc = ece_db:create(Ctx#ctx.db, {Doc}),
-    ReqData2 = wrq:set_resp_body(NewDoc, ReqData),
-    {true, ReqData2, Ctx}.
 
 to_json(ReqData, Ctx) ->
     is_user_online(wrq:path_info(id, ReqData)),
     gen_server:call(?SERVER, {web_pres, ReqData}).
 
-from_json(RD, Ctx, {error, no_data}) ->
-   signal_malformed_request(RD, Ctx).
-
-from_json(ReqData, Ctx) ->
-    case wrq:path_info(id, ReqData) of
-        undefined ->
-            {false, ReqData, Ctx};
-        ID ->
-            JsonDoc = wrq:req_body(ReqData),
-            {struct, Doc} = mochijson2:decode(JsonDoc),
-            NewDoc = ece_db:update(Ctx#ctx.db, ID, Doc),
-            ReqData2 = wrq:set_resp_body(NewDoc, ReqData),
-            {true, ReqData2, Ctx}
-    end.
-
 is_user_online(undefined)->
-  Resp = #web_pres{jaberid = <<"">>, 
+  Resp = #user_webpresence{memberId = <<"">>, 
          presence = <<"offline">>,
          token = get_token()},
   ReqData2 = wrq:set_resp_body(Resp, ReqData),
@@ -105,3 +92,5 @@ code_change(_OldVsn, State, _Extra) ->
 
 signal_malformed_request(RD, Ctx) ->
 	{{halt, 400}, RD, Ctx}.
+get_token()->
+  user_presence_srv:generate_token().

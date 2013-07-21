@@ -2,8 +2,8 @@
 -define(USER_WEBPRESENCE_HRL, true).
 
 -record(user_webpresence, {
-	memberid :: bitstring(),
-	brandid :: bitstring(),
+	memberId :: bitstring(),
+	brandId :: bitstring(),
 	presence :: bitstring(),
 	token :: pos_integer()
 }).
