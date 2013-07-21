@@ -54,22 +54,23 @@ content_types_provided(ReqData, Ctx) ->
 
 
 to_json(ReqData, Ctx) ->
-    is_user_online(wrq:path_info(id, ReqData)),
-    gen_server:call(?SERVER, {web_pres, ReqData}).
+    %is_user_online(wrq:path_info(id, ReqData)),
+    gen_server:call(?SERVER, {list_online, ReqData}).
 
 is_user_online(undefined)->
   Resp = #user_webpresence{memberId = <<"">>, 
          presence = <<"offline">>,
          token = get_token()},
-  ReqData2 = wrq:set_resp_body(Resp, ReqData),
-  {JsonDoc, ReqData2, Ctx};
+  JsonDoc = user_webpresence_model:ensure_binary(Resp),
+  %ReqData2 = wrq:set_resp_body(Resp, ReqData),
+  {JsonDoc};
 
 is_user_online(Id)->
-  Reply = gen_server:call(?SERVER, {web_pres, Id}),
-  ReqData2 = wrq:set_resp_body(Reply, ReqData),
-  {JsonDoc, ReqData2, Ctx}.
+  JsonDoc = gen_server:call(?SERVER, {list_online, Id}),
+  %ReqData2 = wrq:set_resp_body(Reply, ReqData),
+  {JsonDoc}.
 
-handle_call({web_pres, Id}, From, State) ->
+handle_call({list_online, Id}, From, State) ->
   Reply = user_presence_srv:list_online(Id),
   {reply, Reply, State};
 
@@ -90,7 +91,5 @@ terminate(_Reason, _State)->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.  
 
-signal_malformed_request(RD, Ctx) ->
-	{{halt, 400}, RD, Ctx}.
 get_token()->
   user_presence_srv:generate_token().

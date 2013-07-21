@@ -22,7 +22,7 @@
 
 
 -include_lib("webmachine/include/webmachine.hrl").
-%-include_lib("web_pres.hrl").
+-include_lib("web_pres.hrl").
 
 -define(APP_JSON, "application/json").
 -define(SERVER, ?MODULE).
@@ -51,22 +51,23 @@ content_types_provided(ReqData, Ctx) ->
     {[{?APP_JSON, to_json}], ReqData, Ctx}.
 
 to_json(ReqData, Ctx) ->
-    is_user_online(wrq:path_info(id, ReqData)).
+    %list_user_online(wrq:path_info(id, ReqData)).
     gen_server:call(?SERVER, {list_online_user, ReqData}).
 
 list_user_online(undefined)->
-  Resp = #web_pres{jaberid = <<"">>, 
-         presence = <<"offline">>,
+  Reply = #web_pres{ count = 0,
          token = get_token()},
-  ReqData2 = wrq:set_resp_body(Resp, ReqData),
-  {JsonDoc, ReqData2, Ctx};
+ % ReqData2 = wrq:set_resp_body(Resp, ReqData),
+  JsonDoc = web_pres_model:ensure_binary(Reply),
+  {JsonDoc};
 
 list_user_online(Since)->
   Reply = gen_server:call(?SERVER, {list_user_online, Since}),
-  ReqData2 = wrq:set_resp_body(Reply, ReqData),
-  {JsonDoc, ReqData2, Ctx}.
+  JsonDoc = web_pres_model:ensure_binary(Reply),
+% ReqData2 = wrq:set_resp_body(Reply, ReqData),
+  {JsonDoc}.
 
-handle_call({list_user_online, Since}, From, State)
+handle_call({list_user_online, Since}, From, State) ->
   Reply = user_presence_srv:list_all_online(Since),
   {reply, Reply, State};
 
@@ -87,8 +88,5 @@ terminate(_Reason, _State)->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.  
 
-
-
--spec signal_malformed_request(wm_reqdata(), any())-> {{halt, 400}, wm_reqdata(), any()}
-signal_malformed_request(RD, Ctx) ->
-	{{halt, 400}, RD, Ctx};
+get_token()->
+  user_presence_srv:generate_token().

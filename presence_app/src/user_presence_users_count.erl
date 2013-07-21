@@ -2,7 +2,7 @@
 %% @copyright YYYY author.
 %% @doc Example webmachine_resource.
 
--module(user_presence_users).
+-module(user_presence_users_count).
 -behaviour(gen_server).
 
 -export([init/1,
@@ -51,19 +51,21 @@ content_types_provided(ReqData, Ctx) ->
 
 
 to_json(ReqData, Ctx) ->
-    is_user_online(wrq:path_info(id, ReqData)),
+ %   is_user_online(wrq:path_info(id, ReqData)),
     gen_server:call(?SERVER, {list_web_pres, ReqData}).
 
 list_online_count(undefined)->
-  Resp = #web_pres{ count = 0,
+  Reply = #web_pres{ count = 0,
          token = get_token()},
-  ReqData2 = wrq:set_resp_body(Resp, ReqData),
-  {JsonDoc, ReqData2, Ctx};
+  JsonDoc = web_pres_model:ensure_binary(Reply),
+%  ReqData2 = wrq:set_resp_body(Resp, ReqData),
+  {JsonDoc};
 
 list_online_count(Since)->
   Reply = gen_server:call(?SERVER, {list_online_count, Since}),
-  ReqData2 = wrq:set_resp_body(Reply, ReqData),
-  {JsonDoc, ReqData2, Ctx}.
+  JsonDoc = web_pres_model:ensure_binary(Reply),
+ % ReqData2 = wrq:set_resp_body(Reply, ReqData),
+  {JsonDoc}.
 
 handle_call({list_online_count, Since}, From, State) ->
   Reply = user_presence_srv:list_online_count(Since),
