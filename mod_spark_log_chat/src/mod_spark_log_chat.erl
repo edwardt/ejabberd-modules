@@ -51,38 +51,26 @@
 start_link([Host, Opts]) -> start_link(Host, Opts).
 -spec start_link(string(), list()) ->ok | {error, term()}.
 start_link(Host, Opts)->
-	?INFO_MSG("~p gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
-	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-	R1 = gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]),
-  ?INFO_MSG("gen_server started mod_spark_log_chat ~p~n", [R1]),
-  Ret = ensure_dependency_started(),
-  R0 = 7
-  ?INFO_MSG("Started rabbit_farms ~p", [Ret]),
-  ok = self_test([R0, R1]),
-  R1.
+  ?INFO_MSG("~p gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
+  Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+  ensure_dependency_started(),
+  gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]).
+
 ensure_dependency_started()->
   ?INFO_MSG("Starting depedenecies", []),
-  ok = app_util:start_app(syntax_tools),
-  ok = app_util:start_app(compiler),
-  ok = app_util:start_app(goldrush),
-  ok = lager:start(),
-  ok = app_util:start_app(gen_server2),
-  ok = app_util:start_app(rabbit_common),
-  ok = app_util:start_app(amqp_client),
-  ok = app_util:start_app(crypto),
-  ok = app_util:start_app(public_key),
-  ok = app_util:start_app(ssl),
-  ok = app_util:start_app(inets),
-  ok = app_util:start_app(restc),
-  ?INFO_MSG("Started depedenecies", []),
-  ok.
-
--spec self_test(list())-> ok | {error, term()}.
-self_test(Args)->
-  ?INFO_MSG("Start self_test procedure ", []),
-  
-  R = rabbit_farms:publish(call, <<"self_test from mod_spark_chat_log">>),
-  R.
+	Apps = [syntax_tools, 
+		compiler, 
+		crypto,
+		public_key,
+		gen_server2,
+		ssl,
+		goldrush, 
+		rabbit_common,
+		amqp_client,
+		inets, 
+		restc],
+  app_util:start_apps(Apps),
+  ok = lager:start().
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
