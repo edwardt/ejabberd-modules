@@ -1,13 +1,12 @@
 -module(user_presence_srv).
 -behaviour(gen_server).
 
--export([list_online/1,
-		list_online/2,
-		list_online_count/1,
-		list_online_count/2,
-		list_all_online/1,
-		list_all_online/2,
-        generate_token/0]).
+-export([list_online/1
+	 ,list_online_count/1
+	 ,list_online_count/2
+	 ,list_all_online/1
+	 ,list_all_online/2
+         ,generate_token/0]).
 
 -export([ping/0]).
 
@@ -31,8 +30,9 @@
 
 -record(state,{
         cluster_head,
-	      refresh_interval = -1, 
-	      last_check
+	environment,
+	refresh_interval = -1, 
+	last_check
 }).
 
 -record(session, {
@@ -58,6 +58,7 @@ init({Path, File})->
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, Interval} = app_config_util:config_val(refresh_interval, ConfList,-1),
   {ok, Cluster} = app_config_util:config_val(cluster_head, ConfList,undefined),
+  {ok, Environment} = app_config_util:config_val(environment, ConfList,undefined),
   ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
   erlang:send_after(Interval, self(), {list_all_online, Start}),
@@ -66,6 +67,7 @@ init({Path, File})->
   error_logger:info_msg("Done Initiation ~p with config ~p ~p", [?SERVER, Path, File]),
   error_logger:info_msg("Done Initiation ~p Start ~p End ~p", [?SERVER, Start, End]),
   {ok, #state{cluster_head = Cluster, 
+       environment = Environment,	
        refresh_interval = Interval,
        last_check=End}}.
 
@@ -84,9 +86,6 @@ sync_session_from_cluster()->
 list_online(UserId) ->
 	gen_server:call(?SERVER,{list_online, UserId}).
 
-list_online(UserId, Since) ->
-	gen_server:call(?SERVER,{list_online, UserId, Since}).
-
 list_all_online(Since) ->
 	list_all_online(call, Since).
 
@@ -100,13 +99,13 @@ list_online_count(Type, Since) when is_function(Type) ->
 	gen_server:Type(?SERVER,{list_online_count, Since}).
 
 handle_call({list_online, UserId}, _From, State)->
-  OnlineUsers = user_with_active_session(UserId),
-  Reply = transform(OnlineUsers),
-  {reply, Reply, State};
-
-handle_call({list_online, UserId, Since}, _From, State)->
-  OnlineUsers = user_with_active_session(UserId, Since),
-  Reply = transform(OnlineUsers),
+  %OnlineUsers = user_with_active_session(UserId),
+  LServer = get_server_name(State),
+  Online = check_if_user_with_active_session(UserId, LServer),
+  WebPresence = #user_webpresence{ memberId = UserId, 
+			 presence = Online,
+			 token = generate_token()}, 
+  Reply = user_webpresence_model:ensure_binary(WebPresence),  
   {reply, Reply, State};
 
 handle_call({list_all_count, Since}, _From, State)->
@@ -203,6 +202,14 @@ get_users_with_active_session() ->
     [],
     ['$1']}]).
 
+check_if_user_with_active_session(Jid, LServer)->
+    US = {Jid, LServer},
+    case mnesia:dirty_index_read(session, US, #session.us) of
+	[] -> <<"offline">>;
+	Ss -> <<"online">>
+    end.
+
+
 set_user_webpresence()->
    Users = get_users_with_active_session(), 
    lists:map(fun(U) -> update_web_presence(U) end, Users).
@@ -271,6 +278,7 @@ user_with_active_session(Jid, Since) ->
   	   -> {Jid, online};
   	 _ -> {Jid, not_found}
   end.
+
 all_users_with_active_session(Since) ->
    all_users_with_active_session(session, Since).
 
@@ -297,11 +305,15 @@ dirty_get_us_list() ->
 update_web_presence(User) ->
   [MemberId, BrandId] = get_login_data(User),
   Token = generate_token(),
-  mnesia:dirty_write({user_webpresence, MemberId, BrandId, online, Token}),
+  mnesia:dirty_write({user_webpresence, MemberId, online, Token}),
   ok.
 
 get_login_data(User)->
    [<<"">>,<<"">>].
+
+
+get_server_name(State) ->
+  State#state.environment.
 
 generate_token() ->
    R = app_util:os_now(),

@@ -3,7 +3,7 @@
 
 -record(user_webpresence, {
 	memberId :: bitstring(),
-	brandId :: bitstring(),
+%	brandId :: bitstring(),
 	presence :: bitstring(),
 	token :: pos_integer()
 }).

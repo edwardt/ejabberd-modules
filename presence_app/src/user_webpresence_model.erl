@@ -4,8 +4,8 @@
 
 -compile({parse_transform, exprecs}).
 -export([new/1, 
-	 	 rec/1,
-	  	 ensure_binary/1]).
+	 rec/1,
+	 ensure_binary/1]).
 
 -export_records([user_webpresence]).
 
@@ -18,6 +18,6 @@ rec(_) -> undefined.
 
 -spec ensure_binary(atom() | any()) -> binary().
 ensure_binary(#user_webpresence{} = Value) ->
-	Json = json_rec:to_json(Value, user_webpresence_model),
+    Json = json_rec:to_json(Value, user_webpresence_model),
     lists:flatten(mochijson2:encode(Json));
 ensure_binary(Val) -> app_util:ensure_binary(Val).

@@ -13,6 +13,7 @@
 %% @spec start(_Type, _StartArgs) -> ServerRet
 %% @doc application start callback for user_presence_api.
 start(_Type, _StartArgs) ->
+    error_logger:info_msg("Starting user presence webmachine app",[]),
     user_presence_api_sup:start_link().
 
 %% @spec stop(_State) -> ServerRet
