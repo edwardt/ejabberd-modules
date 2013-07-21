@@ -1,0 +1,11 @@
+{application,presence_rest_api,
+             [{description,"presence_rest_api"},
+              {vsn,"1"},
+              {modules,[app_config_util,app_util,presence_rest_api,
+                        presence_rest_api_app,presence_rest_api_sup,
+                        presence_rest_online_user,
+                        presence_rest_online_user_count]},
+              {registered,[]},
+              {applications,[kernel,stdlib,inets,crypto,mochiweb,webmachine]},
+              {mod,{presence_rest_api_app,[]}},
+              {env,[]}]}.

@@ -1,0 +1,10 @@
+*.log
+*.dump
+log
+*.*~
+.*~
+.eunit
+deps
+*.o
+*.beam
+*.plt

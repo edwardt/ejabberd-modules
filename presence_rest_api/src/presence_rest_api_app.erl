@@ -1,11 +1,13 @@
 %% @author author <author@example.com>
 %% @copyright YYYY author.
 
-%% @doc user_presence_api startup code
+%% @doc Callbacks for the presence_rest_api application.
 
--module(user_presence_api).
+-module(presence_rest_api_app).
 -author('author <author@example.com>').
--export([start/0, start_link/0, stop/0]).
+
+-behaviour(application).
+-export([start/2,stop/1]).
 
 %% @spec start_link() -> {ok,Pid::pid()}
 %% @doc Starts the app for inclusion in a supervisor tree
@@ -13,28 +15,34 @@ start_link() ->
     app_util:start_app(inets),
     app_util:start_app(crypto),
     app_util:start_app(mochiweb),
+    app_util:start_app(mnesia),
     application:set_env(webmachine, webmachine_logger_module, 
                         webmachine_logger),
     app_util:start_app(webmachine),
-    user_presence_api_sup:start_link().
+    presence_rest_api_sup:start_link().
 
 %% @spec start() -> ok
-%% @doc Start the user_presence_api server.
-start() ->
+%% @doc Start the presence_rest_api server.
+start(_Type, _StartArgs) ->
     app_util:start_app(inets),
     app_util:start_app(crypto),
     app_util:start_app(mochiweb),
+    app_util:start_app(mnesia),
     application:set_env(webmachine, webmachine_logger_module, 
                         webmachine_logger),
     app_util:start_app(webmachine),
-    application:start(user_presence_api).
+    application:start(presence_rest_api).
 
 %% @spec stop() -> ok
-%% @doc Stop the user_presence_api server.
-stop() ->
-    Res = app_util:stop_app(user_presence_api),
-    app_util:stop_app(webmachine),
-    app_util:stop_app(mochiweb),
-    app_util:stop_app(crypto),
-    app_util:stop_app(inets),
+%% @doc Stop the presence_rest_api server.
+stop(_State) ->
+    Res = application:stop(presence_rest_api),
+    application:stop(webmachine),
+    application:stop(mnesia),
+    application:stop(mochiweb),
+    application:stop(crypto),
+    application:stop(inets),
     Res.
+
+
+

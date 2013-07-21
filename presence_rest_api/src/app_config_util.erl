@@ -8,11 +8,12 @@
 		load_config/2]).
 
 -define(CONFPATH,"conf").
+-define(DEFAULT_CONF,"spark_app.config").
 
 -spec load_config()-> list().
 load_config()->
   {ok, ConfDir}= cwd(),
-  load_config(ConfDir, "spark_consumer.config").
+  load_config(ConfDir, ?DEFAULT_CONF).
 
 -spec load_config(string())-> list().
 load_config(File) ->

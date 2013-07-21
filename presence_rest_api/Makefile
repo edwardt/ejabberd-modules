@@ -1,5 +1,5 @@
 ERL ?= erl
-APP := user_presence_api
+APP := presence_rest_api
 
 .PHONY: deps
 
