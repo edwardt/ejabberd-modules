@@ -28,8 +28,9 @@ init()->init([]).
 init([]) ->
     app_helper:ensure_app_started(spark_app_config),
     app_helper:ensure_app_started(lager),
-    Children = [?CHILD(spark_amqp_client, worker),
-		?CHILD(mod_spark_log_chat_srv, worker)
+    Children = [
+		?CHILD(mod_spark_log_chat_srv, worker),
+		?CHILD(spark_amqp_session, worker)
 		],
     {ok, {?DEFAULT_RESTART, Children}};
 

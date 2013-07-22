@@ -266,6 +266,8 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
    [From, _] = split_composite_id(User),
 %   FromBrandId = lookup_brandid(User),
    FromBrandId = lookup_brandid_from_user(User),
+
+
 %get_memberId(FromJid, IdMap),
    UserB = get_user_from_jid(ToJid),
    [To, _] = split_composite_id(UserB),

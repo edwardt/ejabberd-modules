@@ -64,6 +64,7 @@ test()->
   {ok, stopped} = tear_down().
 
 publish(call, Mod, Message) ->
+  error_logger:info_msg("Going to publish message to rabbitMQ",[]),
   gen_server:call(?SERVER, {publish, call, Mod, Message});
 publish(cast, Mod, Messages) when is_list(Messages) ->
   gen_server:call(?SERVER, {publish, cast, Mod, Messages}).
@@ -87,6 +88,7 @@ init([{Path, File}]) ->
   {ok, ExchangeConfList} = app_config_util:get_value(amqp_exchange, ConfList, []),
   {ok, QueueConfList} = app_config_util:get_value(amqp_queue, ConfList, []),
   {ok, Name} = app_config_util:get_value(amqp_name,ConfList, <<"spark_im_chat">>),
+  error_logger:info("spark_amqp_session is loading config",[ConfList]),
   setup(Name, AmqpConfList, ExchangeConfList, QueueConfList).
 
 
@@ -99,6 +101,7 @@ setup(Name, AmqpConfList,ExchangeConfList,QueueConfList)->
   {'exchange.declare_ok'}  = amqp_channel:call(Channel, ExchangeDeclare),
   {'queue.declare_ok', _, _, _} = amqp_channel:call(Channel, QueueDeclare),
   {'queue.bind_ok'}  = amqp_channel:call(Channel, QueueBind),
+  error_logger:info_msg("spark_amqp_session is configured",[]),
   {ok, #state{ 
     name = Name, 
     amqp_exchange = ExchangeDeclare,
