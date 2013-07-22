@@ -1,10 +1,9 @@
 -module(app_util).
 
--export([start_app/1,
-		 stop_app/1]).
+-export([start_app/1, stop_app/1]).
 -export([start_apps/1]).
 
--export([ensure_binary/1]).
+-export([ensure_binary/1, ensure_loaded/1]).
 
 -export([is_process_alive/1]).
 
@@ -32,7 +31,8 @@ start_app(_)-> {error, badarg}.
 start_apps([])-> ok;
 start_apps(Apps) when is_list(Apps) ->
     lists:map(fun(App) -> 
-   		ok = start_app(App)
+   		ok = start_app(App),
+		error_logger:info_msg("Started application ~p",[App])
    	end, Apps);
 start_apps(_) -> {error, badarg}.
 
@@ -68,6 +68,16 @@ timespan(A,B)->
 
 -spec config_val(atom(), list(), any()) -> any().
 config_val(Key, List, Default) -> {ok, proplists:get_value(Key, List, Default)}.
+
+-spec ensure_loaded(atom()) -> {ok, loaded} | {error, any()}.
+ensure_loaded(Mod) when is_atom(Mod)-> 
+  case code:ensure_loaded(Mod) of
+      {module, Mod} -> {ok, loaded};
+      E -> {error, E}
+  end;
+ensure_loaded(_) -> {error, badarg}.
+
+
 
 %% ===================================================================
 %% EUnit tests
