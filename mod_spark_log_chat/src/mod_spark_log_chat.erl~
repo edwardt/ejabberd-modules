@@ -59,21 +59,22 @@ start_link(Host, Opts)->
 
 ensure_dependency_started()->
   ?INFO_MSG("Starting depedenecies", []),
-	Apps = [syntax_tools, 
+  Apps = [syntax_tools, 
 		compiler, 
 		crypto,
 		public_key,
 		gen_server2,
 		ssl, 
-		ets,
+		%ets,
 		goldrush, 
 		rabbit_common,
 		amqp_client,
 		inets, 
 		restc],
+  ?INFO_MSG("Going to start apps ~p", [lists:flatten(Apps)]),
   app_util:start_apps(Apps),
-  ok = lager:start(),
-  ?INFO_MSG("Starting depedenecies", []).
+  %ok = lager:start(),
+  ?INFO_MSG("Started depedenecies ~p", [lists:flatten(Apps)]).
 
 
 -spec start(string(), list()) -> ok | {error, term()}.
@@ -116,16 +117,27 @@ populate_table(IdMap)->
 
 lookup_brandid(Jid)->
    UserName = jlib:jid_to_string(Jid),
-   CommunityId = get_community_id(UserName),
-   [{_,_,B}] = ets:match_object(id_map,{'$1',CommunityId,'$2'}),
-   ?INFO_MSG("Found BrandId ~p", [B]),
-   B. 
+   lookup_brandid_from_user(UserName). 
 
-get_community_id(UserName)-> 
+lookup_brandid_from_user(UserName)->
+   [MemberId, CommunityId] = split_composite_id(UserName),
+   C = case ets:match_object(id_map,{'$1',CommunityId,'$2'}) of
+    	[{_,_,B}] -> B;
+    	[] -> [];
+	R -> []
+   end,
+   ?INFO_MSG("Found BrandId ~p", [C]),
+   C. 
+
+
+split_composite_id(UserName)-> 
    case re:split(UserName,"-")	of
-	[MemberId, CommunityId]->  CommunityId;
-	[] -> UserName	
+	[MemberId, CommunityId]->  [MemberId, CommunityId];
+	[] -> [UserName, ""];	
+	R -> [R, ""]
    end.
+
+
 
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
 init([Host, Opts])->
@@ -163,7 +175,7 @@ log_packet_send(From, To, Packet) ->
 log_packet_receive(_JID, From, To, _Packet) 
 	when From#jid.lserver =:= To#jid.lserver->
     ok; % self talk
-log_packet_receive(_JID, From, To, Packet) -> 
+log_packet_receive(_Jid, From, To, Packet) -> 
     log_packet(From, To, Packet, To#jid.lserver).
 
 -spec log_packet(jid(), jid(), xmlelement(), string())-> ok | {error, term()}.
@@ -244,17 +256,29 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
         	?INFO_MSG("Will publish Message Payload ~p ", [MessageItem]),
         	post_to_rabbitmq(MessageItem)
     end.
-
+ 
+get_user_from_jid(From)->
+    From#jid.user.
 
 -spec parse_message(jid(), jid(), atom(), string(), string(), string(), [tuple()]) -> chat_message().
 parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
-	[From, FromBrandId] = get_memberId(FromJid, IdMap),
-	[To, ToBrandId]= get_memberId(ToJid, IdMap),
+   User = get_user_from_jid(FromJid),
+   [From, _] = split_composite_id(User),
+%   FromBrandId = lookup_brandid(User),
+   FromBrandId = lookup_brandid_from_user(User),
+
+
+%get_memberId(FromJid, IdMap),
+   UserB = get_user_from_jid(ToJid),
+   [To, _] = split_composite_id(UserB),
+%   ToBrandId= lookup_brandid(UserB),
+   ToBrandId = lookup_brandid_from_user(UserB),
+%get_memberId(ToJid, IdMap),
     Format = ?DEFAULT_FORMAT,
     TimeStamp = get_timestamp(),
     #chat_message{
     	from = From,
-	 	  from_brandId = FromBrandId,
+	from_brandId = FromBrandId,
     	to = To,
     	to_brandId = ToBrandId,
     	type = Type,

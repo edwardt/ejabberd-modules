@@ -32,7 +32,8 @@ start_app(_)-> {error, badarg}.
 start_apps([])-> ok;
 start_apps(Apps) when is_list(Apps) ->
     lists:map(fun(App) -> 
-   		ok = start_app(App)
+   		ok = start_app(App),
+		error_logger:info_msg("Started application ~p",[App])
    	end, Apps);
 start_apps(_) -> {error, badarg}.
 
