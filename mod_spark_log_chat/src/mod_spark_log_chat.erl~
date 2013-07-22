@@ -80,6 +80,7 @@ ensure_dependency_started()->
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
     ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
+     start_amqp(),
    	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
    	ChildSpec = {Proc,
        {?MODULE, start_link, [Host, Opts]},
@@ -87,7 +88,19 @@ start(Host, Opts) ->
        1000,
        worker,
        [?MODULE]},
+   
    	supervisor:start_child(ejabberd_sup, ChildSpec).
+
+start_amqp(Host, Opts)->
+      Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+   	ChildSpec = {Proc,
+       {spark_amqp_session, start_link, [Host, Opts]},
+       temporary,
+       1000,
+       worker,
+       [?MODULE]},
+
+       supervisor:start_child(ejabberd_sup, ChildSpec).	
 
 -spec start_vhs(string(), list()) -> ok | [{atom(), any()}].
 start_vhs(_, []) ->
