@@ -82,7 +82,8 @@ stop()->
 init()->
   init([{?ConfPath, ?ConfFile}]).
 
-init([{Path, File}]) ->
+init(Args) ->
+  [{Path, File}] = Args,
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, AmqpConfList} = app_config_util:get_value(amqp_connection, ConfList, []),
   {ok, ExchangeConfList} = app_config_util:get_value(amqp_exchange, ConfList, []),

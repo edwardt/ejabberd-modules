@@ -13,7 +13,7 @@
 
 -export([start/2,
          init/1,
-	 	 stop/1, ping/0,
+	 	 stop/1, test/0,
 	 	 log_packet_send/3,
 	 	 log_packet_receive/4]).
 
@@ -177,7 +177,7 @@ stop(Host) ->
     ok.
 
 -spec ping()-> {ok, state()}.
-ping()->
+test()->
 	gen_server:call(?PROCNAME, ping).
 
 -spec log_packet_send(jid(), jid(),xmlelement()) -> ok | {error, term()}.

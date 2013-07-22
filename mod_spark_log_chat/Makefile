@@ -15,7 +15,7 @@ all:
 	$(ERL) -pa $(EJABBERD_DEV)/ebin $(SPARK_APP_CONFIG)/ebin $(AMQP_DEV)/ebin  $(RABBITC_DEV)/ebin $(EDOWN)/ebin $(PARSET)/ebin $(JSON_REC)/ebin -make
 
 clean:
-	rm -f ebin/*.beam
+	rm -f ebin/*.*
 
 dist-clean: clean
 	find . \( -name \*~ -o -name *.swp \) -exec rm -f {} \;

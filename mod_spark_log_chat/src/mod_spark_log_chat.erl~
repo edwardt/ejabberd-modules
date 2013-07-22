@@ -80,7 +80,7 @@ ensure_dependency_started()->
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
     ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
-     start_amqp(),
+     start_amqp(Host, Opts),
    	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
    	ChildSpec = {Proc,
        {?MODULE, start_link, [Host, Opts]},
@@ -177,7 +177,7 @@ stop(Host) ->
     ok.
 
 -spec ping()-> {ok, state()}.
-ping()->
+test()->
 	gen_server:call(?PROCNAME, ping).
 
 -spec log_packet_send(jid(), jid(),xmlelement()) -> ok | {error, term()}.
