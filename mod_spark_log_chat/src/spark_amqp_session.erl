@@ -85,23 +85,16 @@ init()->
 init(Args) ->
   [{Path, File}] = Args,
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
-  {ok, AmqpConfList} = app_config_util:get_value(amqp_connection, ConfList, []),
-  {ok, ExchangeConfList} = app_config_util:get_value(amqp_exchange, ConfList, []),
-  {ok, QueueConfList} = app_config_util:get_value(amqp_queue, ConfList, []),
   {ok, Name} = app_config_util:get_value(amqp_name,ConfList, <<"spark_im_chat">>),
   error_logger:info("spark_amqp_session is loading config",[ConfList]),
-  setup(Name, AmqpConfList, ExchangeConfList, QueueConfList).
+  setup_amqp(Name, ConfList).
 
 
-setup(Name, AmqpConfList,ExchangeConfList,QueueConfList)->
-  AmqpParams = spark_rabbit_config:get_connection_setting(AmqpConfList), 
-  ExchangeDeclare = spark_rabbit_config:get_exchange_setting(ExchangeConfList),
-  QueueDeclare = spark_rabbit_config:get_queue_setting(QueueConfList),
-  QueueBind = spark_rabbit_config:get_queue_bind(QueueConfList),
-  {ok, Channel} = amqp_channel(AmqpParams),
-  {'exchange.declare_ok'}  = amqp_channel:call(Channel, ExchangeDeclare),
-  {'queue.declare_ok', _, _, _} = amqp_channel:call(Channel, QueueDeclare),
-  {'queue.bind_ok'}  = amqp_channel:call(Channel, QueueBind),
+setup_amqp(Name, ConfList)->
+  {ok, Channel, AmqpParams} = channel_setup(ConfList),
+  ExchangeDeclare = exchange_setup(Channel, ConfList),
+  QueueDeclare = queue_setup(Channel, ConfList),
+  QueueBind = queue_bind(Channel, ConfList), 
   error_logger:info_msg("spark_amqp_session is configured",[]),
   {ok, #state{ 
     name = Name, 
@@ -110,6 +103,31 @@ setup(Name, AmqpConfList,ExchangeConfList,QueueConfList)->
     amqp_queue_bind = QueueBind,
     amqp_connection = AmqpParams
   }}.
+
+
+channel_setup(ConfList)->
+  {ok, AmqpConfList} = app_config_util:get_value(amqp_connection, ConfList, []),
+  AmqpParams = spark_rabbit_config:get_connection_setting(AmqpConfList), 
+  {ok, Channel} = amqp_channel(AmqpParams),
+  {ok, Channel, AmqpParams}.
+
+exchange_setup(Channel, ConfList)->
+  {ok, ExchangeConfList} = app_config_util:get_value(amqp_exchange, ConfList, []),
+  ExchangeDeclare = spark_rabbit_config:get_exchange_setting(ExchangeConfList),
+  {'exchange.declare_ok'}  = amqp_channel:call(Channel, ExchangeDeclare), 
+  ExchangeDeclare.
+  
+queue_setup(Channel, ConfList)->
+  {ok, QueueConfList} = app_config_util:get_value(amqp_queue, ConfList, []),
+  QueueDeclare = spark_rabbit_config:get_queue_setting(QueueConfList),
+  {'queue.declare_ok', _, _, _} = amqp_channel:call(Channel, QueueDeclare),
+  QueueDeclare.
+
+queue_bind(Channel, ConfList) ->
+  {ok, QueueConfList} = app_config_util:get_value(amqp_queue, ConfList, []),
+  QueueBind = spark_rabbit_config:get_queue_bind(QueueConfList),
+  {'queue.bind_ok'}  = amqp_channel:call(Channel, QueueBind),
+  QueueBind.
   
 handle_call({setup}, _From, State)->
   AmqpParams = State#state.amqp_connection,
@@ -219,6 +237,7 @@ sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State
               Mod:ensure_binary(AMessage),
               amqp_channel:call(Channel, Method, AMessage)
           end ,Messages),
+  error_logger:info_msg("Status of SYNC publishing messages: ~p",[Ret]),
   State#state{message_module = R}.
 
 async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
@@ -232,6 +251,7 @@ async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = Stat
               Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),      
               amqp_channel:cast(Channel, Method, AMessage)
           end, Messages),
+  error_logger:info_msg("Status of ASYNC casting messages: ~p",[Ret]),
   State#state{message_module = R}.
 
 amqp_channel(AmqpParams) ->
