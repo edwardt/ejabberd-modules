@@ -316,7 +316,7 @@ get_im_transform_format(_)->
 -spec post_to_rabbitmq(chat_message())-> ok | {error, term()}.
 post_to_rabbitmq(#chat_message{} = MessageItem) ->
 	Payload = ensure_binary(MessageItem),
-	spark_amqp_session:publish(call, chat_message_model, Payload).
+	mod_spark_rabbitmq:publish(call, chat_message_model, Payload).
 
 -spec get_subject(atom, xmlelement())-> string().
 get_subject(Format, Packet) ->
