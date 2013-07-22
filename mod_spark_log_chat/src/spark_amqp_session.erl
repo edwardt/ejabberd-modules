@@ -63,6 +63,7 @@ test()->
   publish(cast, ?MODULE, test_msg()),
   {ok, stopped} = tear_down().
 
+-spec publish(atom(), atom(), list()) -> ok | {error, tuple()}.
 publish(call, Mod, Message) ->
   error_logger:info_msg("Going to publish message to rabbitMQ",[]),
   gen_server:call(?SERVER, {publish, call, Mod, Message});
@@ -297,10 +298,7 @@ message_id()->
 -spec ensure_load(atom(), trye|false)-> {ok, loaded} | {error, term()}.
 ensure_load(_, true) -> {ok, loaded};
 ensure_load(Mod, _) when is_atom(Mod)-> 
-  case code:ensure_loaded(Mod) of
-      {module, Mod} -> {ok, true};
-      E -> {error, E}
-  end.
+  app_util:ensure_loaded(Mod). 
 
 test_msg()->
   Msg1 = message_id(),

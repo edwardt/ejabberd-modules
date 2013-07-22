@@ -48,17 +48,18 @@
 -type chat_message() :: #chat_message{}.
 -type jid() :: #jid{}.
 -type xmlelement() :: string(). % TODO just say string for now.
+-type datatimefmt() :: calendar:datetime1970().
 
 start_link([Host, Opts]) -> start_link(Host, Opts).
 -spec start_link(string(), list()) ->ok | {error, term()}.
 start_link(Host, Opts)->
   ?INFO_MSG("~p gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
   Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-  ensure_dependency_started(),
+  ensure_dependency_started(Proc),
   gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]).
 
-ensure_dependency_started()->
-  ?INFO_MSG("Starting depedenecies", []),
+ensure_dependency_started(Proc)->
+  ?INFO_MSG("[~p] Starting depedenecies", [Proc]),
   Apps = [syntax_tools, 
 		compiler, 
 		crypto,
@@ -71,25 +72,25 @@ ensure_dependency_started()->
 		amqp_client,
 		inets, 
 		restc],
-  ?INFO_MSG("Going to start apps ~p", [lists:flatten(Apps)]),
+  ?INFO_MSG("[~p] Going to start apps ~p", [Proc, lists:flatten(Apps)]),
   app_util:start_apps(Apps),
   %ok = lager:start(),
-  ?INFO_MSG("Started depedenecies ~p", [lists:flatten(Apps)]).
+  ?INFO_MSG("[~p] Started depedenecies ~p", [Proc, lists:flatten(Apps)]).
 
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
     ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
-     start_amqp(Host, Opts),
-   	Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-   	ChildSpec = {Proc,
+  %   start_amqp(Host, Opts),
+    Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+    ChildSpec = {Proc,
        {?MODULE, start_link, [Host, Opts]},
        temporary,
        1000,
        worker,
        [?MODULE]},
    
-   	supervisor:start_child(ejabberd_sup, ChildSpec).
+    supervisor:start_child(ejabberd_sup, ChildSpec).
 
 start_amqp(Host, Opts)->
       Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
@@ -176,9 +177,9 @@ stop(Host) ->
     supervisor:delete_child(ejabberd_sup, Proc),
     ok.
 
--spec ping()-> {ok, state()}.
+-spec test()-> {ok, state()}.
 test()->
-	gen_server:call(?PROCNAME, ping).
+    gen_server:call(?PROCNAME, ping).
 
 -spec log_packet_send(jid(), jid(),xmlelement()) -> ok | {error, term()}.
 log_packet_send(From, To, Packet) ->
@@ -224,9 +225,10 @@ handle_call({write_packet, Type, FromJid, ToJid, Packet, Host}, _From, State) ->
 
 handle_call(ping, _From, State) ->
   {reply, {ok, State}, State};
-handle_call(stop, _From, State) ->
 
+handle_call(stop, _From, State) ->
   {stop, normal, stopped, State};
+
 handle_call(_Request, _From, State) ->
     Reply = {error, function_clause},
     {reply, Reply, State}.
@@ -387,6 +389,6 @@ ensure_binary(Value) -> app_util:ensure_binary(Value).
 -spec os_now() -> calendar:datetime1970().
 os_now()-> app_util:os_now().
 
--spec timespan( calendar:datetime1970(), calendar:datetime1970())-> calendar:datetime1970().
+-spec timespan( datatimefmt(), datatimefmt())-> datatimefmt().
 timespan(A,B)-> app_util:timespan(A,B).
 	
