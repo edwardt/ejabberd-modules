@@ -55,10 +55,10 @@ ensure_dependency_started(Proc) ->
 		amqp_client,
 		inets 
 		],
-  ?INFO_MSG("[~p] Going to start apps ~p", [Proc, lists:flatten(Apps)]),
+  ?INFO_MSG("[~p] Going to start apps ~p", [?PROCNAME, lists:flatten(Apps)]),
   app_util:start_apps(Apps),
   %ok = lager:start(),
-  ?INFO_MSG("[~p] Started depedenecies ~p", [Proc, lists:flatten(Apps)]).
+  ?INFO_MSG("[~p] Started depedenecies ~p", [?PROCNAME, lists:flatten(Apps)]).
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
