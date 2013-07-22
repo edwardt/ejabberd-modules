@@ -74,8 +74,7 @@ start_link()->
   start_link([{?ConfPath, ?ConfFile}]).
 
 start_link(Args) ->
-  [{Path, File}] = Args,
-  gen_server:start_link({local, spark_amqp_session}, spark_amqp_session, [{Path, File}], []).
+  gen_server:start_link({local, spark_amqp_session}, spark_amqp_session, Args, []).
 
 stop()->
   gen_server:call(?SERVER, {stop, normal}).
@@ -84,7 +83,9 @@ init()->
   init([{?ConfPath, ?ConfFile}]).
 
 init(Args) ->
-  [{Path, File}] = Args,
+  {Path, File} = Args,
+  error_logger:info_msg("~p Initialization with args ~p",[?MODULE, Args]),
+
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
   {ok, Name} = app_config_util:get_value(amqp_name,ConfList, <<"spark_im_chat">>),
   error_logger:info("spark_amqp_session is loading config",[ConfList]),

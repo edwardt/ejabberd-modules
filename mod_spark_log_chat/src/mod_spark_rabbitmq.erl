@@ -37,7 +37,9 @@ start_link(Host, Opts)->
   ?INFO_MSG("~p gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
   Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
   ensure_dependency_started(Proc),
-  gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]).
+  Pid = gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]),
+  ?INFO_MSG("~p started with Pid ~p~n", [?PROCNAME, Pid]), 
+  Pid.
 
 -spec ensure_dependency_started(string())-> ok.
 ensure_dependency_started(Proc) ->
@@ -62,9 +64,8 @@ ensure_dependency_started(Proc) ->
 start(Host, Opts) ->
     ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
     Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-    Path = gen_mod:get_opt(conf_path, Opts, ?ConfPath),
-    File = gen_mod:get_opt(conf_file, Opts, ?ConfFile),
-    Opts = {Path, File},
+
+    ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
     ChildSpec = {Proc,
        {?MODULE, start_link, [Host, Opts]},
        temporary,
@@ -83,7 +84,14 @@ stop(Host) ->
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
 init([Host, Opts])->
     ?INFO_MSG("Starting Module ~p PROCNAME ~p with host ~p config ~p~n", [?MODULE, ?PROCNAME, Host, Opts]),
-    spark_amqp_session:init(Opts), 
+    Path = gen_mod:get_opt(conf_path, Opts, ?ConfPath),
+    File = gen_mod:get_opt(conf_file, Opts, ?ConfFile),
+    {ok, Cwd} = file:get_cwd(),
+    FullPath = lists:concat([Cwd,"/", Path]),
+    Arg = {FullPath, File},
+    ?INFO_MSG("Starting spark_amqp_session with args ~p",[Arg]),
+    Ret = spark_amqp_session:init(Arg), 
+    ?INFO_MSG("Starting spark_amqp_session started with state ~p",[Ret]),
     {ok, #state{}}.
 
 -spec establish() -> {ok, pid()} | {error, badarg}.
