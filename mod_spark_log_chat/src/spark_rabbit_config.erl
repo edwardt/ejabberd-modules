@@ -84,11 +84,17 @@ get_routing_key(ConfList)->
   
 -spec get_queue_bind(binary(), binary(), binary())->#'queue.bind'{}.
 get_queue_bind(Queue, Exchange, RoutingKey)->
+   print_queue_bind(Queue,Exchange, RoutingKey),
    #'queue.bind'{
 		queue = Queue,
 		exchange = Exchange,
 		routing_key = RoutingKey
 		}.
+
+print_queue_bind(Queue,Exchange, RoutingKey) ->
+   error_logger:info_msg("Queue ~p",[Queue]),
+   error_logger:info_msg("Exchange ~p",[Exchange]),
+   error_logger:info_msg("RoutingKey ~p",[RoutingKey]). 
 
 -spec get_consumer(list())-> #'basic.consume'{}.
 get_consumer(FeedOpt) ->
