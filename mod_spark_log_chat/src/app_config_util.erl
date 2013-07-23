@@ -23,7 +23,7 @@ load_config(File) ->
 load_config(ConfDir,File) when is_list(ConfDir), 
 			  is_list(File)->
   FileFullPath = lists:concat([ConfDir,"/", File]),
-  error_logger:info_msg("Loading config: ~p",[FileFullPath]),
+  error_logger:info_msg("[~p]: Loading config: ~p",[?MODULE, FileFullPath]),
   {ok, [ConfList]}= file:consult(FileFullPath),
   {ok, [ConfList]}.
 
@@ -33,4 +33,4 @@ cwd()->
   {ok, lists:concat([Cwd,"/",?CONFPATH])}.
 
 -spec config_val(atom(), list(), any()) -> any().
-config_val(Key, Params, Default) -> proplists:get_value(Key, Params, Default).
+config_val(Key, Params, Default) -> {ok, proplists:get_value(Key, Params, Default)}.
