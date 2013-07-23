@@ -84,9 +84,10 @@ init()->
 
 init(Args) ->
   {Path, File} = Args,
-  error_logger:info_msg("~p Initialization with args ~p",[?MODULE, Args]),
-
+  error_logger:info_msg("~p Initialization with Path ~p File ~p",[?MODULE, Path, File]),
+   
   {ok, [ConfList]} = app_config_util:load_config(Path,File),
+
   {ok, Name} = app_config_util:config_val(amqp_name,ConfList, <<"spark_im_chat">>),
   setup_amqp(Name, ConfList).
 
@@ -95,7 +96,10 @@ setup_amqp(Name, ConfList)->
   {ok, Channel, AmqpParams} = channel_setup(ConfList),
   ExchangeDeclare = exchange_setup(Channel, ConfList),
   QueueDeclare = queue_setup(Channel, ConfList),
-  QueueBind = queue_bind(Channel, ConfList), 
+  Queue = QueueDeclare#'queue.declare'.queue,
+  Exchange =  ExchangeDeclare#'exchange.declare'.exchange,
+  RoutingKey = spark_rabbit_config:get_routing_key(ConfList),
+  QueueBind = queue_bind(Channel, Queue, Exchange, RoutingKey),
   error_logger:info_msg("spark_amqp_session is configured",[]),
   {ok, #state{ 
     name = Name, 
@@ -107,26 +111,31 @@ setup_amqp(Name, ConfList)->
 
 
 channel_setup(ConfList)->
-  {ok, AmqpConfList} = app_config_util:config_val(amqp_connection, ConfList, []),
-  AmqpParams = spark_rabbit_config:get_connection_setting(AmqpConfList), 
-  {ok, Channel} = amqp_channel(AmqpParams),
+%  {ok, AmqpConfList} = app_config_util:config_val(amqp_connection, ConfList, []),
+  AmqpParams = spark_rabbit_config:get_connection_setting(ConfList), 
+
+%  {ok, Channel} = amqp_channel(AmqpParams),  
+  
+  {ok, Connection} = amqp_connection:start(AmqpParams),
+  {ok, Channel} = amqp_connection:open_channel(Connection),
+
   {ok, Channel, AmqpParams}.
 
 exchange_setup(Channel, ConfList)->
-  {ok, ExchangeConfList} = app_config_util:config_val(amqp_exchange, ConfList, []),
-  ExchangeDeclare = spark_rabbit_config:get_exchange_setting(ExchangeConfList),
+%  {ok, ExchangeConfList} = app_config_util:config_val(amqp_exchange, ConfList, []),
+  ExchangeDeclare = spark_rabbit_config:get_exchange_setting(ConfList),
   {'exchange.declare_ok'}  = amqp_channel:call(Channel, ExchangeDeclare), 
   ExchangeDeclare.
   
 queue_setup(Channel, ConfList)->
-  {ok, QueueConfList} = app_config_util:config_val(amqp_queue, ConfList, []),
-  QueueDeclare = spark_rabbit_config:get_queue_setting(QueueConfList),
+%  {ok, QueueConfList} = app_config_util:config_val(amqp_queue, ConfList, []),
+  QueueDeclare = spark_rabbit_config:get_queue_setting(ConfList),
   {'queue.declare_ok', _, _, _} = amqp_channel:call(Channel, QueueDeclare),
   QueueDeclare.
 
-queue_bind(Channel, ConfList) ->
-  {ok, QueueConfList} = app_config_util:config_val(amqp_queue, ConfList, []),
-  QueueBind = spark_rabbit_config:get_queue_bind(QueueConfList),
+queue_bind(Channel, Queue, Exchange, RoutingKey) ->
+%  {ok, QueueConfList} = app_config_util:config_val(amqp_queue, ConfList, []),
+  QueueBind = spark_rabbit_config:get_queue_bind(Queue, Exchange, RoutingKey),
   {'queue.bind_ok'}  = amqp_channel:call(Channel, QueueBind),
   QueueBind.
   

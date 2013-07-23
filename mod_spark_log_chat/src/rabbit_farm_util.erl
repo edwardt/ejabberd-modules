@@ -11,6 +11,7 @@
 		load_config/2]).
 -include_lib("amqp_client/include/amqp_client.hrl").
 -define(CONFPATH,"conf").
+-define(CONFFILE, "spark_amqp.config").
 
 -spec get_fun(cast, atom())-> fun().
 get_fun(cast, Method)->
@@ -37,7 +38,7 @@ ensure_binary(Value) -> app_util:ensure_binary(Value).
 -spec load_config()-> list().
 load_config()->
   {ok, ConfDir}= cwd(),
-  load_config(ConfDir, "spark_consumer.config").
+  load_config(ConfDir, ?CONFFILE).
 
 -spec load_config(string())-> list().
 load_config(File) ->
