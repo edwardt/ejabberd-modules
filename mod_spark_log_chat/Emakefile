@@ -10,6 +10,19 @@
    ]
 }.
 
+{'src/password*',	
+	[debug_info,
+	 warn_unused_vars,
+	 warn_unused_imports, 
+	 verbose,
+	 {outdir, "ebin"},
+	 {i,[
+             "include" 
+	    ]}
+   ]
+}.
+
+
 {'src/spark_*',	
 	[debug_info,
 	 warn_unused_vars,
