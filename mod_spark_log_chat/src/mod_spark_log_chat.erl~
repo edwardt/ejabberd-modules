@@ -36,6 +36,7 @@
 -define(DEFAULT_FORMAT, text).
 -define(ConfPath,"conf").
 -define(ConfFile, "spark_amqp.config").
+-define(TableName, id_map).
 
 -record(state, {
 	idMap =[],
@@ -116,7 +117,7 @@ start_vhs(Host, [{_VHost, _Opts}| Tail]) ->
 start_vh(Host, Opts) ->
     Format = gen_mod:get_opt(format, Opts, ?DEFAULT_FORMAT),
     IdMap = gen_mod:get_opt(idMap, Opts, []),
-    populate_table(IdMap),    
+    populate_table(?TableName, IdMap),    
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
     #state{
@@ -124,18 +125,20 @@ start_vh(Host, Opts) ->
    	    idMap = IdMap
     	}.
 
-populate_table(IdMap)->
+populate_table(Name, IdMap) when is_atom(Name)->
    ?INFO_MSG("Store idMap ~p into ets table", [IdMap]),
-   Tab = ets:new(id_map, [named_table]),
-   lists:map(fun(L)-> true = ets:insert(Tab,L) end,IdMap).
+   Tab = ets:new(Name, [set, named_table]),
+   lists:map(fun(L)-> true = ets:insert(Tab,L) end, IdMap);
+populate_table(_, _)->
+   {error, badarg}.   
 
 lookup_brandid(Jid)->
    UserName = jlib:jid_to_string(Jid),
-   lookup_brandid_from_user(UserName). 
+   lookup_brandid_from_user(id_map, UserName). 
 
-lookup_brandid_from_user(UserName)->
+lookup_brandid_from_user(Name, UserName) when is_atom(Name) ->
    [MemberId, CommunityId] = split_composite_id(UserName),
-   C = case ets:match_object(id_map,{'$1',CommunityId,'$2'}) of
+   C = case ets:match_object(Name,{'$1',CommunityId,'$2'}) of
     	[{_,_,B}] -> B;
     	[] -> [];
 	R -> []
@@ -277,15 +280,16 @@ get_user_from_jid(From)->
 
 -spec parse_message(jid(), jid(), atom(), string(), string(), string(), [tuple()]) -> chat_message().
 parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
+  
    User = get_user_from_jid(FromJid),
    [From, _] = split_composite_id(User),
 %   FromBrandId = lookup_brandid(User),
-   FromBrandId = lookup_brandid_from_user(User),
+   FromBrandId = lookup_brandid_from_user(?TableName, User),
 %get_memberId(FromJid, IdMap),
    UserB = get_user_from_jid(ToJid),
    [To, _] = split_composite_id(UserB),
 %   ToBrandId= lookup_brandid(UserB),
-   ToBrandId = lookup_brandid_from_user(UserB),
+   ToBrandId = lookup_brandid_from_user(?TableName, UserB),
 %get_memberId(ToJid, IdMap),
     Format = ?DEFAULT_FORMAT,
     TimeStamp = get_timestamp(),

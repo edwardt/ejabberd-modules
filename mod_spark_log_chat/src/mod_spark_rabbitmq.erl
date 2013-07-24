@@ -84,15 +84,38 @@ stop(Host) ->
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
 init([Host, Opts])->
     ?INFO_MSG("Starting Module ~p PROCNAME ~p with host ~p config ~p~n", [?MODULE, ?PROCNAME, Host, Opts]),
-    Path = gen_mod:get_opt(conf_path, Opts, ?ConfPath),
+    %Path = gen_mod:get_opt(conf_path, Opts, ?ConfPath),
     File = gen_mod:get_opt(conf_file, Opts, ?ConfFile),
-    {ok, Cwd} = file:get_cwd(),
-    FullPath = lists:concat([Cwd,"/", Path]),
-    Arg = {FullPath, File},
-    ?INFO_MSG("Starting spark_amqp_session with args ~p",[Arg]),
-    Ret = spark_amqp_session:init(Arg), 
+    %{ok, Cwd} = file:get_cwd(),
+    %FullPath = lists:concat([Cwd,"/", Path]),
+    %Arg = {FullPath, File},
+    ?INFO_MSG("Starting spark_amqp_session with args ~p",[File]),
+    Ret = spark_amqp_session:init({file_full_path, File}), 
     ?INFO_MSG("Starting spark_amqp_session started with state ~p",[Ret]),
     {ok, #state{}}.
+
+populate_table(Name, IdMap) when is_atom(Name)->
+   ?INFO_MSG("Store idMap ~p into ets table", [IdMap]),
+   Tab = ets:new(Name, [named_table]),
+   lists:map(fun(L)-> true = ets:insert(Tab,L) end, IdMap);
+populate_table(_, _)->
+   {error, badarg}.   
+
+lookup_brandid(Jid)->
+   UserName = jlib:jid_to_string(Jid),
+   lookup_brandid_from_user(id_map, UserName). 
+
+lookup_brandid_from_user(Name, UserName) when is_atom(Name) ->
+   [MemberId, CommunityId] = split_composite_id(UserName),
+   C = case ets:match_object(Name,{'$1',CommunityId,'$2'}) of
+    	[{_,_,B}] -> B;
+    	[] -> [];
+	R -> []
+   end,
+   ?INFO_MSG("Found BrandId ~p", [C]),
+   C. 
+
+
 
 -spec establish() -> {ok, pid()} | {error, badarg}.
 establish()-> 

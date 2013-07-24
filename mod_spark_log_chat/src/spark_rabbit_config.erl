@@ -14,11 +14,11 @@
 -spec get_connection_setting(list()) ->#'amqp_params_network'{}.
 get_connection_setting(ConfFList) ->
       {ok, ConfList} = app_config_util:config_val(amqp_connection, ConfFList, []),
-	UserName    = proplists:get_value(username, ConfList,<<"spark">>),
-	Password    = proplists:get_value(password,ConfList,<<"spark">>),
+	UserName    = proplists:get_value(username, ConfList, undefined),
+	Password    = proplists:get_value(password,ConfList,undefined),
 	%true = password:is_secure(Password),
-	VirtualHost = proplists:get_value(virtual_host,ConfList,<<"/">>),
-	Host        = proplists:get_value(host, ConfList, "localhost"),
+	VirtualHost = proplists:get_value(virtual_host,ConfList,undefined),
+	Host        = proplists:get_value(host, ConfList, undefined),
 	Port        = proplists:get_value(port,ConfList,5672),
 
 	R = #amqp_params_network{

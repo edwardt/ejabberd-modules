@@ -80,23 +80,55 @@ stop()->
   gen_server:call(?SERVER, {stop, normal}).
 
 init()->
-  init([{?ConfPath, ?ConfFile}]).
+  init({?ConfPath, ?ConfFile}).
 
 init(Args) ->
-  {Path, File} = Args,
-  error_logger:info_msg("~p Initialization with Path ~p File ~p",[?MODULE, Path, File]),
-   
-  {ok, [ConfList]} = app_config_util:load_config(Path,File),
+  error_logger:info_msg("~p Initialization with Path & File ~p",[?MODULE, Args]),
+  create_config_tables(), 
+  {ok, [ConfList]} = read_from_config(Args), 
+  populate_amqp_connection(ConfList),
+  populate_amqp_exchange(ConfList),
+  populate_amqp_queue(ConfList),
+  populate_app_env(ConfList),
 
-  {ok, Name} = app_config_util:config_val(amqp_name,ConfList, <<"spark_im_chat">>),
-  setup_amqp(Name, ConfList).
+%  {ok, Name} = app_config_util:config_val(amqp_name,ConfList, <<"spark_im_chat">>),
+  setup_amqp(ConfList).
 
+read_from_config({file_full_path, File})->
+   {ok, [ConfList]} = app_config_util:load_config_file(File),
+   {ok, [AmqpCon, Exchange, Queue, Other]};
+read_from_config({Path, File}) ->
+   {ok, [ConfList]} = app_config_util:load_config(Path,File),
+   {ok, [ConfList]}.
 
-setup_amqp(Name, ConfList)->
+create_config_tables()->
+   Tables = [amqp_connection, amqp_exchange, amqp_queue, app_env],
+   lists:map(fun(T)-> 
+		T = ets:new(T, [set, named_table]),
+		error_logger:info_msg("Created config table ~p",[T]) 
+	     end,Tables).
+
+populate_amqp_connection(List) ->
+   populate_table(amqp_connection, List).
+
+populate_amqp_exchange(List) ->
+   populate_table(amqp_exchange, List).
+
+populate_amqp_queue(List) ->
+  populate_table(amqp_queue, List).
+
+populate_app_env(List) ->
+  populate_table(app_env, List). 
+
+populate_table(Tag, List) when is_atom(Tag), is_list(List)->
+   lists:map(fun(A)-> ets:insert(Tag, A) end, List).
+
+setup_amqp(ConfList)->
   {ok, Channel, AmqpParams} = channel_setup(ConfList),
   ExchangeDeclare = exchange_setup(Channel, ConfList),
   QueueDeclare = queue_setup(Channel, ConfList),
   Queue = QueueDeclare#'queue.declare'.queue,
+  Name =
   Exchange =  ExchangeDeclare#'exchange.declare'.exchange,
   RoutingKey = spark_rabbit_config:get_routing_key(ConfList),
   QueueBind = queue_bind(Channel, Queue, Exchange, RoutingKey),

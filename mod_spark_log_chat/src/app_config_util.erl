@@ -1,11 +1,13 @@
 -module(app_config_util).
 
 -export([
-		cwd/0,
-		config_val/3,
-		load_config/0,
-		load_config/1,
-		load_config/2]).
+	cwd/0,
+	config_val/3,
+	load_config/0,
+	load_config/1,
+	load_config/2,
+	load_config_file/1
+]).
 
 -define(CONFPATH,"conf").
 
@@ -25,6 +27,14 @@ load_config(ConfDir,File) when is_list(ConfDir),
   FileFullPath = lists:concat([ConfDir,"/", File]),
   error_logger:info_msg("[~p]: Loading config: ~p",[?MODULE, FileFullPath]),
   {ok, [ConfList]}= file:consult(FileFullPath),
+  {ok, [ConfList]}.
+
+load_config_file(FileFullPath) when is_list(FileFullPath)->
+   error_logger:info_msg("[~p]: Loading config: ~p",[?MODULE, FileFullPath]), 
+  {ok, [ConfList]}= file:consult(FileFullPath),
+
+  Conf = lists:flatten(ConfList),
+  error_logger:info_msg("[~p]: Read config: ~p",[?MODULE, Conf]), 
   {ok, [ConfList]}.
 
 -spec cwd()-> {ok, string()}.
