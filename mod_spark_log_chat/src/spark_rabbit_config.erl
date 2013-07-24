@@ -79,7 +79,7 @@ get_queue_setting(ConfList)->
 
 -spec get_routing_key(list()) -> binary().	
 get_routing_key(ConfList)->
-  {ok, QueueConfList} = app_config_util:config_val(amqp_queue, ConfList, []),
+   {ok, QueueConfList} = app_config_util:config_val(amqp_queue, ConfList, []),
    proplists:get_value(routing_key,QueueConfList). 
   
 -spec get_queue_bind(binary(), binary(), binary())->#'queue.bind'{}.
