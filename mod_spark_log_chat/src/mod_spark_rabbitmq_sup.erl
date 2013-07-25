@@ -29,6 +29,7 @@ init([]) ->
 		?CHILD(mod_spark_rabbitmq, worker),
 		?CHILD(spark_amqp_session, worker)
 		],
+    error_logger:info_msg("Spawning mod_spark_rabbitmq and spark_amqp_session",[]),
     {ok, {?DEFAULT_RESTART, Children}};
 
 init(_Args)->

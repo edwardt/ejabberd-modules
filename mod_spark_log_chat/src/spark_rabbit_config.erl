@@ -21,16 +21,13 @@ get_connection_setting(ConfFList) ->
 	Host        = proplists:get_value(host, AmqpConfList, undefined),
 	Port        = proplists:get_value(port, AmqpConfList,5672),
 
-	R = #amqp_params_network{
+	#amqp_params_network{
 				username     = rabbit_farm_util:ensure_binary(UserName),
 				password     = Password,
 				virtual_host = rabbit_farm_util:ensure_binary(VirtualHost),
 				host         = Host,
 				port         = Port
-				}, 
-       print_amqp(R),
-
-       R.
+	 }.
 -spec get_exchange_setting(list())-> #'exchange.declare'{}.
 get_exchange_setting(ConfList)->
   {ok, ExchangeConfList} = app_config_util:config_val(amqp_exchange, ConfList, []),
@@ -84,23 +81,17 @@ get_routing_key(ConfList)->
   
 -spec get_queue_bind(binary(), binary(), binary())->#'queue.bind'{}.
 get_queue_bind(Queue, Exchange, RoutingKey)->
-   print_queue_bind(Queue,Exchange, RoutingKey),
    #'queue.bind'{
 		queue = Queue,
 		exchange = Exchange,
 		routing_key = RoutingKey
 		}.
 
-print_queue_bind(Queue,Exchange, RoutingKey) ->
-   error_logger:info_msg("Queue ~p",[Queue]),
-   error_logger:info_msg("Exchange ~p",[Exchange]),
-   error_logger:info_msg("RoutingKey ~p",[RoutingKey]). 
-
 -spec get_consumer(list())-> #'basic.consume'{}.
 get_consumer(FeedOpt) ->
 	Consumer_tag = proplists:get_value(consumer_tag, FeedOpt, <<"">>),
-	Queue 		 = proplists:get_value(queue, FeedOpt, <<"">>),
-	Ticket 		 = proplists:get_value(ticket, FeedOpt, 0),
+	Queue 		= proplists:get_value(queue, FeedOpt, <<"">>),
+	Ticket 		= proplists:get_value(ticket, FeedOpt, 0),
 	NoLocal		= proplists:get_value(no_local, FeedOpt, false),
 	No_ack		= proplists:get_value(no_ack, FeedOpt, false),
 	Exclusive	= proplists:get_value(exclusive, FeedOpt, false),
@@ -116,6 +107,11 @@ get_consumer(FeedOpt) ->
 		consumer_tag = Consumer_tag,
 		arguments= Arguments
 	}.
+
+print_queue_bind(Queue,Exchange, RoutingKey) ->
+   error_logger:info_msg("Queue ~p",[Queue]),
+   error_logger:info_msg("Exchange ~p",[Exchange]),
+   error_logger:info_msg("RoutingKey ~p",[RoutingKey]). 
 
 print_amqp(#amqp_params_network{} = R) ->
    error_logger:info_msg("Username: ~p",[R#amqp_params_network.username] ),
