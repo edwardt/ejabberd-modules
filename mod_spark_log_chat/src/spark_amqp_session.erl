@@ -40,6 +40,11 @@
 }).
 
 
+-record(app_env,{
+    transform_module,
+    restart_timeout = 5000
+}).
+
 -spec establish() -> {ok, pid()} | {error, badarg}.
 establish()-> 
   gen_server:call(?SERVER, setup).
@@ -84,46 +89,40 @@ init()->
 
 init(Args) ->
   error_logger:info_msg("~p Initialization with Path & File ~p",[?MODULE, Args]),
-  create_config_tables(), 
-  {ok, [ConfList]} = read_from_config(Args), 
-  populate_amqp_connection(ConfList),
-  populate_amqp_exchange(ConfList),
-  populate_amqp_queue(ConfList),
-  populate_app_env(ConfList),
-
-%  {ok, Name} = app_config_util:config_val(amqp_name,ConfList, <<"spark_im_chat">>),
+%  create_config_schema(), 
+  {ok,[ConfList]} = read_from_config(Args), 
+%  [AmqpCon, Exchange, Queue, App_Env] = ConfList,
+%  populate_table((AmqpCon),
+%  populate_table(Exchange),
+%  populate_table(Queue),
+%  populate_table(App_Env),
   setup_amqp(ConfList).
 
 read_from_config({file_full_path, File})->
    {ok, [ConfList]} = app_config_util:load_config_file(File),
-   {ok, [AmqpCon, Exchange, Queue, Other]};
+   ConfList;
+
 read_from_config({Path, File}) ->
    {ok, [ConfList]} = app_config_util:load_config(Path,File),
    {ok, [ConfList]}.
 
+get_config_tables()->
+ [amqp_connection,amqp_exchange,
+  amqp_queue, app_env].
+
 create_config_tables()->
-   Tables = [amqp_connection, amqp_exchange, amqp_queue, app_env],
+   Tables = get_config_tables(),
    lists:map(fun(T)-> 
 		T = ets:new(T, [set, named_table]),
 		error_logger:info_msg("Created config table ~p",[T]) 
 	     end,Tables).
 
-populate_amqp_connection(List) ->
-   populate_table(amqp_connection, List).
-
-populate_amqp_exchange(List) ->
-   populate_table(amqp_exchange, List).
-
-populate_amqp_queue(List) ->
-  populate_table(amqp_queue, List).
-
-populate_app_env(List) ->
-  populate_table(app_env, List). 
-
-populate_table(Tag, List) when is_atom(Tag), is_list(List)->
+populate_table({Tag, List}) when is_atom(Tag), is_list(List)->
    lists:map(fun(A)-> ets:insert(Tag, A) end, List).
 
 setup_amqp(ConfList)->
+ %[AmqpCon, Exchange, Queue, App_Env] = ConfList,
+
   {ok, Channel, AmqpParams} = channel_setup(ConfList),
   ExchangeDeclare = exchange_setup(Channel, ConfList),
   QueueDeclare = queue_setup(Channel, ConfList),

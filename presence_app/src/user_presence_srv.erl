@@ -230,26 +230,20 @@ traverse_table_and_show(Table_name)->
     Iterator = set_user_webpresence(),
     traverse_table_and_show(Iterator, Table_name).
 
-create_user_webpresence()->
+create_config_table()->
   Start = app_util:os_now(),
-  Schema = node(),
-  Ret = case mnesia:create_schema([Schema]) of
-  	ok ->
-  		ok = app_util:start_app(mnesia),
-      error_logger:info_msg("Create user_presence table", []),
+  Ret = case mnesia:create_schema([node()]) of
+  	ok -> ok = app_util:start_app(mnesia),
+      	      error_logger:info_msg("Create mod_spark_rabbit_config table", []),
 
   		{atomic, ok} = mnesia:create_table(user_webpresence,
   							[{ram_copies, [node()]},
   							{type, set},
-  							{attribute, record_info(fields, user_webpresence)},
-  							{index, [memberid]}
+  							{attribute, record_info(fields, user_webpresence)}
   							]
-  			), 
-  		R = mnesia:add_table_index(user_webpresence, memberid),
-      error_logger:info_msg("Created table user_webpresence table with {atomic, ok} index for user_presence table status ~p", [R]),
-      R;
+  			);
   	{error,{S, {already_exists, S}}} -> 
-        error_logger:info_msg("Failure to create_schema: ~p", [{S, {already_exists, S}}]),
+        error_logger:warn_msg("Failure to create_schema: ~p", [{S, {already_exists, S}}]),
         %ok = should_delete_schema(Schema),
         ok = app_util:start_app(mnesia);
     Else ->

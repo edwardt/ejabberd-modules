@@ -115,7 +115,12 @@ lookup_brandid_from_user(Name, UserName) when is_atom(Name) ->
    ?INFO_MSG("Found BrandId ~p", [C]),
    C. 
 
-
+split_composite_id(UserName) ->
+   case re:split(UserName, "-") of
+	[A,B] -> [A,B];
+	[] -> [UserName, ""];
+   	R -> [R, ""]
+   end.
 
 -spec establish() -> {ok, pid()} | {error, badarg}.
 establish()-> 

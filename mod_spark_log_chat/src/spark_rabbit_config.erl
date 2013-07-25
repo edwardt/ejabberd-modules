@@ -13,13 +13,13 @@
 
 -spec get_connection_setting(list()) ->#'amqp_params_network'{}.
 get_connection_setting(ConfFList) ->
-      {ok, ConfList} = app_config_util:config_val(amqp_connection, ConfFList, []),
-	UserName    = proplists:get_value(username, ConfList, undefined),
-	Password    = proplists:get_value(password,ConfList,undefined),
+      {ok, [AmqpConfList]} = app_config_util:config_val(amqp_connection, ConfFList, []),
+	UserName    = proplists:get_value(username, AmqpConfList, undefined),
+	Password    = proplists:get_value(password,AmqpConfList,undefined),
 	%true = password:is_secure(Password),
-	VirtualHost = proplists:get_value(virtual_host,ConfList,undefined),
-	Host        = proplists:get_value(host, ConfList, undefined),
-	Port        = proplists:get_value(port,ConfList,5672),
+	VirtualHost = proplists:get_value(virtual_host, AmqpConfList,undefined),
+	Host        = proplists:get_value(host, AmqpConfList, undefined),
+	Port        = proplists:get_value(port, AmqpConfList,5672),
 
 	R = #amqp_params_network{
 				username     = rabbit_farm_util:ensure_binary(UserName),
@@ -33,16 +33,16 @@ get_connection_setting(ConfFList) ->
        R.
 -spec get_exchange_setting(list())-> #'exchange.declare'{}.
 get_exchange_setting(ConfList)->
-  {ok, FeedOpt} = app_config_util:config_val(amqp_exchange, ConfList, []),
-	Ticket       = proplists:get_value(ticket,FeedOpt,0),
-	Exchange     = proplists:get_value(exchange,FeedOpt),
-	Type         = proplists:get_value(type,FeedOpt,<<"direct">>),
-	Passive      = proplists:get_value(passive,FeedOpt,false),
-	Durable      = proplists:get_value(durable,FeedOpt,false),
-	AutoDelete   = proplists:get_value(auto_delete,FeedOpt,false),
-	Internal     = proplists:get_value(internal,FeedOpt,false),
-	NoWait       = proplists:get_value(nowait,FeedOpt,false),
-	Arguments    = proplists:get_value(arguments,FeedOpt,[]),
+  {ok, [ExchangeConfList]} = app_config_util:config_val(amqp_exchange, ConfList, []),
+	Ticket       = proplists:get_value(ticket,ExchangeConfList,0),
+	Exchange     = proplists:get_value(exchange,ExchangeConfList),
+	Type         = proplists:get_value(type,ExchangeConfList,<<"direct">>),
+	Passive      = proplists:get_value(passive,ExchangeConfList,false),
+	Durable      = proplists:get_value(durable,ExchangeConfList,false),
+	AutoDelete   = proplists:get_value(auto_delete,ExchangeConfList,false),
+	Internal     = proplists:get_value(internal,ExchangeConfList,false),
+	NoWait       = proplists:get_value(nowait,ExchangeConfList,false),
+	Arguments    = proplists:get_value(arguments,ExchangeConfList,[]),
 	#'exchange.declare'{
 				ticket      = Ticket,
 				exchange    = rabbit_farm_util:ensure_binary(Exchange),
@@ -57,15 +57,15 @@ get_exchange_setting(ConfList)->
 
 -spec get_queue_setting(list())-> #'queue.declare'{}.
 get_queue_setting(ConfList)->
-     {ok, FeedOpt} = app_config_util:config_val(amqp_queue, ConfList, []),
-	QTicket		 = proplists:get_value(qticket, FeedOpt, 0),
-	Queue 		 = proplists:get_value(queue, FeedOpt, <<"">>),
-	QPassive	 = proplists:get_value(qpassive, FeedOpt, false),
-	QDurable	 = proplists:get_value(qdurable, FeedOpt, false),
-	QExclusive	 = proplists:get_value(qexclusive, FeedOpt, false),
-	QAutoDelete	 = proplists:get_value(qauto_delete, FeedOpt, false),
-	QNoWait 	 = proplists:get_value(qnowait, FeedOpt, false),
-	QArguments	 = proplists:get_value(qarguments, FeedOpt, []),
+     {ok, [AmqpQueueConfList]} = app_config_util:config_val(amqp_queue, ConfList, []),
+     QTicket		 = proplists:get_value(qticket, AmqpQueueConfList, 0),
+	Queue 		 = proplists:get_value(queue, AmqpQueueConfList, <<"">>),
+	QPassive	 = proplists:get_value(qpassive, AmqpQueueConfList, false),
+	QDurable	 = proplists:get_value(qdurable, AmqpQueueConfList, false),
+	QExclusive	 = proplists:get_value(qexclusive, AmqpQueueConfList, false),
+	QAutoDelete	 = proplists:get_value(qauto_delete, AmqpQueueConfList, false),
+	QNoWait 	 = proplists:get_value(qnowait, AmqpQueueConfList, false),
+	QArguments	 = proplists:get_value(qarguments, AmqpQueueConfList, []),
 
 	#'queue.declare'{
 			   ticket = QTicket,
@@ -79,7 +79,7 @@ get_queue_setting(ConfList)->
 
 -spec get_routing_key(list()) -> binary().	
 get_routing_key(ConfList)->
-   {ok, QueueConfList} = app_config_util:config_val(amqp_queue, ConfList, []),
+   {ok, [QueueConfList]} = app_config_util:config_val(amqp_queue, ConfList, []),
    proplists:get_value(routing_key,QueueConfList). 
   
 -spec get_queue_bind(binary(), binary(), binary())->#'queue.bind'{}.
