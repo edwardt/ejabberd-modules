@@ -40,7 +40,6 @@
 
 -record(state, {
 	idMap =[],
-	table = undefined,
 	format = ?DEFAULT_FORMAT
 }).
 
@@ -128,7 +127,7 @@ start_vh(Host, Opts) ->
 populate_table(Name, IdMap) when is_atom(Name)->
    ?INFO_MSG("Store idMap ~p into ets table", [IdMap]),
    Tab = ets:new(Name, [set, named_table]),
-   lists:map(fun(L)-> true = ets:insert(Tab,L) end, IdMap);
+   lists:map(fun(L)-> true = ets:insert(Tab, L) end, IdMap);
 populate_table(_, _)->
    {error, badarg}.   
 

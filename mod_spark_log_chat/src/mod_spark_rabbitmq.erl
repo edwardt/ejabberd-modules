@@ -94,7 +94,7 @@ start(Host, Opts) ->
     Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
     ChildSpec = {?SERVER,
        {?MODULE, start_link, [Host, Opts]},
-       permanent,
+       temporary,
        1000,
        worker,
        [?MODULE]},
@@ -228,14 +228,14 @@ setup_amqp(ConfList)->
   QueueBind = queue_bind(Channel, Queue, Exchange, RoutingKey),
   AppEnv = get_app_env(ConfList),
   error_logger:info_msg("spark_amqp_session is configured",[]),
-  {ok, #state{ 
+  #state{ 
     name = Name, 
     amqp_exchange = ExchangeDeclare,
     amqp_queue_declare = QueueDeclare,
     amqp_queue_bind = QueueBind,
     amqp_connection = AmqpParams,
     app_env = AppEnv
-  }}.
+  }.
 
 -spec get_app_env(list()) -> #app_env{}.	
 get_app_env(ConfList)->
@@ -316,9 +316,8 @@ handle_call({list_all_active_chan}, _From, State)->
   {reply, Reply, State};
 
 handle_call({publish, call, Mod, AMessage}, _From, State)->
- 
+  error_logger:info_msg("[~p] Handling_call Publishing CALL to rabbitmq using connection amqp_params",[?SERVER]),
   AmqpParams = State#state.amqp_connection,
-  error_logger:info_msg("Publishing to rabbitmq using connection amqp_params: ~p",[?SERVER, AmqpParams]),
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
@@ -330,6 +329,7 @@ handle_call({publish, call, Mod, AMessage}, _From, State)->
   {reply, Reply, State};
 
 handle_call({publish, cast, Mod, Messages}, _From, State)->
+  error_logger:info_msg("[~p] Handling_call Publishing CAST to rabbitmq using connection amqp_params",[?SERVER]),
   AmqpParams = State#state.amqp_connection,
   Reply =
   case amqp_channel(AmqpParams) of

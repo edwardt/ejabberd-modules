@@ -40,7 +40,6 @@
 
 -record(state, {
 	idMap =[],
-	table = undefined,
 	format = ?DEFAULT_FORMAT
 }).
 
