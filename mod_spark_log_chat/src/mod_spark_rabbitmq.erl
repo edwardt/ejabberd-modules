@@ -62,9 +62,10 @@ start_link([Host, Opts]) -> start_link(Host, Opts).
 -spec start_link(string(), list()) ->ok | {error, term()}.
 start_link(Host, Opts)->
   ?INFO_MSG("~p gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
-  Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-  ensure_dependency_started(Proc),
-  Pid = gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]),
+%  Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+  ensure_dependency_started(?SERVER),
+%  Pid = gen_server:start_link({local, Proc}, ?MODULE, [Host, Opts],[]),
+  Pid = gen_server:start_link({local, ?SERVER}, ?MODULE, [Host, Opts],[]),
   ?INFO_MSG("~p started with Pid ~p~n", [?PROCNAME, Pid]), 
   Pid.
 
@@ -91,12 +92,9 @@ ensure_dependency_started(Proc) ->
 start(Host, Opts) ->
     ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
     Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-
-    ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
-    Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-    ChildSpec = {Proc,
+    ChildSpec = {?SERVER,
        {?MODULE, start_link, [Host, Opts]},
-       temporary,
+       permanent,
        1000,
        worker,
        [?MODULE]},
@@ -105,9 +103,9 @@ start(Host, Opts) ->
 
 -spec stop(string()) -> ok.
 stop(Host) ->
-    Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-    gen_server:call(Proc, stop),
-    supervisor:delete_child(ejabberd_sup, Proc),
+%    Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+    gen_server:call(?SERVER, stop),
+    supervisor:delete_child(ejabberd_sup, ?SERVER),
     ok.
 
 -spec init() -> {ok, pid()} | {error, tuple()}.
@@ -120,8 +118,8 @@ init([Host, Opts])->
     File = gen_mod:get_opt(conf_file, Opts, ?ConfFile),
     
     ?INFO_MSG("~p gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
-    Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
-    ensure_dependency_started(Proc),
+%    Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+    ensure_dependency_started(?SERVER),
 
     ?INFO_MSG("Starting spark_amqp_session with args ~p",[File]),
     ConfList= read_from_config({file_full_path, File}), 
@@ -182,9 +180,11 @@ test()->
 
 -spec publish(atom(), atom(), list()) -> ok | {error, tuple()}.
 publish(call, Mod, Message) ->
+%  Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
   error_logger:info_msg("~p: MOD_SPARK_RABBIT Going to publish CALL message to rabbitMQ",[?SERVER]),
   gen_server:call(?SERVER, {publish, call, Mod, Message});
 publish(cast, Mod, Messages) when is_list(Messages) ->
+%  Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
   error_logger:info_msg("~p: MOD_SPARK_RABBIT Going to publish CAST message to rabbitMQ",[?SERVER]),
   gen_server:call(?SERVER, {publish, cast, Mod, Messages}).
 
