@@ -90,7 +90,7 @@ init()->
 init(Args) ->
   error_logger:info_msg("~p Initialization with Path & File ~p",[?MODULE, Args]),
 %  create_config_schema(), 
-  {ok,[ConfList]} = read_from_config(Args), 
+   ConfList= read_from_config(Args), 
 %  [AmqpCon, Exchange, Queue, App_Env] = ConfList,
 %  populate_table((AmqpCon),
 %  populate_table(Exchange),
@@ -99,12 +99,12 @@ init(Args) ->
   setup_amqp(ConfList).
 
 read_from_config({file_full_path, File})->
-   {ok, [ConfList]} = app_config_util:load_config_file(File),
-   ConfList;
+   {ok, [L]} = app_config_util:load_config_file(File),
+   L;
 
 read_from_config({Path, File}) ->
-   {ok, [ConfList]} = app_config_util:load_config(Path,File),
-   {ok, [ConfList]}.
+   {ok, [L]} = app_config_util:load_config(Path,File),
+   L.
 
 get_config_tables()->
  [amqp_connection,amqp_exchange,
@@ -122,7 +122,7 @@ populate_table({Tag, List}) when is_atom(Tag), is_list(List)->
 
 setup_amqp(ConfList)->
  %[AmqpCon, Exchange, Queue, App_Env] = ConfList,
-
+  error_logger:info_msg("~p establishing amqp connection to server",[?SERVER]),
   {ok, Channel, AmqpParams} = channel_setup(ConfList),
   ExchangeDeclare = exchange_setup(Channel, ConfList),
   QueueDeclare = queue_setup(Channel, ConfList),
@@ -143,12 +143,22 @@ setup_amqp(ConfList)->
 
 channel_setup(ConfList)->
 %  {ok, AmqpConfList} = app_config_util:config_val(amqp_connection, ConfList, []),
-  AmqpParams = spark_rabbit_config:get_connection_setting(ConfList), 
 
-%  {ok, Channel} = amqp_channel(AmqpParams),  
+  error_logger:info_msg("Setting up communication: ~p",[ConfList]),  
   
+  AmqpParams = spark_rabbit_config:get_connection_setting(ConfList), 
+  
+%  {ok, Channel} = amqp_channel(AmqpParams),  
+
   {ok, Connection} = amqp_connection:start(AmqpParams),
+
+  error_logger:info_msg("AMQP connection established with pid: ~p",[Connection]),
+
+  error_logger:info_msg("Setting up channel: ~p",[AmqpParams]), 
+
   {ok, Channel} = amqp_connection:open_channel(Connection),
+
+  error_logger:info_msg("AMQP channel established with pid: ~p",[Channel]),
 
   {ok, Channel, AmqpParams}.
 

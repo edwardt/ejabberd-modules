@@ -13,7 +13,7 @@
 
 -spec get_connection_setting(list()) ->#'amqp_params_network'{}.
 get_connection_setting(ConfFList) ->
-      {ok, [AmqpConfList]} = app_config_util:config_val(amqp_connection, ConfFList, []),
+      {ok, AmqpConfList} = app_config_util:config_val(amqp_connection, ConfFList, []),
 	UserName    = proplists:get_value(username, AmqpConfList, undefined),
 	Password    = proplists:get_value(password,AmqpConfList,undefined),
 	%true = password:is_secure(Password),
@@ -33,7 +33,7 @@ get_connection_setting(ConfFList) ->
        R.
 -spec get_exchange_setting(list())-> #'exchange.declare'{}.
 get_exchange_setting(ConfList)->
-  {ok, [ExchangeConfList]} = app_config_util:config_val(amqp_exchange, ConfList, []),
+  {ok, ExchangeConfList} = app_config_util:config_val(amqp_exchange, ConfList, []),
 	Ticket       = proplists:get_value(ticket,ExchangeConfList,0),
 	Exchange     = proplists:get_value(exchange,ExchangeConfList),
 	Type         = proplists:get_value(type,ExchangeConfList,<<"direct">>),
@@ -57,7 +57,7 @@ get_exchange_setting(ConfList)->
 
 -spec get_queue_setting(list())-> #'queue.declare'{}.
 get_queue_setting(ConfList)->
-     {ok, [AmqpQueueConfList]} = app_config_util:config_val(amqp_queue, ConfList, []),
+     {ok, AmqpQueueConfList} = app_config_util:config_val(amqp_queue, ConfList, []),
      QTicket		 = proplists:get_value(qticket, AmqpQueueConfList, 0),
 	Queue 		 = proplists:get_value(queue, AmqpQueueConfList, <<"">>),
 	QPassive	 = proplists:get_value(qpassive, AmqpQueueConfList, false),
@@ -79,7 +79,7 @@ get_queue_setting(ConfList)->
 
 -spec get_routing_key(list()) -> binary().	
 get_routing_key(ConfList)->
-   {ok, [QueueConfList]} = app_config_util:config_val(amqp_queue, ConfList, []),
+   {ok, QueueConfList} = app_config_util:config_val(amqp_queue, ConfList, []),
    proplists:get_value(routing_key,QueueConfList). 
   
 -spec get_queue_bind(binary(), binary(), binary())->#'queue.bind'{}.

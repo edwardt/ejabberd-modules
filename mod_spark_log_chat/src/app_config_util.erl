@@ -31,7 +31,7 @@ load_config(ConfDir,File) when is_list(ConfDir),
 
 load_config_file(FileFullPath) when is_list(FileFullPath)->
    error_logger:info_msg("[~p]: Loading config: ~p",[?MODULE, FileFullPath]), 
-  {ok, [ConfList]}= file:consult(FileFullPath),
+  {ok, [ConfList]} = file:consult(FileFullPath),
 
   Conf = lists:flatten(ConfList),
   error_logger:info_msg("[~p]: Read config: ~p",[?MODULE, Conf]), 
