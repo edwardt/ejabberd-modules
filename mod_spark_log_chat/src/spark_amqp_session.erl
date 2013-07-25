@@ -290,6 +290,7 @@ sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State
           fun(AMessage) ->
               Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),  
               Mod:ensure_binary(AMessage),
+	      error_logger:info_msg("[~p] Publish CALL Fun establish Channel ~p with Method ~p",[?SERVER, Channel, Method]),
               amqp_channel:call(Channel, Method, AMessage)
           end ,Messages),
   error_logger:info_msg("Status of SYNC publishing messages: ~p",[Ret]),
@@ -303,7 +304,8 @@ async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = Stat
   R = ensure_load(Mod, Loaded),
   Ret =  lists:map(
           fun(AMessage) ->
-              Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),      
+	      Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),      
+	      error_logger:info_msg("[~p] Publish CAST Fun establish Channel ~p with Method ~p",[?SERVER, Channel, Method]),
               amqp_channel:cast(Channel, Method, AMessage)
           end, Messages),
   error_logger:info_msg("Status of ASYNC casting messages: ~p",[Ret]),
