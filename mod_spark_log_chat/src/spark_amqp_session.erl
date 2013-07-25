@@ -282,10 +282,14 @@ code_change(_OldVsn, State, _Extra) ->
 sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
 
-  Routing_key = QueueBind#'queue.bind'.routing_key,
-  {Mod, Loaded} = State#state.message_module,
+  error_logger:info_msg("[~p] Publish CALL content type ~p",[?SERVER, ContentType]),
 
+  Routing_key = QueueBind#'queue.bind'.routing_key,
+  error_logger:info_msg("[~p] Publish CALL routing key ~p",[?SERVER, Routing_key]),
+  
+  {Mod, Loaded} = State#state.message_module,
   R = ensure_load(Mod, Loaded),
+  error_logger:info_msg("[~p] Publish CALL loaded module ~p",[?SERVER, Mod]),
   Ret =  lists:map(
           fun(AMessage) ->
               Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),  
@@ -300,8 +304,8 @@ async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = Stat
   ContentType = <<"text/binary">>,
   Routing_key = QueueBind#'queue.bind'.routing_key,
   {Mod, Loaded} = State#state.message_module,
-  
   R = ensure_load(Mod, Loaded),
+  error_logger:info_msg("[~p] Publish CAST loaded module ~p",[?SERVER, Mod]),
   Ret =  lists:map(
           fun(AMessage) ->
 	      Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),      

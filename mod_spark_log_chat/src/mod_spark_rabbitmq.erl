@@ -46,7 +46,7 @@
     app_env
 }).
 -record(app_env,{
-    transform_module = {undefine, not_loaded},
+    transform_module = {undefined, not_loaded},
     restart_timeout = 5000
 }).
 
@@ -373,17 +373,32 @@ code_change(_OldVsn, State, _Extra) ->
 sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
 
+  error_logger:info_msg("[~p] Sync SEND to ~p encode",[?SERVER, Mod]),
+
   Routing_key = QueueBind#'queue.bind'.routing_key,
   {Mod, Loaded} = (State#state.app_env)#app_env.transform_module,
 
   R = ensure_load(Mod, Loaded),
   App = #app_env{transform_module = R},
+
+  error_logger:info_msg("[~p] Sync SEND Encoding module ~p is loaded",[?SERVER, Mod]),
+
   Ret =  lists:map(
           fun(AMessage) ->
-              Method = publish_fun(cast, Exchange, Routing_key, 
-			AMessage, ContentType, Mod),  
-              Mod:ensure_binary(AMessage),
-              amqp_channel:call(Channel, Method, AMessage)
+  	      error_logger:info_msg("[~p] Sync SEND to Channel ~p Method ~p Encoded message",[?SERVER, Channel, Mod]),
+
+%             Amqp_func = publish_fun(call, Exchange, Routing_key, 
+%			AMessage, ContentType, Mod),  
+
+              Message = Mod:ensure_binary(AMessage),
+	      Method = create_publish_method(Exchange, Routing_key),
+	      Payload = create_publish_payload(ContentType, Message),
+	      Ret0 = amqp_channel:call(Channel, Method, Payload),
+
+  	      error_logger:info_msg("[~p] Sync SENT to Channel ~p Ret ~p",[?SERVER, Channel, Ret0])
+
+	      % Amqp_func(Channel, Method, AMessage)
+              %amqp_channel:call(Channel, Method, AMessage)
           end ,Messages),
   error_logger:info_msg("Status of SYNC publishing messages: ~p",[Ret]),
   State#state{app_env=App}.
@@ -395,19 +410,28 @@ async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = Stat
   
   R = ensure_load(Mod, Loaded),
   App = #app_env{transform_module = R},
+
   Ret =  lists:map(
           fun(AMessage) ->
-              Method = publish_fun(cast, Exchange, Routing_key, 	
-                                   AMessage, ContentType, Mod),      
-              amqp_channel:cast(Channel, Method, AMessage)
+  	      error_logger:info_msg("[~p] ASYNC CAST to Channel ~p Method ~p Encoded message",[?SERVER, Channel, Mod]),
+%             Amqp_func = publish_fun(call, Exchange, Routing_key, 
+%			AMessage, ContentType, Mod),  
+              Message = Mod:ensure_binary(AMessage),
+	      Method = create_publish_method(Exchange, Routing_key),
+	      Payload = create_publish_payload(ContentType, Message),
+	      Ret0 = amqp_channel:cast(Channel, Method, Payload),
+
+  	      error_logger:info_msg("[~p] ASYNC CASTED to Channel ~p Ret ~p",[?SERVER, Channel, Ret0])
           end, Messages),
   error_logger:info_msg("Status of ASYNC casting messages: ~p",[Ret]),
   State#state{app_env=App}.
 
 amqp_channel(AmqpParams) ->
+  error_logger:info_msg("Checking for existing connection with ~p",[AmqpParams]),
   case maybe_new_pid({AmqpParams, connection},
                      fun() -> amqp_connection:start(AmqpParams) end) of
     {ok, Client} ->
+        error_logger:info_msg("Found existing connection with ~p",[Client]),
       maybe_new_pid({AmqpParams, channel},
                     fun() -> amqp_connection:open_channel(Client) end);
     Error -> Error
@@ -428,26 +452,42 @@ maybe_new_pid(Group, StartFun) ->
     Pid -> {ok, Pid}
   end.
 
+%publish_fun(CallType, Exchange,Routing_key, Message, ContentType, Mod) ->
+%  Mod:ensure_binary(Message),
+%  error_logger:info_msg("Start Publishing func ~p",[CallType]),
+%  R = rabbit_farm_util:get_fun(CallType, 
+%      #'basic.publish'{ exchange   = Exchange,
+%                  routing_key = Routing_key},
+%      
+%      #amqp_msg{props = #'P_basic'{content_type = ContentType,
+%                  message_id=message_id()}, 
+%              
+%      payload = Message}), 
+%  error_logger:info_msg("End Publishing func ~p",[CallType]),
+%  R.
 
-publish_fun(CallType, Exchange,Routing_key, Message, ContentType, Mod) ->
-  Mod:ensure_binary(Message),
-
-  rabbit_farm_util:get_fun(CallType, 
-      #'basic.publish'{ exchange   = Exchange,
-                  routing_key = Routing_key},
-      
+create_publish_method(Exchange, Routing_Key)->
+       ExchangeName = Exchange#'exchange.declare'.exchange,
+            
+       #'basic.publish'{ exchange   = ExchangeName,
+                  routing_key = Routing_Key}.
+ 
+create_publish_payload(ContentType, Message)->
       #amqp_msg{props = #'P_basic'{content_type = ContentType,
-                  message_id=message_id()}, 
-              
-      payload = Message}).
+                message_id=message_id()}, payload = Message}.  
+
+
 -spec message_id()-> binary().
 message_id()->
   uuid:uuid4().
 
 -spec ensure_load(atom(), trye|false)-> {ok, loaded} | {error, term()}.
-ensure_load(_, true) -> {ok, loaded};
+ensure_load(M, loaded) -> {M, loaded};
 ensure_load(Mod, _) when is_atom(Mod)-> 
-  app_util:ensure_loaded(Mod). 
+  case app_util:ensure_loaded(Mod) of 
+  	{ok, loaded} -> {Mod, loaded};
+	{error, _} -> {Mod, not_loaded}
+  end.
 
 test_msg()->
   Msg1 = message_id(),
