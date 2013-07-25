@@ -1,4 +1,4 @@
--module(mod_spark_log_chat_sup).
+-module(mod_spark_rabbitmq_sup).
 -behaviour(supervisor).
 
 %% API
@@ -25,9 +25,9 @@ start_link() ->
 init()->init([]).
 
 init([]) ->
-
     Children = [
-		?CHILD(mod_spark_log_chat_srv, worker)
+		?CHILD(mod_spark_rabbitmq, worker),
+		?CHILD(spark_amqp_session, worker)
 		],
     {ok, {?DEFAULT_RESTART, Children}};
 

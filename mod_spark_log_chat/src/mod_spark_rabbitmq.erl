@@ -67,12 +67,18 @@ start(Host, Opts) ->
 
     ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
     ChildSpec = {Proc,
-       {?MODULE, start_link, [Host, Opts]},
-       temporary,
-       1000,
-       worker,
-       [?MODULE]},
-   supervisor:start_child(ejabberd_sup, ChildSpec).
+       {mod_spark_rabbitmq_sup, start_link, [Host, Opts]},
+       permanent,
+       infinity,
+       supervisor,
+       [mod_spark_rabbitmq_sup]},
+    case supervisor:start_child(ejabberd_sup, ChildSpec) of
+        {ok, _Pid} -> ok;
+        {ok, _Pid, _Info} ->ok;
+        {error, {already_started, _PidOther}} -> ok;
+        {error, Error} ->
+            {'EXIT', {start_child_error, Error}}
+    end.
 
 -spec stop(string()) -> ok.
 stop(Host) ->
@@ -84,15 +90,18 @@ stop(Host) ->
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
 init([Host, Opts])->
     ?INFO_MSG("Starting Module ~p PROCNAME ~p with host ~p config ~p~n", [?MODULE, ?PROCNAME, Host, Opts]),
-    %Path = gen_mod:get_opt(conf_path, Opts, ?ConfPath),
     File = gen_mod:get_opt(conf_file, Opts, ?ConfFile),
-    %{ok, Cwd} = file:get_cwd(),
-    %FullPath = lists:concat([Cwd,"/", Path]),
-    %Arg = {FullPath, File},
+    
+    ?INFO_MSG("~p gen_server starting  ~p ~p~n", [?PROCNAME, Host, Opts]),
+    Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
+    ensure_dependency_started(Proc),
+
     ?INFO_MSG("Starting spark_amqp_session with args ~p",[File]),
     Ret = spark_amqp_session:init({file_full_path, File}), 
     ?INFO_MSG("Starting spark_amqp_session started with state ~p",[Ret]),
     {ok, #state{}}.
+
+
 
 populate_table(Name, IdMap) when is_atom(Name)->
    ?INFO_MSG("Store idMap ~p into ets table", [IdMap]),
@@ -128,9 +137,10 @@ establish()->
 
 -spec publish(atom(), atom(), list()) -> ok | {error, tuple()}.
 publish(call, Mod, Message) ->
-  error_logger:info_msg("Going to publish message to rabbitMQ",[]),
+  error_logger:info_msg("~p: MOD_SPARK_RABBIT Going to publish CALL message to rabbitMQ",[?SERVER]),
   gen_server:call(?SERVER, {publish, call, Mod, Message});
 publish(cast, Mod, Messages) when is_list(Messages) ->
+  error_logger:info_msg("~p: MOD_SPARK_RABBIT Going to publish CAST message to rabbitMQ",[?SERVER]),
   gen_server:call(?SERVER, {publish, cast, Mod, Messages}).
 
 handle_call({setup}, _From, State)->
@@ -138,6 +148,7 @@ handle_call({setup}, _From, State)->
   {reply, Reply, State};
 
 handle_call({publish, call, Mod, AMessage}, _From, State)->
+  error_logger:info_msg("~p Calling spark_amqp_session:publish/3",[?SERVER]), 
   Reply = spark_amqp_session:publish(call, Mod, AMessage),
   {reply, Reply, State};
 

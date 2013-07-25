@@ -70,9 +70,10 @@ test()->
 
 -spec publish(atom(), atom(), list()) -> ok | {error, tuple()}.
 publish(call, Mod, Message) ->
-  error_logger:info_msg("Going to publish message to rabbitMQ",[]),
+  error_logger:info_msg("[~p] Going to publish(call) message to rabbitMQ",[?SERVER]),
   gen_server:call(?SERVER, {publish, call, Mod, Message});
 publish(cast, Mod, Messages) when is_list(Messages) ->
+  error_logger:info_msg("[~p] Going to publish(cast) message to rabbitMQ",[?SERVER]),
   gen_server:call(?SERVER, {publish, cast, Mod, Messages}).
 
 start_link()->
@@ -224,10 +225,13 @@ handle_call({list_all_active_chan}, _From, State)->
   {reply, Reply, State};
 
 handle_call({publish, call, Mod, AMessage}, _From, State)->
+ 
   AmqpParams = State#state.amqp_connection,
+  error_logger:info_msg("Publishing to rabbitmq using connection amqp_params: ~p",[?SERVER, AmqpParams]),
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
+      error_logger:info_msg("[~p] Found connection ~p resuse",[?SERVER, Channel]),
       sync_send(State,  [AMessage], Channel, Mod); 
     _ ->
       State
