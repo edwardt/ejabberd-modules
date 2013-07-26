@@ -33,6 +33,9 @@
              "include" 
 	    ]},
 	 {i,[
+             "../deps" 
+	    ]},
+	 {i,[
              ".." 
 	    ]}
    ]
@@ -47,6 +50,9 @@
 	 {outdir, "ebin"},
 	 {i,[
              "include" 
+	    ]},
+	 {i,[
+             "../deps" 
 	    ]},
 	 {i,[
              "../ejabberd-dev/trunk/include" 
@@ -104,10 +110,12 @@
          {i, [
 	     "../json_rec/include"
 	    ]},
+	 {i,[
+             "../deps" 
+	    ]},
 	 {i, [
 	     "../json_rec/deps/parse_trans/include"
 	    ]}
-
    ]
 }.
 

@@ -4,6 +4,8 @@
 -behaviour(gen_mod).
 -behaviour(gen_server).
 
+-compile([parse_transform, lager_transform]).
+
 -export([publish/3]).
 
 -export([start/2, 
@@ -31,6 +33,7 @@
 -include_lib("chat_message.hrl").
 -include_lib("amqp_client/include/amqp_client.hrl").
 
+-include_lib("lager/include/lager.hrl").
 
 -define(ConfPath,"conf").
 -define(ConfFile, "spark_amqp.config").
@@ -386,21 +389,9 @@ sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State
   Ret =  lists:map(
           fun(AMessage) ->
   	      error_logger:info_msg("[~p] Sync SEND to Channel ~p Method ~p Encoded message",[?SERVER, Channel, Mod]),
-
 	      Ret0 = publish_message_sync(Mod, Channel, Exchange, Routing_key, ContentType, AMessage),
-
-
-%             Amqp_func = publish_fun(call, Exchange, Routing_key, 
-%			AMessage, ContentType, Mod),  
-
-%              Message = Mod:ensure_binary(AMessage),
-%	      Method = create_publish_method(Exchange, Routing_key),
-%	      Payload = create_publish_payload(ContentType, Message),
-%	      Ret0 = amqp_channel:call(Channel, Method, Payload),
-
-%  	      Amqp_func(Channel, Method, AMessage),
 	      error_logger:info_msg("[~p] Sync SENT to Channel ~p Ret ~p",[?SERVER, Channel, Ret0])
-              %amqp_channel:call(Channel, Method, AMessage)
+
           end ,Messages),
   error_logger:info_msg("Status of SYNC publishing messages: ~p",[Ret]),
   State#state{app_env=App}.
@@ -416,16 +407,7 @@ async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = Stat
   Ret =  lists:map(
           fun(AMessage) ->
   	      error_logger:info_msg("[~p] ASYNC CAST to Channel ~p Method ~p Encoded message",[?SERVER, Channel, Mod]),
-
 	      Ret0 = publish_message_async(Mod, Channel, Exchange, Routing_key, ContentType, AMessage),
-
-%             Amqp_func = publish_fun(call, Exchange, Routing_key, 
-%			AMessage, ContentType, Mod),  
-%              Message = Mod:ensure_binary(AMessage),
-%	      Method = create_publish_method(Exchange, Routing_key),
-%	      Payload = create_publish_payload(ContentType, Message),
-%	      Ret0 = amqp_channel:cast(Channel, Method, Payload),
-
   	      error_logger:info_msg("[~p] ASYNC CASTED to Channel ~p Ret ~p",[?SERVER, Channel, Ret0])
           end, Messages),
   error_logger:info_msg("Status of ASYNC casting messages: ~p",[Ret]),
@@ -457,17 +439,6 @@ maybe_new_pid(Group, StartFun) ->
     Pid -> {ok, Pid}
   end.
 
-%publish_fun(CallType, Exchange,Routing_key, AMessage, ContentType, Mod) ->
-%  Message = Mod:ensure_binary(AMessage),
-%  error_logger:info_msg("Start Publishing func ~p",[CallType]),
-%  ExchangeName = Exchange#'exchange.declare'.exchange,
-%  rabbit_farm_util:get_fun(CallType, 
-%      #'basic.publish'{ exchange   = Exchange,
-%                  routing_key = Routing_key},      
-%      #amqp_msg{props = #'P_basic'{content_type = ContentType,
-%                  message_id=message_id()}, 
-%      payload = Message}).
-
 publish_message_sync(Mod, Channel, Exchange, Routing_key, CententType, AMessage)->
    publish_message(amqp_channel, call, Mod, Channel, Exchange, Routing_key, CententType, AMessage).
 
@@ -479,9 +450,7 @@ publish_message(AMQP_Chan, Func, Mod, Channel, Exchange, Routing_key, ContentTyp
     Method = create_publish_method(Exchange, Routing_key),
     Payload = create_publish_payload(ContentType, Message),
     Ret0 = AMQP_Chan:Func(Channel, Method, Payload).
-    
-
-
+  
 create_publish_method(Exchange, Routing_Key)->
        ExchangeName = Exchange#'exchange.declare'.exchange,
             
