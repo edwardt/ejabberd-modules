@@ -360,11 +360,12 @@ get_memberId_communityId(UserName) ->
               Else -> {error, Else}
   end.
 -spec get_timestamp() -> calendar:datetime1970().
-get_timestamp() ->
-  {A,B} =os_now(),
-  O = tuple_to_list(A),
-  P = tuple_to_list(B),
-  mongreljson:tuple_to_json({date_time, lists:concat([O,P])}).
+get_timestamp() -> 
+  lager_util:format_time().
+%  {A,B} =os_now(),
+%  O = tuple_to_list(A),
+%  P = tuple_to_list(B),
+%  mongreljson:tuple_to_json({date_time, lists:concat([O,P])}).
 
 -spec get_login_data(jid(), string()) -> [jid()].
 get_login_data(_,[])-> ["",""];

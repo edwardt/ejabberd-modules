@@ -194,8 +194,6 @@ publish(cast, Mod, Messages) when is_list(Messages) ->
 stop()->
   gen_server:call(?SERVER, {stop, normal}).
 
-
-
 read_from_config({file_full_path, File})->
    {ok, [L]} = app_config_util:load_config_file(File),
    L;
