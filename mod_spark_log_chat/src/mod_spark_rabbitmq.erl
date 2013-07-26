@@ -438,16 +438,16 @@ maybe_new_pid(Group, StartFun) ->
   end.
 
 publish_message_sync(Mod, Channel, Exchange, Routing_key, CententType, AMessage)->
-   publish_message(amqp_channel, call, Mod, Channel, Exchange, Routing_key, CententType, AMessage).
+   publish_message(call, Mod, Channel, Exchange, Routing_key, CententType, AMessage).
 
 publish_message_async(Mod, Channel, Exchange, Routing_key, ContentType, AMessage)->
-   publish_message(amqp_channel, cast, Mod, Channel, Exchange, Routing_key, ContentType, AMessage).
+   publish_message(cast, Mod, Channel, Exchange, Routing_key, ContentType, AMessage).
 
-publish_message(AMQP_Chan, Func, Mod, Channel, Exchange, Routing_key, ContentType, AMessage)->
+publish_message(Func, Mod, Channel, Exchange, Routing_key, ContentType, AMessage)->
     Message = Mod:ensure_binary(AMessage),
     Method = create_publish_method(Exchange, Routing_key),
     Payload = create_publish_payload(ContentType, Message),
-    Ret0 = AMQP_Chan:Func(Channel, Method, Payload).
+    Ret0 = amqp_channel:Func(Channel, Method, Payload).
   
 create_publish_method(Exchange, Routing_Key)->
        ExchangeName = Exchange#'exchange.declare'.exchange,
