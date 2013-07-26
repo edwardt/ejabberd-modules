@@ -361,7 +361,7 @@ get_memberId_communityId(UserName) ->
   end.
 -spec get_timestamp() -> calendar:datetime1970().
 get_timestamp() -> 
-   Seconds = date_util:now(),
+   Seconds = date_util:epoch(),
    {{Year, Month, Day}, {Hour, Min, Sec}} = calendar:gregorian_seconds_to_datetime(Seconds),
    R = io_lib:fwrite("~2B/~2B/~4..0B ~2B:~2.10.0B:~2.10.0B", [Month, Day, Year, Hour, Min, Sec]),
    erlang:list_to_binary(R).
