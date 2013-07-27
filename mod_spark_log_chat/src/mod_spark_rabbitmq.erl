@@ -284,7 +284,7 @@ handle_call({tear_down, Pids}, From, State)->
      {error, _} -> {ok, stopped};
      Pids -> lists:map(
                   fun(Pid) -> 
-                    amqp_connection:close(Pid) 
+                      catch(amqp_connection:close(Pid)) 
                   end,
                   Pids
              )
