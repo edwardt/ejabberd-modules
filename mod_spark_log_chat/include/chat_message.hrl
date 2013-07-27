@@ -2,9 +2,8 @@
 -define(CHAT_MESSAGE_HRL, true).
 -record(chat_message, {
 		from ::bitstring(),
-		from_brandId  ::bitstring(),
 		to  ::bitstring(),
-		to_brandId ::bitstring(),
+		brandId  ::bitstring(),
 		type ::bitstring(), 
 		format ::bitstring(),
 		subject ::bitstring(), 

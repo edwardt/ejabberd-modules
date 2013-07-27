@@ -16,7 +16,6 @@ rec(_)-> undefined.
 
 -spec ensure_binary(atom() | any()) -> binary().
 ensure_binary(#chat_message{} = Value) ->
-        Value2 = Value#chat_message{time_stamp = lager_util:format_time()}, 
-	Json = json_rec:to_json(Value2, chat_message_model),
+    Json = json_rec:to_json(Value, chat_message_model),
     lists:flatten(mochijson2:encode(Json));
 ensure_binary(Val) -> app_util:ensure_binary(Val).

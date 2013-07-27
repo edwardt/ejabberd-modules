@@ -451,9 +451,8 @@ publish_message(Func, Mod, Channel, Exchange, Routing_key, ContentType, AMessage
   
 create_publish_method(Exchange, Routing_Key)->
        ExchangeName = Exchange#'exchange.declare'.exchange,
-            
        #'basic.publish'{ exchange   = ExchangeName,
-                  routing_key = Routing_Key}.
+                  	 routing_key = Routing_Key}.
  
 create_publish_payload(ContentType, Message)->
       #amqp_msg{props = #'P_basic'{content_type = ContentType,

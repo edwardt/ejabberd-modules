@@ -7,7 +7,7 @@
 
 -export([is_process_alive/1]).
 
--export([os_now/0, timespan/2]).
+-export([os_now/0, timespan/2, get_printable_timestamp/0]).
 
 -export([config_val/3]).
 
@@ -61,6 +61,13 @@ ensure_binary(Value) when is_list(Value)->
 os_now()->
   R =os:timestamp(),
   calendar:now_to_universal_time(R).
+
+-spec get_printable_timestamp() -> string().
+get_printable_timestamp() -> 
+   Seconds = date_util:epoch(),
+   {{Year, Month, Day}, {Hour, Min, Sec}} = calendar:gregorian_seconds_to_datetime(Seconds),
+   R = io_lib:fwrite("~2B/~2B/~4..0B ~2B:~2.10.0B:~2.10.0B", [Month, Day, Year, Hour, Min, Sec]),
+   erlang:list_to_binary(R).
 
 -spec timespan( calendar:datetime1970(), calendar:datetime1970())-> calendar:datetime1970().
 timespan(A,B)->

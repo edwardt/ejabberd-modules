@@ -9,13 +9,18 @@
 		  spark_app_config
                  ]},
   {modules, {
-	app_util, app_config_util,
-       chat_message_model, xmerl_ucs,
-
-       mod_spark_log_chat, spark_amqp_session,
-	     mod_spark_log_chat_app,
-	     mod_spark_log_chat_sup,
-	     mod_spark_log_chat_srv
+		app_util,
+		app_config_util,
+       		chat_message_model,
+		xmerl_ucs,
+	       	date_util,
+		password,
+		mongreljson,
+		rabbit_farm_util,
+		mod_spark_log_chat, 
+		spark_amqp_session,
+	     	mod_spark_log_chat_app,
+	     	mod_spark_log_chat_sup
 	     }},
   {mod, { mod_spark_log_chat_app, []}},
   {env, []}

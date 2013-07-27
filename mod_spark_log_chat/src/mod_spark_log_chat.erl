@@ -210,10 +210,8 @@ handle_chat_msg("error", _From, _To, Packet, _Host) ->
    
 handle_chat_msg(ChatType, FromJid, ToJid, Packet, Host) -> 
     ?INFO_MSG("Writing packet to ~p rabbitmq: ", [?PROCNAME]),
-%     write_packet(ChatType, FromJid, ToJid, Packet, Host, []).
     Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
     gen_server:call(Proc, {write_packet, ChatType, FromJid, ToJid, Packet, Host}).
-%    write_packet(From, To, Packet, Host).
 
 -spec handle_call(tuple(), pid(), state()) -> {reply, any(), state()}.
 handle_call({write_packet, Type, FromJid, ToJid, Packet, Host}, _From, State) ->
@@ -222,7 +220,7 @@ handle_call({write_packet, Type, FromJid, ToJid, Packet, Host}, _From, State) ->
   ?INFO_MSG("Start publish message to rabbitmq: start ~p ", [Start]),
   Reply = write_packet(Type, FromJid, ToJid, Packet, Host, IdMap),
   End = os_now(),
-  ?INFO_MSG("Published packet to rabbitmq: start ~p end ~p time span ~p", [Start, End, timespan(Start, End)]),
+  ?INFO_MSG("Published packet to rabbitmq: start ~p end ~p", [Start, End]),
   {reply, Reply, State};
 
 handle_call(ping, _From, State) ->
@@ -291,12 +289,11 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
    ToBrandId = lookup_brandid_from_user(?TableName, UserB),
 %get_memberId(ToJid, IdMap),
     Format = ?DEFAULT_FORMAT,
-    TimeStamp = get_timestamp(),
+    TimeStamp = app_util:get_printable_timestamp(),
     #chat_message{
     	from = From,
-	from_brandId = FromBrandId,
-    	to = To,
-    	to_brandId = ToBrandId,
+	to = To,
+    	brandId = ToBrandId,
     	type = Type,
     	format = Format,
     	subject = Subject,
@@ -359,18 +356,6 @@ get_memberId_communityId(UserName) ->
               {error, Reason} -> {error, Reason};
               Else -> {error, Else}
   end.
--spec get_timestamp() -> calendar:datetime1970().
-get_timestamp() -> 
-   Seconds = date_util:epoch(),
-   {{Year, Month, Day}, {Hour, Min, Sec}} = calendar:gregorian_seconds_to_datetime(Seconds),
-   R = io_lib:fwrite("~2B/~2B/~4..0B ~2B:~2.10.0B:~2.10.0B", [Month, Day, Year, Hour, Min, Sec]),
-   erlang:list_to_binary(R).
-
-
-%  {A,B} =os_now(),
-%  O = tuple_to_list(A),
-%  P = tuple_to_list(B),
-%  mongreljson:tuple_to_json({date_time, lists:concat([O,P])}).
 
 -spec get_login_data(jid(), string()) -> [jid()].
 get_login_data(_,[])-> ["",""];
@@ -396,8 +381,6 @@ ensure_binary(#chat_message{} = Value) ->
 ensure_binary(Value) -> app_util:ensure_binary(Value).
 
 -spec os_now() -> calendar:datetime1970().
-os_now()-> app_util:os_now().
+os_now()-> app_util:get_printable_timestamp().
 
--spec timespan( datatimefmt(), datatimefmt())-> datatimefmt().
-timespan(A,B)-> app_util:timespan(A,B).
-	
+
