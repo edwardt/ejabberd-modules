@@ -29,6 +29,7 @@
 -define(ConfPath,"conf").
 -define(ConfFile, "spark_amqp.config").
 -define(SERVER, ?MODULE).
+-define(SLEEP, 3000).
 
 -record(state, {
     name = <<"">>, 
@@ -36,7 +37,8 @@
     amqp_queue_declare,
     amqp_queue_bind ,
     amqp_connection,
-    message_module 
+    message_module,
+    rest_now = false 
 }).
 
 
@@ -258,7 +260,7 @@ handle_call(stop, _From, State) ->
 handle_call(_Request, _From, State) ->
   {ok, ok, State}.
 
--spec handle_info(tuple(), pid(), #state{}) -> {ok, #state{}}.
+
 handle_info(stop, _From, State)->
   terminate(normal, State).
 
@@ -268,6 +270,21 @@ handle_cast(Info, State) ->
   {noreply, State}.
 
 -spec handle_info(atom, #state{}) -> {ok, #state{}}.
+handle_info(#'basic.return'{reply_code=C, reply_text = <<"unroutable">>, exchange = X, routing_key= Y} = BasicReturn, State) ->
+  error_logger:warn_msg("Message not delivered [~p] Exchange:~p Routing_Key: ~p",[C, X,Y]), 
+  {noreply, State};
+
+handle_info(#'channel.flow'{active = Active}, State) ->
+  AmqpParam = State#state.amqp_connection,
+  Host = AmqpParam#amqp_params_network.host,
+  NewState = case Active of
+		false ->  error_logger:warn_msg("Rabbitmq server ~p is resource constrained ",[Host]), 
+		          State#state{rest_now = true};
+  		true ->   error_logger:warn_msg("Rabbitmq server ~p is resource relived",[Host]),
+  		          State#state{rest_now = false}
+	 end,
+  {noreply, NewState};
+
 handle_info(_Info, State) ->
   {ok, State}.
 
@@ -279,11 +296,14 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
+rest_if_need(true)-> timer:sleep(?SLEEP);
+rest_if_need(false)-> ok.
+
 sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
 
   error_logger:info_msg("[~p] Publish CALL content type ~p",[?SERVER, ContentType]),
-
+  rest_if_need(State#state.rest_now),
   Routing_key = QueueBind#'queue.bind'.routing_key,
   error_logger:info_msg("[~p] Publish CALL routing key ~p",[?SERVER, Routing_key]),
   
@@ -306,6 +326,7 @@ async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = Stat
   {Mod, Loaded} = State#state.message_module,
   R = ensure_load(Mod, Loaded),
   error_logger:info_msg("[~p] Publish CAST loaded module ~p",[?SERVER, Mod]),
+  rest_if_need(State#state.rest_now),
   Ret =  lists:map(
           fun(AMessage) ->
 	      Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),      
