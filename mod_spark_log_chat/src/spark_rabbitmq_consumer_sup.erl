@@ -41,10 +41,12 @@ init()->
 init(ConsumerArgs) ->
     error_logger:info_msg("Spawning amqp_gen_consumer and ~p",
 			 [?CONSUMER_MOD]),
-    {ok, {{one_for_all, 0, 1},
-          [{gen_consumer, {amqp_gen_consumer, start_link,
-                           [?CONSUMER_MOD, ConsumerArgs]},
-           intrinsic, ?MAX_WAIT, worker, [amqp_gen_consumer]}
+    Children = [{amqp_gen_consumer, start_link,
+		 [?CONSUMER_MOD, ConsumerArgs]},
+           	  {permanent, ?MAX_WAIT}, worker, 
+	         [amqp_gen_consumer]],
+    {ok, {{simple_one_for_one_terminate, 10, 10},
+          [{spark_rabbitmq_consumer, Children}
     ]}}.
 
 
