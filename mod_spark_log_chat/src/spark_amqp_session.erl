@@ -296,6 +296,8 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
+throttle_self(Flag) -> rest_if_need(Flag).
+
 rest_if_need(true)-> timer:sleep(?SLEEP);
 rest_if_need(false)-> ok.
 
@@ -303,7 +305,7 @@ sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State
   ContentType = <<"text/binary">>,
 
   error_logger:info_msg("[~p] Publish CALL content type ~p",[?SERVER, ContentType]),
-  rest_if_need(State#state.rest_now),
+  throttle_self(State#state.rest_now),
   Routing_key = QueueBind#'queue.bind'.routing_key,
   error_logger:info_msg("[~p] Publish CALL routing key ~p",[?SERVER, Routing_key]),
   
@@ -326,7 +328,7 @@ async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = Stat
   {Mod, Loaded} = State#state.message_module,
   R = ensure_load(Mod, Loaded),
   error_logger:info_msg("[~p] Publish CAST loaded module ~p",[?SERVER, Mod]),
-  rest_if_need(State#state.rest_now),
+  throttle_self(State#state.rest_now),
   Ret =  lists:map(
           fun(AMessage) ->
 	      Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),      
