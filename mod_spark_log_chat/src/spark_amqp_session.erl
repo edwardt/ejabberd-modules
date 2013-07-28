@@ -140,7 +140,8 @@ setup_amqp(ConfList)->
     amqp_exchange = ExchangeDeclare,
     amqp_queue_declare = QueueDeclare,
     amqp_queue_bind = QueueBind,
-    amqp_connection = AmqpParams
+    amqp_connection = AmqpParams,
+    rest_now = false
   }}.
 
 
@@ -234,7 +235,8 @@ handle_call({publish, call, Mod, AMessage}, _From, State)->
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
       error_logger:info_msg("[~p] Found connection ~p resuse",[?SERVER, Channel]),
-      sync_send(State,  [AMessage], Channel, Mod); 
+      Throttle = State#state.rest_now,
+      sync_send(State,  [AMessage], Channel, Mod, Throttle); 
     _ ->
       State
   end,
@@ -245,7 +247,8 @@ handle_call({publish, cast, Mod, Messages}, _From, State)->
   Reply =
   case amqp_channel(AmqpParams) of
     {ok, Channel} ->
-      async_send(State, Messages, Channel, Mod); 
+      Throttle = State#state.rest_now,
+      async_send(State, Messages, Channel, Mod, Throttle); 
     _ ->
       State
   end,
@@ -299,13 +302,12 @@ code_change(_OldVsn, State, _Extra) ->
 throttle_self(Flag) -> rest_if_need(Flag).
 
 rest_if_need(true)-> timer:sleep(?SLEEP);
-rest_if_need(false)-> ok.
+rest_if_need(_)-> ok.
 
-sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
+sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State, Messages, Channel, Mod, Throttle) ->
+  throttle_self(Throttle),
   ContentType = <<"text/binary">>,
-
   error_logger:info_msg("[~p] Publish CALL content type ~p",[?SERVER, ContentType]),
-  throttle_self(State#state.rest_now),
   Routing_key = QueueBind#'queue.bind'.routing_key,
   error_logger:info_msg("[~p] Publish CALL routing key ~p",[?SERVER, Routing_key]),
   
@@ -322,13 +324,13 @@ sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State
   error_logger:info_msg("Status of SYNC publishing messages: ~p",[Ret]),
   State#state{message_module = R}.
 
-async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
+async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State,  Messages, Channel, Mod, Throttle) ->
+  throttle_self(Throttle),
   ContentType = <<"text/binary">>,
   Routing_key = QueueBind#'queue.bind'.routing_key,
   {Mod, Loaded} = State#state.message_module,
   R = ensure_load(Mod, Loaded),
   error_logger:info_msg("[~p] Publish CAST loaded module ~p",[?SERVER, Mod]),
-  throttle_self(State#state.rest_now),
   Ret =  lists:map(
           fun(AMessage) ->
 	      Method = publish_fun(cast, Exchange, Routing_key, AMessage, ContentType, Mod),      
