@@ -373,14 +373,14 @@ code_change(_OldVsn, State, _Extra) ->
 
 sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State, Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
-
   error_logger:info_msg("[~p] Sync SEND to ~p encode",[?SERVER, Mod]),
-
   Routing_key = QueueBind#'queue.bind'.routing_key,
-  {Mod, Loaded} = (State#state.app_env)#app_env.transform_module,
 
-  R = ensure_load(Mod, Loaded),
-  App = #app_env{transform_module = R},
+%  {Mod, Loaded} = (State#state.app_env)#app_env.transform_module,
+%  R = ensure_load(Mod, Loaded),
+%  App = #app_env{transform_module = R},
+
+   App = ensure_module_loaded(State),
 
   error_logger:info_msg("[~p] Sync SEND Encoding module ~p is loaded",[?SERVER, Mod]),
 
@@ -397,11 +397,11 @@ sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State
 async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
   Routing_key = QueueBind#'queue.bind'.routing_key,
-  {Mod, Loaded} = (State#state.app_env)#app_env.transform_module,
-  
-  R = ensure_load(Mod, Loaded),
-  App = #app_env{transform_module = R},
+%  {Mod, Loaded} = (State#state.app_env)#app_env.transform_module,
+%  R = ensure_load(Mod, Loaded),
+%  App = #app_env{transform_module = R},
 
+  App = ensure_module_loaded(State),
   Ret =  lists:map(
           fun(AMessage) ->
   	      error_logger:info_msg("[~p] ASYNC CAST to Channel ~p Method ~p Encoded message",[?SERVER, Channel, Mod]),
@@ -463,6 +463,13 @@ create_publish_payload(ContentType, Message)->
 message_id()->
   uuid:uuid4().
 
+-spec ensure_module_loaded(#state{})-> {atom(), atom()}.
+ensure_module_loaded(State)->
+  {Mod, Loaded} = (State#state.app_env)#app_env.transform_module,
+  R = ensure_load(Mod, Loaded),
+  #app_env{transform_module = R}.
+
+  
 -spec ensure_load(atom(), trye|false)-> {ok, loaded} | {error, term()}.
 ensure_load(M, loaded) -> {M, loaded};
 ensure_load(Mod, _) when is_atom(Mod)-> 
