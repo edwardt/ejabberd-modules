@@ -48,11 +48,9 @@ start_link()->
 start_link(Args)->
    error_logger:info_msg("~p gen_server starting  ~p ~n",
 		 [?SERVER, Args]),
-
-   Ret = start(Args),
-   error_logger:info_msg("Dependency started ~p",[Ret]),
-   amqp_gen_consumer:start_link({local, ?SERVER}, ?MODULE, Args,[]).
-
+   R = amqp_gen_consumer:start_link(?SERVER, [Args]),
+   error_logger:info_msg("amqp_gen_consumer start_link ~p",[R]), 
+   R.
 
 start()->
    ConfPath = application:get_env(?SERVER, conf_path,?CONFPATH),
@@ -62,7 +60,8 @@ start()->
    start(Args).
   
 -spec start() -> ok.
-start({ConfPath, AmqpConf, RestConf})->
+start(Args)->
+   [{ConfPath, AmqpConf, RestConf}] = Args,
    error_logger:info_msg("Starting application ~p",[?SERVER]),
  %  ensure_dependency_started()
    ok.
@@ -103,12 +102,12 @@ ensure_dependency_started()->
 
 init(Args)->
     process_flag(trap_exit, true),
-    {ConfPath, AmqpConf, RestConf} = Args,
-    error_logger:info_msg("Starting  ~p with config path ~p, amqp config file ~p, spark rest config ~p",
+    [{ConfPath, AmqpConf, RestConf}] = Args,
+    error_logger:info_msg(" Starting  ~p with config path ~p, amqp config file ~p, spark rest config ~p",
 			   [?SERVER, ConfPath, AmqpConf, RestConf]),
     ConfList= read_from_config(ConfPath, AmqpConf), 
     Ret = setup_amqp(ConfList),
-    error_logger:info_msg("Starting  started with state ~p",
+    error_logger:info_msg("[~p] Started initiated with state ~p",
 			   [?SERVER, Ret]),
     erlang:send_after(?INITWAIT, register_to_channel ,self()),
     {ok, Ret}.
@@ -134,7 +133,7 @@ setup_amqp(ConfList)->
   RoutingKey = spark_rabbit_config:get_routing_key(ConfList),
   QueueBind = queue_bind(Channel, Queue, Exchange, RoutingKey),
   AppEnv = get_app_env(ConfList),
-  error_logger:info_msg("spark_amqp_session is configured",[]),
+  error_logger:info_msg("spark rabbit consumer amqp_session is configured",[]),
   #state{ 
     name = Name, 
     amqp_queue_declare = QueueDeclare,

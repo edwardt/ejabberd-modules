@@ -25,9 +25,9 @@
 
 start_link() ->
     supervisor2:start_link({local, ?SERVER}, ?MODULE, 
-	[{?CONFPATH, ?AMQP_CONF, ?REST_CONF }]).
+	[{?CONFPATH, ?AMQP_CONF, ?REST_CONF}]).
 start_link(Args) ->
-    supervisor2:start_link({local, ?SERVER}, ?MODULE, Args).
+    supervisor2:start_link({local, ?SERVER}, ?MODULE, [Args]).
 
 %% ===================================================================
 %% Supervisor callbacks
@@ -39,7 +39,7 @@ init()->
     AmqpConf = application:get_env(?SERVER, amqp_conf,?AMQP_CONF),
     RestConf = application:get_env(?SERVER, rest_conf, ?REST_CONF),
     ConsumerArgs = {ConfPath, AmqpConf, RestConf},
-    init(ConsumerArgs).
+    init([ConsumerArgs]).
 
 init(ConsumerArgs) ->
 %    error_logger:info_msg("[~p] Starting with args ~p", [?SERVER, ConsumerArgs]),
