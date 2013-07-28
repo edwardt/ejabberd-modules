@@ -133,6 +133,7 @@ setup_amqp(ConfList)->
   RoutingKey = spark_rabbit_config:get_routing_key(ConfList),
   QueueBind = queue_bind(Channel, Queue, Exchange, RoutingKey),
   AppEnv = get_app_env(ConfList),
+
   error_logger:info_msg("spark rabbit consumer amqp_session is configured",[]),
   #state{ 
     name = Name, 
@@ -156,8 +157,9 @@ get_app_env(ConfList)->
   {ok, AppConfList} = app_config_util:config_val(app_env, ConfList, []),
   TransformMod = proplists:get_value(transform_module,AppConfList),
   Restart_timeout = proplists:get_value(restart_timeout,AppConfList),
+  IsLoaded = ensure_load(TransformMod, false),
   #app_env{
-    transform_module = {TransformMod, not_loaded},
+    transform_module = IsLoaded,
     restart_timeout = Restart_timeout}. 
 
 -spec channel_setup(list()) -> {ok, pid()} | {error, term()}.
