@@ -216,12 +216,21 @@ create_config_tables()->
 populate_table({Tag, List}) when is_atom(Tag), is_list(List)->
    lists:map(fun(A)-> ets:insert(Tag, A) end, List).
 
-setup_amqp(ConfList)->
- %[AmqpCon, Exchange, Queue, App_Env] = ConfList,
-  error_logger:info_msg("~p establishing amqp connection to server",[?SERVER]),
+setup_rabbitmq__runtime_env(ConfList)->
   {ok, Channel, AmqpParams} = channel_setup(ConfList),
   ExchangeDeclare = exchange_setup(Channel, ConfList),
   QueueDeclare = queue_setup(Channel, ConfList),
+  {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare}.
+
+setup_amqp(ConfList)->
+ %[AmqpCon, Exchange, Queue, App_Env] = ConfList,
+  error_logger:info_msg("~p establishing amqp connection to server",[?SERVER]),
+
+%  {ok, Channel, AmqpParams} = channel_setup(ConfList),
+%  ExchangeDeclare = exchange_setup(Channel, ConfList),
+%  QueueDeclare = queue_setup(Channel, ConfList),
+  {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare} =
+	setup_rabbitmq__runtime_env(ConfList),
   Queue = QueueDeclare#'queue.declare'.queue,
   Name =
   Exchange =  ExchangeDeclare#'exchange.declare'.exchange,
@@ -375,13 +384,7 @@ sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State
   ContentType = <<"text/binary">>,
   error_logger:info_msg("[~p] Sync SEND to ~p encode",[?SERVER, Mod]),
   Routing_key = QueueBind#'queue.bind'.routing_key,
-
-%  {Mod, Loaded} = (State#state.app_env)#app_env.transform_module,
-%  R = ensure_load(Mod, Loaded),
-%  App = #app_env{transform_module = R},
-
-   App = ensure_module_loaded(State),
-
+  App = ensure_module_loaded(State),
   error_logger:info_msg("[~p] Sync SEND Encoding module ~p is loaded",[?SERVER, Mod]),
 
   Ret =  lists:map(
@@ -397,10 +400,6 @@ sync_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State
 async_send(#state{ amqp_exchange = Exchange, amqp_queue_bind= QueueBind } = State,  Messages, Channel, Mod) ->
   ContentType = <<"text/binary">>,
   Routing_key = QueueBind#'queue.bind'.routing_key,
-%  {Mod, Loaded} = (State#state.app_env)#app_env.transform_module,
-%  R = ensure_load(Mod, Loaded),
-%  App = #app_env{transform_module = R},
-
   App = ensure_module_loaded(State),
   Ret =  lists:map(
           fun(AMessage) ->
