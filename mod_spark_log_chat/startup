@@ -1,8 +1,11 @@
 code:add_path("ebin").
-code:add_path("deps/json_rec/ebin").
+code:add_path("../deps/json_rec/ebin").
+code:add_path("../deps/json_rec/deps/edown/ebin").
+code:add_path("../deps/json_rec/deps/parse_trans/ebin").
 code:add_path("../amqp_client/ebin").
 code:add_path("../rabbit_common/ebin").
 code:add_path("json_rec/ebin").
+code:add_path(""
 X = "/opt/ejabberd-modules/mod_spark_log_chat/conf".
 Y = "spark_amqp.config".
 %Z = spark_amqp_session:start_link({X,Y}).

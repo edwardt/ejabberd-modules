@@ -20,6 +20,7 @@
 -define(HEARTBEAT, 5).
 
 %% API
+-export([start_link/1, start_link/0]).
 -export([start/0, stop/0]).
 -export([init/1, 
 	 handle_consume_ok/3, handle_consume/3, 		
@@ -40,30 +41,31 @@
     restart_timeout = 5000
 }).
 
+start_link()->
+   start().
+
 -spec start_link(list()) -> pid() | {error, term()}.
 start_link(Args)->
    error_logger:info_msg("~p gen_server starting  ~p ~n",
 		 [?SERVER, Args]),
-   Pid = start(),
-   error_logger:info_msg("~p started with Pid ~p~n",
-		 [?SERVER, Pid]), 
-   Pid.
+
+   Ret = start(Args),
+   error_logger:info_msg("Dependency started ~p",[Ret]),
+   amqp_gen_consumer:start_link({local, ?SERVER}, ?MODULE, Args,[]).
 
 
--spec start() -> ok.
 start()->
-   error_logger:info_msg("Starting application ~p",[?SERVER]),
-   ok = ensure_dependency_started(),
    ConfPath = application:get_env(?SERVER, conf_path,?CONFPATH),
    AmqpConf = application:get_env(?SERVER, amqp_conf,?AMQP_CONF),
    RestConf = application:get_env(?SERVER, rest_conf, ?REST_CONF),
-   error_logger:info_msg("Fetching configuration files ~p ~p ~p",
-			  [ConfPath, AmqpConf, RestConf]),
-   R = amqp_gen_consumer:start_link(?SERVER,
-		 [{ConfPath, AmqpConf, RestConf}]),
-   
-   error_logger:info_msg("Registered ~p with amqp_gen_consumer with result: ~p",[?SERVER, R]), 
-   R.
+   Args = {ConfPath, AmqpConf, RestConf},
+   start(Args).
+  
+-spec start() -> ok.
+start({ConfPath, AmqpConf, RestConf})->
+   error_logger:info_msg("Starting application ~p",[?SERVER]),
+ %  ensure_dependency_started()
+   ok.
 
 -spec stop() -> ok.
 stop()->
@@ -78,13 +80,13 @@ ensure_dependency_started()->
 	  compiler, 
 	  crypto,
 	  public_key,
-	  gen_server2,
+%	  gen_server2,
 	  ssl, 
-	  goldrush, 
+%	  goldrush, 
 	  rabbit_common,
 	  amqp_client,
-	  inets, 
-	  restc],
+%	  restc,
+	  inets],
   error_logger:info_msg("[~p] Going to start apps ~p",
 			 [?SERVER, lists:flatten(Apps)]),
   app_util:start_apps(Apps),
