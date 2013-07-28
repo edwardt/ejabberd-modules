@@ -39,16 +39,11 @@ init()->
     ConsumerArgs = {ConfPath, AmqpConf, RestConf},
     init(ConsumerArgs).
 
-
 init(ConsumerArgs) ->
-    error_logger:info_msg("Spawning amqp_gen_consumer and ~p",
-			 [?CONSUMER_MOD]),
-    Children = [{amqp_gen_consumer, start_link,
-		 [?CONSUMER_MOD, ConsumerArgs]},
-           	  {permanent, ?MAX_WAIT}, worker, 
-	         [amqp_gen_consumer]],
-    {ok, {{simple_one_for_one_terminate, 10, 10},
-          [{spark_rabbitmq_consumer, Children}
-    ]}}.
+    {ok, {{one_for_one, 10, 10}, child_specs(ConsumerArgs)}}.
 
-
+child_specs(ConsumerArgs)->
+    [{spark_rabbitmq_consumer, {amqp_gen_consumer, start_link,
+	[?CONSUMER_MOD, ConsumerArgs]},
+	 permanent, ?MAX_WAIT, worker, [amqp_gen_consumer]}
+	].    

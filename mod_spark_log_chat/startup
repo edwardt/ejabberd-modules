@@ -7,4 +7,13 @@ X = "/opt/ejabberd-modules/mod_spark_log_chat/conf".
 Y = "spark_amqp.config".
 %Z = spark_amqp_session:start_link({X,Y}).
 Z = lists:concat([X,"/",Y]).
+l(amqp_gen_consumer).
+l(supervisor2).
+l(spark_rabbitmq_consumer_sup).
+l(spark_rabbit_consumer).
+l(gen_server2).
+
+
+spark_rabbitmq_consumer_sup:start_link().
+
 spark_amqp_session:init({file_full_path, Q}).
