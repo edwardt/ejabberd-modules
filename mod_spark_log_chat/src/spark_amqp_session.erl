@@ -288,8 +288,13 @@ handle_info(#'channel.flow'{active = Active}, State) ->
 	 end,
   {noreply, NewState};
 
+
+
+handle_info({'Down', _Ref, process, What, Why}, State)-> 
+  {noreply, {connection_down, What, Why}, State};
+
 handle_info(_Info, State) ->
-  {ok, State}.
+  {noreply, State}.
 
 -spec terminate(atom(), #state{} ) ->ok.
 terminate(_Reason, _State) ->

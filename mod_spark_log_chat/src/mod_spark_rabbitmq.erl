@@ -361,7 +361,7 @@ handle_info(stop, State)->
   terminate(normal, State);
 handle_info(Info, State) ->
   error_logger:error_msg("Unsupported Request",[Info]), 
-  {ok, State}.
+  {noreply, State}.
 
 -spec terminate(atom(), state() ) ->ok.
 terminate(_Reason, _State) ->
