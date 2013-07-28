@@ -23,7 +23,9 @@
 -export([start/0, stop/0]).
 -export([init/1, 
 	 handle_consume_ok/3, handle_consume/3, 		
-	 handle_cancel_ok/3,handle_cancel/2, handle_deliver/3, 		 	  handle_info/2, handle_call/3,
+	 handle_cancel_ok/3,handle_cancel/2,
+	 handle_deliver/3,
+	 handle_info/2, handle_call/3,
          terminate/2]).
 
 -record(state, {
@@ -197,7 +199,7 @@ amqp_channel(AmqpParams) ->
 -spec register_default_consumer(pid(), pid()) -> ok | {error, term()}.
 register_default_consumer(ChannelPid, ConsumerPid) 
 	when is_pid(ChannelPid), is_pid(ConsumerPid) ->
-  amqp_channel:call_consumer(ChannelPid, 
+   amqp_channel:call_consumer(ChannelPid, 
 			     {register_default_consumer, ConsumerPid});
 
 register_default_consumer(AmqpParams, ConsumerPid) 
@@ -226,27 +228,99 @@ maybe_new_pid(Group, StartFun) ->
     Pid -> {ok, Pid}
   end.
 
+-spec extract_content(#amqp_msg{}) -> 
+	{[binary()], binary(), binary(), binary()}.
+
+extract_content(Content) when is_record(Content, amqp_msg)->
+    #amqp_msg{props = Props, payload = Payload} = Content,
+    #'P_basic'{
+    	content_type = ContentType,
+    	message_id = MessageId
+    } = Props,
+    {Props, Payload, ContentType, MessageId}.
+ 
+
 
 %%%===================================================================
 %%% amqp_gen_consumer callbacks
 %%%===================================================================
-handle_consumer()->
+handle_consume(Method, Args, State)->
+   AmqpParams = State#state.amqp_connection,
+   ConsumerPid = self(),
+   #'basic.consume'{queue = Queue, no_ack = false} = Method,
+   Reply = case amqp_channel(AmqpParams) of
+	{ok, ChannelPid} -> 
+		    error_logger:info_msg("Register channel ~p with consumer ~p on Queue ~p", [ChannelPid, ConsumerPid, Queue]),
+		    amqp_channel:subscribe(ChannelPid, Method, ConsumerPid);
+	Else -> error_logger:error_msg("Failed register consumer ~p to channel on Queue ~p Reason: ~p",[ConsumerPid, Queue, Else]), Else
+   end, 
+   {reply, Reply, State}. 
+
+handle_consume_ok(Method, Args, State)->
+   #'basic.consume_ok'{consumer_tag = Reply} = Method,
+   error_logger:info_msg("subscribe ok Ctag ~p on pid ~p",
+			[Reply, self()]),
+   {reply, Reply, State}.    
 
 
-handle_consume_ok()->
+handle_cancel(Method, State)->
+   #'basic.cancel'{consumer_tag = CTag} = Method,
+   AmqpParams = State#state.amqp_connection,
+   ConsumerPid = self(),
+   Reply = case amqp_channel(AmqpParams) of
+	{ok, ChannelPid} -> 
+		    error_logger:info_msg("Register channel ~p with consumer ~p", [ChannelPid, ConsumerPid]),
+		    amqp_channel:call(ChannelPid, Method);
+	Else -> error_logger:error_msg("Failed register consumer ~p to channel. Reason: ~p",[ConsumerPid, Else]), Else
+   end,   
+   error_logger:info_msg("unsubscribe from Channel Ctag ~p on pid ~p",[CTag ,ConsumerPid]),
+   {reply, Reply, State}.
+
+handle_cancel_ok(Method, Args, State)->
+   #'basic.cancel_ok'{consumer_tag = Reply} = Method,
+   error_logger:info_msg("unsubscribe ok Ctag ~p on pid ~p",	[Reply , self()]),
+   {reply, Reply, State}. 
+
+handle_deliver(Method, Content, State)->
+   Start = app_util:get_printable_timestamp(),
+   #'basic.deliver'{consumer_tag = CTag,
+			   delivery_tag = DTag,
+			   redelivered = Redelivered,
+			   exchange = Exchange,
+			   routing_key  =RoutingKey
+			  } = Method,
+
+   {Props, Payload, ContentType, MessageId} = extract_content(Content),
+   App = ensure_module_loaded(State),
+   {ResponseType, Reply} = 
+			process_message(ContentType, Payload, App),
+   End = app_util:get_printable_timestamp(),
+   {reply, Reply, State}.
 
 
-handle_cancel()->
+handle_call({stop, {error, Why}}, From, State)->
+  terminate(Why, State);
 
-handle_cancel_ok()->
+handle_call({stop, Why}, From, State)->
+  terminate(Why, State);
 
-handle_deliver()->
+handle_call(Request, _From, State)->
+  error_logger:warn_msg("[~p]: Unknown request ~p",[?SERVER, Request]),
+  {noreply, State}.  
 
+handle_cast(Request, State) ->
+  error_logger:warn_msg("[~p]: Unknown request ~p",[?SERVER, Request]),
+  {noreply, State}.
 
 handle_info(register_to_channel, State)->
-  AmqpParams =  State#amqp_connection, 
+  AmqpParams = State#state.amqp_connection,
   register_default_consumer(AmqpParams, self()),
-  {noreply, State}.   
+  {noreply, State};
+
+handle_info(timeout, State)->   
+  AmqpParams = State#state.amqp_connection,
+  register_default_consumer(AmqpParams, self()),  	
+  {noreply, State};
 
 handle_info({'DOWN', MRef, process, Pid, Info}, State)->
   error_logger:error_msg("Connection down, ~p ~p",[Pid, Info]),
@@ -258,8 +332,34 @@ handle_info({'DOWN', _MRef, process, Pid, Info}, _Len, State)->
 
 terminate(Reason, State) ->
   error_logger:info_msg("[~p] Termination ~p",[?SERVER, Reason]),
-  ok
+  ok.
 
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
+-spec ensure_module_loaded(#state{})-> {atom(), atom()}.
+ensure_module_loaded(State)->
+  {Mod, Loaded} = (State#state.app_env)#app_env.transform_module,
+  R = ensure_load(Mod, Loaded),
+  #app_env{transform_module = R}.
+ 
+-spec ensure_load(atom(), trye|false)-> {ok, loaded} | {error, term()}.
+ensure_load(M, loaded) -> {M, loaded};
+ensure_load(Mod, _) when is_atom(Mod)-> 
+  case app_util:ensure_loaded(Mod) of 
+  	{ok, loaded} -> {Mod, loaded};
+	{error, _} -> {Mod, not_loaded}
+  end.
+
+process_message(chat,Payload, Module)->
+  Message = Module:new(Payload),
+  process_message(Message);
+
+process_message(undefined, Payload, State)->
+  {cannot_process_message, undefined};
+
+process_message(ContentType, Payload, State)->
+  {cannot_process_message, ContentType}.
+
+process_message(Payload) ->
+  error_logger:info_msg("Sending to rest api", [?SERVER]).    
