@@ -308,10 +308,14 @@ handle_consume(Method, Args, State)->
    Reply = case amqp_channel(AmqpParams) of
 	{ok, ChannelPid} -> 
 		    error_logger:info_msg("Register channel ~p with consumer ~p on Queue ~p", [ChannelPid, ConsumerPid, Queue]),
-		    amqp_channel:subscribe(ChannelPid, Method2, ConsumerPid);
+		    Ret = amqp_channel:subscribe(ChannelPid, Method2, ConsumerPid),
+		    #'basic.consume_ok'{consumer_tag = CTag} = Ret ,
+                    CTag;
+	
 	Else -> error_logger:error_msg("Failed register consumer ~p to channel on Queue ~p Reason: ~p",[ConsumerPid, Queue, Else]), Else
    end, 
-   {reply, Reply, State}. 
+   
+   {ok, State}. 
 
 handle_consume_ok(Method, Args, State)->
    error_logger:info_msg("subscribe ok Ctag ~p on pid ~p",
@@ -319,7 +323,7 @@ handle_consume_ok(Method, Args, State)->
    #'basic.consume_ok'{consumer_tag = Reply} = Method,
    error_logger:info_msg("subscribe ok Ctag ~p on pid ~p",
 			[Reply, self()]),
-   {reply, Reply, State}.    
+   {ok , State}.    
 
 
 handle_cancel(Method, State)->
@@ -341,23 +345,27 @@ handle_cancel(Method, State)->
 handle_cancel_ok(Method, Args, State)->
    #'basic.cancel_ok'{consumer_tag = Reply} = Method,
    error_logger:info_msg("unsubscribe ok Ctag ~p on pid ~p",	[Reply , self()]),
-   {reply, Reply, State}. 
+   {ok, State}. 
 
 handle_deliver(Method, Content, State)->
+   error_logger:info_msg("[~p] Getting messages from Server. Content ~p",
+			[?SERVER, Content]),   
    Start = app_util:get_printable_timestamp(),
    #'basic.deliver'{consumer_tag = CTag,
 			   delivery_tag = DTag,
 			   redelivered = Redelivered,
 			   exchange = Exchange,
-			   routing_key  =RoutingKey
+			   routing_key  = RoutingKey
 			  } = Method,
 
+   error_logger:info_msg("[~p] Extract content from messages from Server",[?SERVER]), 
    {Props, Payload, ContentType, MessageId} = extract_content(Content),
    App = ensure_module_loaded(State),
+   error_logger:info_msg("[~p] Process message .....",[?SERVER]), 
    {ResponseType, Reply} = 
 			process_message(ContentType, Payload, App),
    End = app_util:get_printable_timestamp(),
-   {reply, Reply, State}.
+   {ok, State}.
 
 
 handle_call(register_default_consumer, From, State) -> 
@@ -366,7 +374,7 @@ handle_call(register_default_consumer, From, State) ->
   AmqpParams = State#state.amqp_connection,
   error_logger:info_msg("Handle_call, sending request of self registration",[]),
   Reply = register_default_consumer(AmqpParams, From),
-  {reply, Reply, State};
+  {reply, ok, State};
 
 
 handle_call(subscribe, From, State) -> 
