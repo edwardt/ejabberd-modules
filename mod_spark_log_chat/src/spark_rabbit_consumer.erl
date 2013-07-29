@@ -31,7 +31,8 @@
 	 handle_info/2, handle_call/3,
          terminate/2]).
 
--export([register_default_consumer/0,
+-export([register_default_consumer/0, 
+         register_default_consumer/1,
          subscribe/0,
          unsubscribe/0,
          subscribe/1,
@@ -105,9 +106,12 @@ ensure_dependency_started()->
 			 [?SERVER, lists:flatten(Apps)]),
   ok.
 
-register_default_consumer() ->
-%  amqp_gen_consumer:call
-  gen_server2:call(?SERVER, register_default_consumer). 
+register_default_consumer()->
+  register_default_consumer(self()). 
+register_default_consumer(Pid) ->
+  Reply =  amqp_gen_consumer:call_consumer(Pid, register_default_consumer),
+  error_logger:info_msg("Default Consumer registration reply from amqp_gen_consumer ~p", [Reply]),
+  Reply.  
 
 subscribe()-> subscribe(self()).
 subscribe(Pid)->
@@ -247,9 +251,8 @@ register_default_consumer(ChannelPid, ConsumerPid)
    amqp_channel:call_consumer(ChannelPid, 
 			     {register_default_consumer, ConsumerPid});
 
-register_default_consumer(AmqpParams, ConsumerPid) 
-	when is_record(AmqpParams, amqp_params_network),
-	     is_pid(ConsumerPid)-> 
+register_default_consumer(AmqpParams, ConsumerPid) -> 
+  error_logger:info_msg("register_Default_Consumer .......",[]),
   case amqp_channel(AmqpParams) of
 	{ok, Pid} -> error_logger:info_msg("Register channel ~p with consumer ~p",[Pid, ConsumerPid]),
 		    register_default_consumer(Pid, ConsumerPid);
@@ -311,7 +314,7 @@ handle_consume(Method, Args, State)->
 
 handle_consume_ok(Method, Args, State)->
    error_logger:info_msg("subscribe ok Ctag ~p on pid ~p",
-			[?SERVER,self()]),  
+			[?SERVER, self()]),  
    #'basic.consume_ok'{consumer_tag = Reply} = Method,
    error_logger:info_msg("subscribe ok Ctag ~p on pid ~p",
 			[Reply, self()]),

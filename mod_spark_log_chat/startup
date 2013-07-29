@@ -25,6 +25,7 @@ application:set_env(spark_rabbit_consumer, rest_conf,"spark_rest.config").
 T = spark_rabbit_consumer:start_link().
 T.
 {ok, K} = T.
+spark_rabbit_consumer:register_default_consumer(K).
 spark_rabbit_consumer:subscribe(K).
 
 spark_amqp_session:init({file_full_path, Q}).
