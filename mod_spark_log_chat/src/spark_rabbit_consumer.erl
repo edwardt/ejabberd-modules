@@ -37,6 +37,7 @@
 
 -record(state, {
     name = <<"">>, 
+    ctag = <<"">>,
     amqp_queue_declare,
     amqp_queue_bind ,
     amqp_connection,
@@ -59,6 +60,7 @@ start_link(Args)->
 		 [?SERVER, Args]),
    R = amqp_gen_consumer:start_link(?SERVER, [Args]),
    error_logger:info_msg("amqp_gen_consumer start_link ~p",[R]), 
+   
    R.
 
 start()->
@@ -72,7 +74,7 @@ start(Args)->
 stop()->
    error_logger:info_msg("Terminating app: ~p ", [?SERVER]),
    %R = amqp_gen_consumer:terminate(?SERVER),
-   %gen_server:call(?SERVER,{stop, normal})
+   %gen_server:call(?SERVER,{stop, normal}),
    ok.
 
 ensure_dependency_started()->
@@ -104,7 +106,7 @@ subscribe(Pid)->
   Method = #'basic.consume'{},
   error_logger:info_msg("Sending subscription request to amqp_gen_consumer pid ~p", [Pid]),
   Reply =  amqp_gen_consumer:call_consumer(Pid, Method, []),
-  error_logger:info_msg("Subscritpion reply from amqp_gen_consumer ~p", [Reply]),
+  error_logger:info_msg("Subscription reply from amqp_gen_consumer ~p", [Reply]),
   Reply.
   
 unsubscribe() -> 
@@ -301,12 +303,14 @@ handle_consume(Method, Args, State)->
 		    error_logger:info_msg("Register channel ~p with consumer ~p on Queue ~p", [ChannelPid, ConsumerPid, Queue]),
 		    Ret = amqp_channel:subscribe(ChannelPid, Method2, ConsumerPid),
 		    #'basic.consume_ok'{consumer_tag = CTag} = Ret ,
+                    error_logger:info_msg("Subscription consumer CTag ~p",CTag),
                     CTag;
 	
-	Else -> error_logger:error_msg("Failed register consumer ~p to channel on Queue ~p Reason: ~p",[ConsumerPid, Queue, Else]), Else
+	Else -> error_logger:error_msg("Failed register consumer ~p to channel on Queue ~p Reason: ~p",[ConsumerPid, Queue, Else]), 
+		State#state.ctag
    end, 
    
-   {ok, State}. 
+   {ok, State#state{ctag = Reply}}. 
 
 handle_consume_ok(Method, Args, State)->
    error_logger:info_msg("subscribe ok Ctag ~p on pid ~p",
@@ -314,24 +318,30 @@ handle_consume_ok(Method, Args, State)->
    #'basic.consume_ok'{consumer_tag = Reply} = Method,
    error_logger:info_msg("subscribe ok Ctag ~p on pid ~p",
 			[Reply, self()]),
-   {ok , State}.    
+  
+   {ok , State#state{ctag=Reply}}.    
 
 
 handle_cancel(Method, State)->
    error_logger:info_msg("[~p] is Handling unsubscription. My pid is ~p",
 			[?SERVER, self()]),   
-
-   %#'basic.cancel'{consumer_tag = CTag} = Method,
+   
+   #'basic.cancel'{consumer_tag = CTag} = Method,
+   CTag1 = State#state.ctag,
+   Method2 = #'basic.cancel'{consumer_tag=CTag1},
+  
    AmqpParams = State#state.amqp_connection,
    ConsumerPid = self(),
    Reply = case amqp_channel(AmqpParams) of
-	{ok, ChannelPid} -> 
-		    error_logger:info_msg("Unsubscription Register channel ~p with consumer ~p", [ChannelPid, ConsumerPid]),
-		    amqp_channel:call(ChannelPid, Method);
-	Else -> error_logger:error_msg("Failed unsubscribe consumer ~p to channel. Reason: ~p",[ConsumerPid, Else]), Else
-   end,   
+	   {ok, ChannelPid} -> 
+		    error_logger:info_msg("Unsubscription Register channel ~p with consumer ~p with ctag ~p", [ChannelPid, ConsumerPid, CTag1]),
+		    amqp_channel:call(ChannelPid, Method2), 
+                    ok;
+	      Else -> error_logger:error_msg("Failed unsubscribe consumer ~p to channel. Reason: ~p",[ConsumerPid, Else]), 
+		    {error, connection_closed}
+          end,   
    error_logger:info_msg("unsubscribe from Channel on pid ~p",[ConsumerPid]),
-   {reply, Reply, State}.
+   {ok, State}.
 
 handle_cancel_ok(Method, Args, State)->
    #'basic.cancel_ok'{consumer_tag = Reply} = Method,
@@ -439,12 +449,16 @@ handle_info(timeout, State)->
   {ok, State};
 
 handle_info({'DOWN', MRef, process, Pid, Info}, State)->
-  error_logger:error_msg("Connection down, ~p ~p",[Pid, Info]),
+  io:format("Connection down, ~p ~p",[Pid, Info]),
   {error, connection_down, State}.
 
 handle_info({'DOWN', _MRef, process, Pid, Info}, _Len, State)->
-  error_logger:error_msg("Connection down, ~p ~p",[Pid, Info]),
-  {error, connection_down, State}.
+  io:format("Connection down, ~p ~p",[Pid, Info]),
+  {error, connection_down, State};
+
+handle_info(UnknownRequest, _From, State)->
+  io:format("Uknown request: ~p",[UnknownRequest]), 
+  {ok, State}.
 
 terminate(Reason, State) ->
 %  error_logger:info_msg("[~p] Termination ~p",[?SERVER, Reason]),
@@ -490,4 +504,11 @@ process_message(ContentType, Payload, State)->
   {cannot_process_message, ContentType}.
 
 process_message(Payload) ->
-  error_logger:info_msg("Sending to rest api", [?SERVER]).    
+  error_logger:info_msg("Sending to rest api", [?SERVER]).   
+
+tag(#'basic.consume'{consumer_tag = Tag})-> Tag;
+tag(#'basic.consume_ok'{consumer_tag = Tag})-> Tag;
+tag(#'basic.cancel'{consumer_tag = Tag})-> Tag;
+tag(#'basic.cancel_ok'{consumer_tag = Tag})-> Tag;
+tag(#'basic.deliver'{consumer_tag = Tag})-> Tag.
+ 

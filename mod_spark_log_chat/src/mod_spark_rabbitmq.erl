@@ -42,6 +42,7 @@
 
 -record(state, {
     name = <<"">>, 
+    ctag = <<"">>,
     amqp_exchange,
     amqp_queue_declare,
     amqp_queue_bind ,
