@@ -288,7 +288,19 @@ extract_content(Content) when is_record(Content, amqp_msg)->
     } = Props,
     {Props, Payload, ContentType, MessageId}.
  
-
+-spec ack(pid(), integer()) -> ok | {error, noproc | closing}.
+ack(AmqpParams, DeliveryTag) ->
+   Method = #'basic.ack'{delivery_tag = DeliveryTag, multiple = false},
+   R = case amqp_channel(AmqpParams) of
+	{ok, Channel} -> error_logger:info_msg("Start Delivery ack. ~p",[Channel]),
+		     try amqp_channel:call(Channel, Method) of
+        			ok      -> ok;
+        			closing -> {error, closing}
+    		     catch
+        			_:{noproc, _} -> {error, noproc}
+    		     end;
+	Else -> error_logger:error_msg("Failed delivery ack. Reason: ~p",[Else]), Else
+  end.
 
 %%%===================================================================
 %%% amqp_gen_consumer callbacks
@@ -358,9 +370,15 @@ handle_deliver(Method, Content, State)->
 			   routing_key  = RoutingKey
 			  } = Method,
 
-   process_delivery(Content, State),
+
+   AmqpParams = State#state.amqp_connection,
+   R = case process_delivery(Content, State) of
+       {ok, processed} ->  ack(AmqpParams,DTag),
+			   ok;
+       Else -> {error, not_processed}
+   end,
    End = app_util:get_printable_timestamp(),
-   {ok, State}.
+   {R, State}.
 
 handle_call(register_default_consumer, From, State) -> 
   error_logger:info_msg("Handle_call, registration of self as default consumer ~p",[From]),
@@ -435,9 +453,14 @@ handle_info({#'basic.deliver'
 			 Content}, State
 			) ->
    Start = app_util:get_printable_timestamp(),
-   process_delivery(Content, State),
+   AmqpParams = State#state.amqp_connection,
+   R = case process_delivery(Content, State) of
+       {ok, processed} ->  ack(AmqpParams,DTag),
+			   ok;
+       Else -> {error, not_processed}
+   end,
    End = app_util:get_printable_timestamp(),
-   {ok, State};
+   {R, State};
 
 handle_info(timeout, State)->   
   AmqpParams = State#state.amqp_connection,
@@ -480,7 +503,10 @@ process_delivery(Content, State)->
    App = ensure_module_loaded(State),
    error_logger:info_msg("[~p] Process message .....",[?SERVER]), 
    {ResponseType, Reply} = 
-			process_message(ContentType, Payload, App).
+			process_message(ContentType, Payload, App),
+%% TODO TESTING ONLY
+   {ok, processed}
+   .
 
 process_message(chat,Payload, Module)->
   Message = Module:new(Payload),
