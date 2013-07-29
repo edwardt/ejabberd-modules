@@ -1,8 +1,6 @@
 -module(spark_rabbit_consumer).
 -behaviour(amqp_gen_consumer).
 
-%-behaviour(gen_server2).
-
 -include("rabbit_farms.hrl").
 -include("rabbit_farms_internal.hrl").
 -include("spark_restc_config.hrl").
@@ -31,8 +29,7 @@
 	 handle_info/2, handle_call/3,
          terminate/2]).
 
--export([register_default_consumer/0, 
-         register_default_consumer/1,
+-export([
          subscribe/0,
          unsubscribe/0,
          subscribe/1,
@@ -65,18 +62,11 @@ start_link(Args)->
    R.
 
 start()->
-   {ok, ConfPath} = application:get_env(?SERVER, conf_path),
-   {ok, AmqpConf} = application:get_env(?SERVER, amqp_conf),
-   {ok, RestConf} = application:get_env(?SERVER, rest_conf),
-   Args = [{ConfPath, AmqpConf, RestConf}],
-   start(Args).
+   start_link().
   
 -spec start() -> ok.
 start(Args)->
-   [{ConfPath, AmqpConf, RestConf}] = Args,
-   error_logger:info_msg("Starting application ~p",[?SERVER]),
- %  ensure_dependency_started()
-   ok.
+   start_link(Args).
 
 -spec stop() -> ok.
 stop()->
@@ -106,37 +96,26 @@ ensure_dependency_started()->
 			 [?SERVER, lists:flatten(Apps)]),
   ok.
 
-register_default_consumer()->
-  register_default_consumer(self()). 
-register_default_consumer(Pid) ->
-  Reply =  amqp_gen_consumer:call_consumer(Pid, register_default_consumer),
-  error_logger:info_msg("Default Consumer registration reply from amqp_gen_consumer ~p", [Reply]),
-  Reply.  
-
-subscribe()-> subscribe(self()).
+subscribe()-> 
+   
+  subscribe(self()).
 subscribe(Pid)->
   error_logger:info_msg("Subscribe, subscription",[]),
- % Pid = self(),  
   Method = #'basic.consume'{},
   error_logger:info_msg("Sending subscription request to amqp_gen_consumer pid ~p", [Pid]),
   Reply =  amqp_gen_consumer:call_consumer(Pid, Method, []),
   error_logger:info_msg("Subscritpion reply from amqp_gen_consumer ~p", [Reply]),
   Reply.
   
-unsubscribe() -> unsubscribe(self()).
+unsubscribe() -> 
+  unsubscribe(self()).
 unsubscribe(Pid)->  
   error_logger:info_msg("Unsubscription: ~p",[Pid]),
- % Pid = self(),  
   Method = #'basic.cancel'{},
   error_logger:info_msg("Cancelling subscription request to amqp_gen_consumer pid ~p", [Pid]),
   Reply =  amqp_gen_consumer:call_consumer(Pid, Method, []),
   error_logger:info_msg("Cancelling Subscritpion reply from amqp_gen_consumer ~p", [Reply]),
   Reply.
-
-
-
-%  gen_server2:call(?SERVER, unsubscribe).
-
 
 
 %%%===================================================================
@@ -339,19 +318,19 @@ handle_consume_ok(Method, Args, State)->
 
 
 handle_cancel(Method, State)->
-   error_logger:info_msg("[~p] is handling unsubscription. My pid is ~p",
+   error_logger:info_msg("[~p] is Handling unsubscription. My pid is ~p",
 			[?SERVER, self()]),   
 
-   #'basic.cancel'{consumer_tag = CTag} = Method,
+   %#'basic.cancel'{consumer_tag = CTag} = Method,
    AmqpParams = State#state.amqp_connection,
    ConsumerPid = self(),
    Reply = case amqp_channel(AmqpParams) of
 	{ok, ChannelPid} -> 
-		    error_logger:info_msg("Register channel ~p with consumer ~p", [ChannelPid, ConsumerPid]),
+		    error_logger:info_msg("Unsubscription Register channel ~p with consumer ~p", [ChannelPid, ConsumerPid]),
 		    amqp_channel:call(ChannelPid, Method);
-	Else -> error_logger:error_msg("Failed register consumer ~p to channel. Reason: ~p",[ConsumerPid, Else]), Else
+	Else -> error_logger:error_msg("Failed unsubscribe consumer ~p to channel. Reason: ~p",[ConsumerPid, Else]), Else
    end,   
-   error_logger:info_msg("unsubscribe from Channel Ctag ~p on pid ~p",[CTag ,ConsumerPid]),
+   error_logger:info_msg("unsubscribe from Channel on pid ~p",[ConsumerPid]),
    {reply, Reply, State}.
 
 handle_cancel_ok(Method, Args, State)->
@@ -379,14 +358,6 @@ handle_deliver(Method, Content, State)->
    end,
    End = app_util:get_printable_timestamp(),
    {R, State}.
-
-handle_call(register_default_consumer, From, State) -> 
-  error_logger:info_msg("Handle_call, registration of self as default consumer ~p",[From]),
- % Pid = self(),  
-  AmqpParams = State#state.amqp_connection,
-  error_logger:info_msg("Handle_call, sending request of self registration",[]),
-  Reply = register_default_consumer(AmqpParams, From),
-  {reply, ok, State};
 
 
 handle_call(subscribe, From, State) -> 
