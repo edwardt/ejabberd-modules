@@ -57,10 +57,10 @@ start_link(Args)->
    R.
 
 start()->
-   ConfPath = application:get_env(?SERVER, conf_path,?CONFPATH),
-   AmqpConf = application:get_env(?SERVER, amqp_conf,?AMQP_CONF),
-   RestConf = application:get_env(?SERVER, rest_conf, ?REST_CONF),
-   Args = {ConfPath, AmqpConf, RestConf},
+   {ok, ConfPath} = application:get_env(?SERVER, conf_path),
+   {ok, AmqpConf} = application:get_env(?SERVER, amqp_conf),
+   {ok, RestConf} = application:get_env(?SERVER, rest_conf),
+   Args = [{ConfPath, AmqpConf, RestConf}],
    start(Args).
   
 -spec start() -> ok.
@@ -105,18 +105,25 @@ register_default_consumer() ->
 subscribe()->
   error_logger:info_msg("Handle_call, subscription",[]),
   Pid = self(),  
-%  QueueDeclare = State#state.amqp_queue_declare,
-%  Queue = QueueDeclare#'queue.declare'.queue,
-%  Method = #'basic.consume'{queue = Queue, no_ack = false},
   Method = #'basic.consume'{},
-  error_logger:info_msg("Sending subscription request to amqp_gen_consumer", []),
+  error_logger:info_msg("Sending subscription request to amqp_gen_consumer pid ~p", [Pid]),
   Reply =  amqp_gen_consumer:call_consumer(Pid, Method),
-  error_logger:info_msg("Subscritpion reply from amqp_gen_consumer ~p", [Reply]), Reply.
+  error_logger:info_msg("Subscritpion reply from amqp_gen_consumer ~p", [Reply]),
+  Reply.
   
- % gen_server2:call(?SERVER, subscribe).
 
 unsubscribe()->  
-  gen_server2:call(?SERVER, unsubscribe).
+  error_logger:info_msg("unsubscription",[]),
+  Pid = self(),  
+  Method = #'basic.cancel'{},
+  error_logger:info_msg("Cancelling subscription request to amqp_gen_consumer pid ~p", [Pid]),
+  Reply =  amqp_gen_consumer:call_consumer(Pid, Method),
+  error_logger:info_msg("Cancelling Subscritpion reply from amqp_gen_consumer ~p", [Reply]),
+  Reply.
+
+
+
+%  gen_server2:call(?SERVER, unsubscribe).
 
 
 
