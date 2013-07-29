@@ -17,11 +17,12 @@ l(spark_rabbit_consumer).
 l(gen_server2).
 
 
-spark_rabbitmq_consumer_sup:start_link().
+T0 = spark_rabbitmq_consumer_sup:start_link().
+T0.
 application:set_env(spark_rabbit_consumer, conf_path,"conf").
 application:set_env(spark_rabbit_consumer, amqp_conf,"spark_amqp.config").
 application:set_env(spark_rabbit_consumer, rest_conf,"spark_rest.config").
-spark_rabbit_consumer:start().
-
+T = spark_rabbit_consumer:start_link().
+T.
 
 spark_amqp_session:init({file_full_path, Q}).

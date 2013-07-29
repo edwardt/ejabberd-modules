@@ -31,7 +31,9 @@
 	 handle_info/2, handle_call/3,
          terminate/2]).
 
--export([register_default_consumer/0,subscribe/0,unsubscribe/0]).
+-export([register_default_consumer/0,
+         subscribe/1,
+         unsubscribe/1]).
 
 -record(state, {
     name = <<"">>, 
@@ -46,7 +48,10 @@
 }).
 
 start_link()->
-   start().
+   {ok, ConfPath} = application:get_env(?SERVER, conf_path),
+   {ok, AmqpConf} = application:get_env(?SERVER, amqp_conf),
+   {ok, RestConf} = application:get_env(?SERVER, rest_conf),
+   start_link([{ConfPath, AmqpConf, RestConf}]).
 
 -spec start_link(list()) -> pid() | {error, term()}.
 start_link(Args)->
@@ -102,9 +107,9 @@ register_default_consumer() ->
 %  amqp_gen_consumer:call
   gen_server2:call(?SERVER, register_default_consumer). 
 
-subscribe()->
+subscribe(Pid)->
   error_logger:info_msg("Handle_call, subscription",[]),
-  Pid = self(),  
+ % Pid = self(),  
   Method = #'basic.consume'{},
   error_logger:info_msg("Sending subscription request to amqp_gen_consumer pid ~p", [Pid]),
   Reply =  amqp_gen_consumer:call_consumer(Pid, Method),
@@ -112,9 +117,9 @@ subscribe()->
   Reply.
   
 
-unsubscribe()->  
+unsubscribe(Pid)->  
   error_logger:info_msg("unsubscription",[]),
-  Pid = self(),  
+ % Pid = self(),  
   Method = #'basic.cancel'{},
   error_logger:info_msg("Cancelling subscription request to amqp_gen_consumer pid ~p", [Pid]),
   Reply =  amqp_gen_consumer:call_consumer(Pid, Method),
