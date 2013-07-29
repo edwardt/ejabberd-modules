@@ -1,7 +1,7 @@
 -module(spark_rabbit_consumer).
 -behaviour(amqp_gen_consumer).
 
--behaviour(gen_server2).
+%-behaviour(gen_server2).
 
 -include("rabbit_farms.hrl").
 -include("rabbit_farms_internal.hrl").
@@ -99,10 +99,21 @@ ensure_dependency_started()->
   ok.
 
 register_default_consumer() ->
+%  amqp_gen_consumer:call
   gen_server2:call(?SERVER, register_default_consumer). 
 
 subscribe()->
-  gen_server2:call(?SERVER, subscribe).
+  error_logger:info_msg("Handle_call, subscription",[]),
+  Pid = self(),  
+%  QueueDeclare = State#state.amqp_queue_declare,
+%  Queue = QueueDeclare#'queue.declare'.queue,
+%  Method = #'basic.consume'{queue = Queue, no_ack = false},
+  Method = #'basic.consume'{},
+  error_logger:info_msg("Sending subscription request to amqp_gen_consumer", []),
+  Reply =  amqp_gen_consumer:call_consumer(Pid, Method),
+  error_logger:info_msg("Subscritpion reply from amqp_gen_consumer ~p", [Reply]), Reply.
+  
+ % gen_server2:call(?SERVER, subscribe).
 
 unsubscribe()->  
   gen_server2:call(?SERVER, unsubscribe).
@@ -266,11 +277,17 @@ extract_content(Content) when is_record(Content, amqp_msg)->
 handle_consume(Method, Args, State)->
    AmqpParams = State#state.amqp_connection,
    ConsumerPid = self(),
+   
    #'basic.consume'{queue = Queue, no_ack = false} = Method,
+   
+   QueueDeclare = State#state.amqp_queue_declare,
+   Queue2 = QueueDeclare#'queue.declare'.queue,   
+   Method2 = #'basic.consume'{queue = Queue2, no_ack = false},
+   
    Reply = case amqp_channel(AmqpParams) of
 	{ok, ChannelPid} -> 
 		    error_logger:info_msg("Register channel ~p with consumer ~p on Queue ~p", [ChannelPid, ConsumerPid, Queue]),
-		    amqp_channel:subscribe(ChannelPid, Method, ConsumerPid);
+		    amqp_channel:subscribe(ChannelPid, Method2, ConsumerPid);
 	Else -> error_logger:error_msg("Failed register consumer ~p to channel on Queue ~p Reason: ~p",[ConsumerPid, Queue, Else]), Else
    end, 
    {reply, Reply, State}. 
