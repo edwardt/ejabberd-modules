@@ -1,6 +1,8 @@
 -module(spark_rabbit_consumer).
 -behaviour(amqp_gen_consumer).
 
+-behaviour(gen_server2).
+
 -include("rabbit_farms.hrl").
 -include("rabbit_farms_internal.hrl").
 -include("spark_restc_config.hrl").
@@ -11,7 +13,7 @@
 -define(APP,rabbit_consumer).
 -define(DELAY, 10).
 -define(RECON_TIMEOUT, 5000).
--define(INITWAIT, 3000).
+-define(INITWAIT, 3).
 -define(ETS_FARMS,ets_rabbit_farms).
 -define(RESPONSE_TIMEOUT,2000).
 -define(CONFPATH,"conf").
@@ -28,6 +30,8 @@
 	 handle_deliver/3,
 	 handle_info/2, handle_call/3,
          terminate/2]).
+
+-export([register_default_consumer/0,subscribe/0,unsubscribe/0]).
 
 -record(state, {
     name = <<"">>, 
@@ -94,12 +98,22 @@ ensure_dependency_started()->
 			 [?SERVER, lists:flatten(Apps)]),
   ok.
 
+register_default_consumer() ->
+  gen_server2:call(?SERVER, register_default_consumer). 
+
+subscribe()->
+  gen_server2:call(?SERVER, subscribe).
+
+unsubscribe()->  
+  gen_server2:call(?SERVER, unsubscribe).
+
+
 
 %%%===================================================================
 %%% Internal API
 %%%===================================================================
 
-
+ 
 init(Args)->
     process_flag(trap_exit, true),
     [{ConfPath, AmqpConf, RestConf}] = Args,
@@ -109,7 +123,9 @@ init(Args)->
     Ret = setup_amqp(ConfList),
     error_logger:info_msg("[~p] Started initiated with state ~p",
 			   [?SERVER, Ret]),
-    erlang:send_after(?INITWAIT, register_to_channel ,self()),
+%    {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare} = Ret,
+%    register_default_consumer(ChannelPid, ConsumerPid),
+    %erlang:send_after(?INITWAIT, register_to_channel  ,self()),
     {ok, Ret}.
 
 setup_rabbitmq__runtime_env(ConfList)->
@@ -301,6 +317,32 @@ handle_deliver(Method, Content, State)->
    {reply, Reply, State}.
 
 
+handle_call(register_default_consumer, From, State) -> 
+  Pid = self(),  
+  AmqpParams = State#state.amqp_connection,
+  Reply = register_default_consumer(AmqpParams, Pid),
+  {reply, Reply, State};
+
+
+handle_call(subscribe, From, State) -> 
+  Pid = self(),  
+  QueueDeclare = State#state.amqp_queue_declare,
+  Queue = QueueDeclare#'queue.declare'.queue,
+  Method = #'basic.consume'{queue = Queue, no_ack = false},
+  Reply =  amqp_gen_consumer:call(Pid, Method, []),
+  {reply, Reply, State};
+
+handle_call(unsubscribe, From, State) -> 
+  Pid = self(),  
+  QueueDeclare = State#state.amqp_queue_declare,
+  Queue = QueueDeclare#'queue.declare'.queue,
+  Method = #'basic.cancel'{},
+  Reply =  amqp_gen_consumer:call(Pid, Method, []),
+  {reply, Reply, State};
+
+
+
+
 handle_call({stop, {error, Why}}, From, State)->
   terminate(Why, State);
 
@@ -316,6 +358,7 @@ handle_cast(Request, State) ->
   {noreply, State}.
 
 handle_info(register_to_channel, State)->
+  error_logger:info_msg("[~p] Delayed registering to channel",[?SERVER]),
   AmqpParams = State#state.amqp_connection,
   register_default_consumer(AmqpParams, self()),
   {noreply, State};
@@ -334,7 +377,8 @@ handle_info({'DOWN', _MRef, process, Pid, Info}, _Len, State)->
   {noreply, State}.
 
 terminate(Reason, State) ->
-  error_logger:info_msg("[~p] Termination ~p",[?SERVER, Reason]),
+%  error_logger:info_msg("[~p] Termination ~p",[?SERVER, Reason]),
+  io:format("[~p] Termination ~p",[?SERVER, Reason]),
   ok.
 
 code_change(_OldVsn, State, _Extra) ->
