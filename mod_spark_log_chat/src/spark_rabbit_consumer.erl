@@ -318,25 +318,31 @@ handle_deliver(Method, Content, State)->
 
 
 handle_call(register_default_consumer, From, State) -> 
+  error_logger:info_msg("Handle_call, registration of self as default consumer",[]),
   Pid = self(),  
   AmqpParams = State#state.amqp_connection,
+  error_logger:info_msg("Handle_call, sending request of self registration",[]),
   Reply = register_default_consumer(AmqpParams, Pid),
   {reply, Reply, State};
 
 
 handle_call(subscribe, From, State) -> 
+  error_logger:info_msg("Handle_call, subscription",[]),
   Pid = self(),  
   QueueDeclare = State#state.amqp_queue_declare,
   Queue = QueueDeclare#'queue.declare'.queue,
   Method = #'basic.consume'{queue = Queue, no_ack = false},
+  error_logger:info_msg("Handle_call, sending subscription request of",[]),
   Reply =  amqp_gen_consumer:call(Pid, Method, []),
   {reply, Reply, State};
 
 handle_call(unsubscribe, From, State) -> 
+  error_logger:info_msg("Handle_call, unsubscription",[]),
   Pid = self(),  
   QueueDeclare = State#state.amqp_queue_declare,
   Queue = QueueDeclare#'queue.declare'.queue,
   Method = #'basic.cancel'{},
+  error_logger:info_msg("Handle_call, sending unsubscription request of",[]),
   Reply =  amqp_gen_consumer:call(Pid, Method, []),
   {reply, Reply, State};
 
