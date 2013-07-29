@@ -252,10 +252,11 @@ register_default_consumer(ChannelPid, ConsumerPid)
 			     {register_default_consumer, ConsumerPid});
 
 register_default_consumer(AmqpParams, ConsumerPid) -> 
-  error_logger:info_msg("register_Default_Consumer .......",[]),
+  error_logger:info_msg("Register_Default_Consumer ~p Pid ~p",[AmqpParams, ConsumerPid]),
   case amqp_channel(AmqpParams) of
 	{ok, Pid} -> error_logger:info_msg("Register channel ~p with consumer ~p",[Pid, ConsumerPid]),
-		    register_default_consumer(Pid, ConsumerPid);
+		     amqp_channel:call_consumer(Pid, 
+			     {register_default_consumer, ConsumerPid});
 	Else -> error_logger:error_msg("Failed register consumer ~p to channel. Reason: ~p",[ConsumerPid, Else]), Else
 
   end. 
