@@ -358,15 +358,9 @@ handle_deliver(Method, Content, State)->
 			   routing_key  = RoutingKey
 			  } = Method,
 
-   error_logger:info_msg("[~p] Extract content from messages from Server",[?SERVER]), 
-   {Props, Payload, ContentType, MessageId} = extract_content(Content),
-   App = ensure_module_loaded(State),
-   error_logger:info_msg("[~p] Process message .....",[?SERVER]), 
-   {ResponseType, Reply} = 
-			process_message(ContentType, Payload, App),
+   process_delivery(Content, State),
    End = app_util:get_printable_timestamp(),
    {ok, State}.
-
 
 handle_call(register_default_consumer, From, State) -> 
   error_logger:info_msg("Handle_call, registration of self as default consumer ~p",[From]),
@@ -424,18 +418,39 @@ handle_info(register_to_channel, State)->
   register_default_consumer(AmqpParams, self()),
   {noreply, State};
 
+handle_info({'basic.consume_ok', CTag}, State)->
+	error_logger:info_msg("Handle info sunbsribe consume_ok ~p",[CTag]),
+   {ok, State};
+handle_info({'basic.cancel_ok',_}, State)->
+    error_logger:info_msg("Handle info Unsubscribe_ok",[]),
+   {ok, State};
+
+handle_info({#'basic.deliver'
+			  {consumer_tag = CTag,
+			   delivery_tag = DTag,
+			   redelivered = Redelivered,
+			   exchange = Exchange,
+			   routing_key  =RoutingKey
+			  },
+			 Content}, State
+			) ->
+   Start = app_util:get_printable_timestamp(),
+   process_delivery(Content, State),
+   End = app_util:get_printable_timestamp(),
+   {ok, State};
+
 handle_info(timeout, State)->   
   AmqpParams = State#state.amqp_connection,
   register_default_consumer(AmqpParams, self()),  	
-  {noreply, State};
+  {ok, State};
 
 handle_info({'DOWN', MRef, process, Pid, Info}, State)->
   error_logger:error_msg("Connection down, ~p ~p",[Pid, Info]),
-  {noreply, State}.
+  {error, connection_down, State}.
 
 handle_info({'DOWN', _MRef, process, Pid, Info}, _Len, State)->
   error_logger:error_msg("Connection down, ~p ~p",[Pid, Info]),
-  {noreply, State}.
+  {error, connection_down, State}.
 
 terminate(Reason, State) ->
 %  error_logger:info_msg("[~p] Termination ~p",[?SERVER, Reason]),
@@ -458,6 +473,14 @@ ensure_load(Mod, _) when is_atom(Mod)->
   	{ok, loaded} -> {Mod, loaded};
 	{error, _} -> {Mod, not_loaded}
   end.
+
+process_delivery(Content, State)->
+   error_logger:info_msg("[~p] Extract content from messages from Server",[?SERVER]), 
+   {Props, Payload, ContentType, MessageId} = extract_content(Content),
+   App = ensure_module_loaded(State),
+   error_logger:info_msg("[~p] Process message .....",[?SERVER]), 
+   {ResponseType, Reply} = 
+			process_message(ContentType, Payload, App).
 
 process_message(chat,Payload, Module)->
   Message = Module:new(Payload),

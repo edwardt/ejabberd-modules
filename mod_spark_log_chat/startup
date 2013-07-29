@@ -28,6 +28,28 @@ T.
 spark_rabbit_consumer:subscribe(K).
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 spark_rabbit_consumer:register_default_consumer(K).
 spark_rabbit_consumer:subscribe(K).
 
