@@ -303,7 +303,7 @@ handle_consume(Method, Args, State)->
 		    error_logger:info_msg("Register channel ~p with consumer ~p on Queue ~p", [ChannelPid, ConsumerPid, Queue]),
 		    Ret = amqp_channel:subscribe(ChannelPid, Method2, ConsumerPid),
 		    #'basic.consume_ok'{consumer_tag = CTag} = Ret ,
-                    error_logger:info_msg("Subscription consumer CTag ~p",CTag),
+                    error_logger:info_msg("Subscription consumer CTag ~p", CTag),
                     CTag;
 	
 	Else -> error_logger:error_msg("Failed register consumer ~p to channel on Queue ~p Reason: ~p",[ConsumerPid, Queue, Else]), 
@@ -485,10 +485,21 @@ ensure_load(Mod, _) when is_atom(Mod)->
 process_delivery(Content, State)->
    error_logger:info_msg("[~p] Extract content from messages from Server",[?SERVER]), 
    {Props, Payload, ContentType, MessageId} = extract_content(Content),
+  
+ %  io:format("[~s] Extracted content type ~p payload: ~s~n", ContentType, Payload),
+
+
    App = ensure_module_loaded(State),
    error_logger:info_msg("[~p] Process message .....",[?SERVER]), 
+
+%   io:format("[~s] Process message by module ~s ...~n",[?SERVER, App]), 
+
    {ResponseType, Reply} = 
 			process_message(ContentType, Payload, App),
+
+  % io:format("[~s] Processed message by module ~s...~n",[?SERVER, App]), 
+
+
 %% TODO TESTING ONLY
    {ok, processed}
    .
