@@ -51,6 +51,7 @@
 }).
 -record(app_env,{
     transform_module = {undefined, not_loaded},
+    publisher_confirm = false,
     restart_timeout = 5000
 }).
 
@@ -219,9 +220,15 @@ populate_table({Tag, List}) when is_atom(Tag), is_list(List)->
 
 setup_rabbitmq__runtime_env(ConfList)->
   {ok, Channel, AmqpParams} = channel_setup(ConfList),
+  AppEnv = get_app_env(ConfList),
+  {ok, Ret} = register_channel_confirm(AppEnv, Channel),
   ExchangeDeclare = exchange_setup(Channel, ConfList),
   QueueDeclare = queue_setup(Channel, ConfList),
-  {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare}.
+  {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare, AppEnv}.
+
+register_channel_confirm(#app_env{publisher_confirm = Confirm}
+			 = AppEnv, Channel) ->
+  {'confirm.select_ok'} = amqp_channel:call(Channel, Confirm).   
 
 setup_amqp(ConfList)->
  %[AmqpCon, Exchange, Queue, App_Env] = ConfList,
@@ -230,14 +237,13 @@ setup_amqp(ConfList)->
 %  {ok, Channel, AmqpParams} = channel_setup(ConfList),
 %  ExchangeDeclare = exchange_setup(Channel, ConfList),
 %  QueueDeclare = queue_setup(Channel, ConfList),
-  {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare} =
+  {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare, AppEnv} =
 	setup_rabbitmq__runtime_env(ConfList),
   Queue = QueueDeclare#'queue.declare'.queue,
   Name =
   Exchange =  ExchangeDeclare#'exchange.declare'.exchange,
   RoutingKey = spark_rabbit_config:get_routing_key(ConfList),
   QueueBind = queue_bind(Channel, Queue, Exchange, RoutingKey),
-  AppEnv = get_app_env(ConfList),
   error_logger:info_msg("spark_amqp_session is configured",[]),
   #state{ 
     name = Name, 
@@ -253,10 +259,17 @@ get_app_env(ConfList)->
   {ok, AppConfList} = app_config_util:config_val(app_env, ConfList, []),
   TransformMod = proplists:get_value(transform_module,AppConfList),
   Restart_timeout = proplists:get_value(restart_timeout,AppConfList),
+  Publisher_confirm = proplists:get_value(publisher_confirm,AppConfList),
   IsLoaded = ensure_load(TransformMod, false),
+  Confirm = case Publisher_confirm of 
+ 	true -> #'confirm.select'{nowait = false};
+	false -> []
+  end,
   #app_env{
     transform_module = IsLoaded,
+    publisher_confirm = Confirm,
     restart_timeout = Restart_timeout}. 
+
 
 -spec channel_setup(list()) -> {ok, pid()} | {error, term()}.
 channel_setup(ConfList)->

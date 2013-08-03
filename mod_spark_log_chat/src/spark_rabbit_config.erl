@@ -5,8 +5,9 @@
 	get_queue_setting/1,
  	get_routing_key/1,
 	get_queue_bind/3,
-	get_consumer/1, clone_queue_setting/2
-
+	get_consumer/1, 
+	clone_queue_setting/2
+	
 ]).
 
 -include_lib("amqp_client/include/amqp_client.hrl").
@@ -122,7 +123,6 @@ get_consumer(ConfList) ->
 		consumer_tag = Consumer_tag,
 		arguments= Arguments
 	}.
-
 
 
 print_queue_bind(Queue,Exchange, RoutingKey) ->
