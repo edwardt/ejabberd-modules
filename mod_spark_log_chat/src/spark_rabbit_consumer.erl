@@ -519,20 +519,15 @@ process_message(chat,Payload, Module)->
 		body = Body, 
 		thread = ThreadId,
 		time_stamp = TimeStamp} = Payload,
-  Msg = #spark_im_mail_message{
+ 
+  Spark_Msg = 
+	spark_im_mail_message_model:ensure_binary(#spark_im_mail_message{
 	recipientMemberId = To,
 	subject = Subject,
 	body = Body,
 	mailtype = <<"16">>,
 	originalMessageRepliedtoId = ThreadId
-  },
-
-  Spark_Msg = spark_im_mail_message_model:ensure_binary(Msg),
-  
- % AccessToken =   
-
-  Message = Module:new(Payload),
-  process_message(Message);
+  });
 
 process_message(undefined, Payload, State)->
   {cannot_process_message, undefined};
