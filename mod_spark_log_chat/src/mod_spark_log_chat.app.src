@@ -12,6 +12,7 @@
 		app_util,
 		app_config_util,
        		chat_message_model,
+		spark_im_mail_message_model,
 		xmerl_ucs,
 	       	date_util,
 		password,
