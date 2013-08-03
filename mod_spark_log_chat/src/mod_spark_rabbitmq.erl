@@ -473,6 +473,18 @@ create_publish_payload(ContentType, Message)->
                 message_id=message_id()}, payload = Message}.  
 
 
+-spec ack(atom(), pid(), integer()) -> ok | {error, noproc | closing}.
+ack(Func, Channel, DeliveryTag) ->
+   Method = #'basic.ack'{delivery_tag = DeliveryTag, multiple = false},
+   try amqp_channel:Func(Channel, Method) of
+       ok      -> ok;
+       closing -> {error, closing}
+   catch
+   	_:{noproc, _} -> {error, noproc}
+   end.
+
+
+
 -spec message_id()-> binary().
 message_id()->
   uuid:uuid4().
