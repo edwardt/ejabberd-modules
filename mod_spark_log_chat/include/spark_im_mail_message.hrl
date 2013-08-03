@@ -4,7 +4,7 @@
 		recipientMemberId ::bitstring(),
 		subject ::bitstring(), 
 		body ::bitstring(), 
-		mailtype = <<"16">> ::bitstring(),
+		mailtype ::bitstring(),
 		originalMessageRepliedtoId ::bitstring()}).
 
 

@@ -7,6 +7,10 @@
 -include_lib("lager/include/lager.hrl").
 -include("amqp_client/include/amqp_gen_consumer_spec.hrl").
 
+-include_lib("chat_message.hrl").
+-include_lib("spark_im_mail_message.hrl").
+
+
 -define(SERVER,?MODULE).
 -define(APP,rabbit_consumer).
 -define(DELAY, 10).
@@ -45,6 +49,7 @@
 }).
 -record(app_env,{
     transform_module = {undefined, not_loaded},
+    publisher_confirm = false,
     restart_timeout = 5000
 }).
 
@@ -485,7 +490,7 @@ ensure_load(Mod, _) when is_atom(Mod)->
 process_delivery(Content, State)->
    error_logger:info_msg("[~p] Extract content from messages from Server",[?SERVER]), 
    {Props, Payload, ContentType, MessageId} = extract_content(Content),
-  
+    
  %  io:format("[~s] Extracted content type ~p payload: ~s~n", ContentType, Payload),
 
 
@@ -505,6 +510,27 @@ process_delivery(Content, State)->
    .
 
 process_message(chat,Payload, Module)->
+  #chat_message{from = From,
+		to  = To,
+		brandId = BrandId,
+		type = Type, 
+		format = Format,
+		subject = Subject, 
+		body = Body, 
+		thread = ThreadId,
+		time_stamp = TimeStamp} = Payload,
+  Msg = #spark_im_mail_message{
+	recipientMemberId = To,
+	subject = Subject,
+	body = Body,
+	mailtype = <<"16">>,
+	originalMessageRepliedtoId = ThreadId
+  },
+
+  Spark_Msg = spark_im_mail_message_model:ensure_binary(Msg),
+  
+ % AccessToken =   
+
   Message = Module:new(Payload),
   process_message(Message);
 
