@@ -224,6 +224,7 @@ setup_rabbitmq__runtime_env(ConfList)->
   {ok, Ret} = register_channel_confirm(AppEnv, Channel),
   ExchangeDeclare = exchange_setup(Channel, ConfList),
   QueueDeclare = queue_setup(Channel, ConfList),
+  ok = register_default_handler(Channel, self()),
   {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare, AppEnv}.
 
 register_channel_confirm(#app_env{publisher_confirm = Confirm}
@@ -231,12 +232,7 @@ register_channel_confirm(#app_env{publisher_confirm = Confirm}
   {'confirm.select_ok'} = amqp_channel:call(Channel, Confirm).   
 
 setup_amqp(ConfList)->
- %[AmqpCon, Exchange, Queue, App_Env] = ConfList,
   error_logger:info_msg("~p establishing amqp connection to server",[?SERVER]),
-
-%  {ok, Channel, AmqpParams} = channel_setup(ConfList),
-%  ExchangeDeclare = exchange_setup(Channel, ConfList),
-%  QueueDeclare = queue_setup(Channel, ConfList),
   {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare, AppEnv} =
 	setup_rabbitmq__runtime_env(ConfList),
   Queue = QueueDeclare#'queue.declare'.queue,
@@ -296,6 +292,10 @@ queue_bind(Channel, Queue, Exchange, RoutingKey) ->
   QueueBind = spark_rabbit_config:get_queue_bind(Queue, Exchange, RoutingKey),
   {'queue.bind_ok'}  = amqp_channel:call(Channel, QueueBind),
   QueueBind.
+  
+register_default_handler(Channel, Pid) ->
+  amqp_channel:call(Channel, Pid),
+  ok.
   
 handle_call({setup}, _From, State)->
   AmqpParams = State#state.amqp_connection,
@@ -377,6 +377,10 @@ handle_cast(Info, State) ->
   {noreply, State}.
 
 -spec handle_info(atom(), pid(), state()) -> {ok, state()}.
+
+handle_info(#'basic.return'{reply_code = ReplyCode, reply_text = << "unroutable" >>, exchange = Exchange, routing_key = RouteKey}, _From, State) ->
+  error_logger:error_msg("Undeliverable messages. status: ~p, from: ~p with key: ~p",[ReplyCode, Exchange, RouteKey]),
+  {noreply, State};
 handle_info(stop, _From, State)->
   terminate(normal, State).
 

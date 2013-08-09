@@ -13,13 +13,13 @@
 
 -export([start/2,
          init/1,
-	 	 stop/1, test/0,
-	 	 log_packet_send/3,
-	 	 log_packet_receive/4]).
+	 stop/1, test/0,
+	 log_packet_send/3,
+	 log_packet_receive/4]).
 
 -export([start_link/1, start_link/2]).
 -export([
-		 handle_call/3,
+	  handle_call/3,
 		 handle_cast/2,
 		 handle_info/2, 
 		 terminate/2, 
@@ -292,7 +292,7 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
     TimeStamp = app_util:get_printable_timestamp(),
     #chat_message{
     	from = From,
-	to = To,
+		to = To,
     	brandId = ToBrandId,
     	type = Type,
     	format = Format,

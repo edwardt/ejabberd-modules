@@ -522,7 +522,7 @@ process_message(chat,Payload, Module)->
  
   Spark_Msg = 
 	spark_im_mail_message_model:ensure_binary(#spark_im_mail_message{
-	recipientMemberId = To,
+	recipientMemberId = To, 
 	subject = Subject,
 	body = Body,
 	mailtype = <<"16">>,

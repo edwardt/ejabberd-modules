@@ -172,3 +172,22 @@
    ]
 }.
 
+
+{'src/gen_*',	
+	[debug_info,
+	 warn_unused_vars,
+	 warn_unused_imports, 
+	 verbose,
+	 {outdir, "ebin"},
+	 {i,[
+             "include" 
+	    ]},
+	 {i,[
+             "../deps" 
+	    ]},
+	 {i,[
+             ".." 
+	    ]}
+   ]
+}.
+
