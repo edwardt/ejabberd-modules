@@ -203,6 +203,7 @@ channel_setup(ConfList)->
   error_logger:info_msg("Setting up channel: ~p",[AmqpParams]), 
   {ok, Channel} = amqp_connection:open_channel(Connection),
   error_logger:info_msg("AMQP channel established with pid: ~p",[Channel]),
+  ok = register_default_return_handler(Channel, self()),
   {ok, Channel, AmqpParams}.
 
 exchange_setup(Channel, ConfList)->
@@ -231,19 +232,20 @@ amqp_channel(AmqpParams) ->
     Error -> Error
   end.
 
--spec register_default_consumer(pid(), pid()) -> ok | {error, term()}.
-register_default_consumer(ChannelPid, ConsumerPid) 
+-spec register_default_return_handler(pid(), pid()) -> ok | {error, term()}.
+register_default_return_handler(ChannelPid, ConsumerPid) 
 	when is_pid(ChannelPid), is_pid(ConsumerPid) ->
-   amqp_channel:call_consumer(ChannelPid, 
-			     {register_default_consumer, ConsumerPid});
+   amqp_channel:register_return_handler(ChannelPid, ConsumerPid),
+   ok;
 
-register_default_consumer(AmqpParams, ConsumerPid) -> 
+register_default_return_handler(AmqpParams, ConsumerPid) -> 
   error_logger:info_msg("Register_Default_Consumer ~p Pid ~p",[AmqpParams, ConsumerPid]),
   case amqp_channel(AmqpParams) of
 	{ok, Pid} -> error_logger:info_msg("Register channel ~p with consumer ~p",[Pid, ConsumerPid]),
-		     amqp_channel:call_consumer(Pid, 
-			     {register_default_consumer, ConsumerPid});
-	Else -> error_logger:error_msg("Failed register consumer ~p to channel. Reason: ~p",[ConsumerPid, Else]), Else
+		     amqp_channel:register_return_handler(Pid, ConsumerPid),
+		     ok;
+	Else -> error_logger:error_msg("Failed register consumer ~p to channel. Reason: ~p",[ConsumerPid, Else]), 
+	        Else
 
   end. 
 
@@ -416,10 +418,10 @@ handle_cast(Request, State) ->
   error_logger:warn_msg("[~p]: Unknown request ~p",[?SERVER, Request]),
   {noreply, State}.
 
-handle_info(register_to_channel, State)->
-  error_logger:info_msg("[~p] Delayed registering to channel",[?SERVER]),
+handle_info(register_default_return_handler, State)->
+  error_logger:info_msg("[~p] Delayed registering default handler to channel",[?SERVER]),
   AmqpParams = State#state.amqp_connection,
-  register_default_consumer(AmqpParams, self()),
+  register_default_return_handler(AmqpParams, self()),
   {noreply, State};
 
 handle_info({'basic.consume_ok', CTag}, State)->
@@ -450,13 +452,17 @@ handle_info({#'basic.deliver'
 
 handle_info(timeout, State)->   
   AmqpParams = State#state.amqp_connection,
-  register_default_consumer(AmqpParams, self()),  	
+  register_default_return_handler(AmqpParams, self()),  	
   {ok, State};
 
 handle_info({'DOWN', MRef, process, Pid, Info}, State)->
   io:format("Connection down, ~p ~p",[Pid, Info]),
   {error, connection_down, State}.
 
+handle_info(#'basic.return'{reply_code = ReplyCode, reply_text = << "unroutable" >>, exchange = Exchange, routing_key = RouteKey}, _From, State) ->
+  error_logger:error_msg("Undeliverable messages. status: ~p, from: ~p with key: ~p",[ReplyCode, Exchange, RouteKey]),
+  {noreply, State};
+  
 handle_info({'DOWN', _MRef, process, Pid, Info}, _Len, State)->
   io:format("Connection down, ~p ~p",[Pid, Info]),
   {error, connection_down, State};
