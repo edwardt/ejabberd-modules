@@ -229,7 +229,14 @@ setup_rabbitmq__runtime_env(ConfList)->
 
 register_channel_confirm(#app_env{publisher_confirm = Confirm}
 			 = AppEnv, Channel) ->
-  {'confirm.select_ok'} = amqp_channel:call(Channel, Confirm).   
+  
+  R = case Confirm of 
+      [] -> will_not_confirm;
+      Else ->  {'confirm.select_ok'} =  
+                    amqp_channel:call(Channel, Else), 
+               will_confirm_delivery      
+  end,
+  {ok, R}.   
 
 setup_amqp(ConfList)->
   error_logger:info_msg("~p establishing amqp connection to server",[?SERVER]),
@@ -252,6 +259,7 @@ setup_amqp(ConfList)->
 
 -spec get_app_env(list()) -> #app_env{}.	
 get_app_env(ConfList)->
+  error_logger:info_msg("Reading application setting",[]),
   {ok, AppConfList} = app_config_util:config_val(app_env, ConfList, []),
   TransformMod = proplists:get_value(transform_module,AppConfList),
   Restart_timeout = proplists:get_value(restart_timeout,AppConfList),
@@ -261,6 +269,7 @@ get_app_env(ConfList)->
  	true -> #'confirm.select'{nowait = false};
 	false -> []
   end,
+  error_logger:info_msg("Retrieved application setting",[]),
   #app_env{
     transform_module = IsLoaded,
     publisher_confirm = Confirm,
@@ -279,22 +288,32 @@ channel_setup(ConfList)->
   {ok, Channel, AmqpParams}.
 
 exchange_setup(Channel, ConfList)->
+  error_logger:info_msg("Establishing exchange",[]),
   ExchangeDeclare = spark_rabbit_config:get_exchange_setting(ConfList),
   {'exchange.declare_ok'}  = amqp_channel:call(Channel, ExchangeDeclare), 
+  error_logger:info_msg("Exchange established"),
   ExchangeDeclare.
   
 queue_setup(Channel, ConfList)->
+  error_logger:info_msg("Declaring Queue",[]),
   QueueDeclare = spark_rabbit_config:get_queue_setting(ConfList),
   {'queue.declare_ok', _, _, _} = amqp_channel:call(Channel, QueueDeclare),
+  
+  error_logger:info_msg("Declared Queue",[]),
   QueueDeclare.
 
 queue_bind(Channel, Queue, Exchange, RoutingKey) ->
+  error_logger:info_msg("Binding Queue",[]),
+
   QueueBind = spark_rabbit_config:get_queue_bind(Queue, Exchange, RoutingKey),
   {'queue.bind_ok'}  = amqp_channel:call(Channel, QueueBind),
+  error_logger:info_msg("Bound Queue",[]),
+
   QueueBind.
   
 register_default_handler(Channel, Pid) ->
-  amqp_channel:call(Channel, Pid),
+  R = amqp_channel:register_return_handler(Channel, Pid),
+  error_logger:info_msg("Register ~p as a default handler for unrourtable message: ~p",[self(), R]),
   ok.
   
 handle_call({setup}, _From, State)->
