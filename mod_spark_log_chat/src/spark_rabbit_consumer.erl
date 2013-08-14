@@ -104,8 +104,8 @@ ensure_dependency_started()->
   ok.
 
 subscribe()-> 
-   
   subscribe(self()).
+
 subscribe(Pid)->
   error_logger:info_msg("Subscribe, subscription",[]),
   Method = #'basic.consume'{},

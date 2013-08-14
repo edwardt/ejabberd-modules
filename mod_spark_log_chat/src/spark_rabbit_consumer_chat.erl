@@ -5,7 +5,7 @@
 %% API
 -export([
     start/0,
-    start/1,
+    start/2,
     stop/0,
     stop/1,
     subscribe/0,
@@ -22,12 +22,17 @@
 -record(state, {msgList = []}).
 
 -define(SERVER, spark_rabbit_consumer).
+-define(CONF_PATH, "conf").
+-define(CONF_AMQP, "spark_amqp.config").
+-define(CONF_REST, "spark_rest.config").
+
 
 start()->
-	start(?SERVER).
+	Args = [{?CONF_PATH, ?CONF_AMQP, ?CONF_REST}],
+	start(?SERVER, Args).
 	
-start(Name) ->
-    gen_server_cluster:start(Name, ?SERVER, [], []).
+start(Name, Args) ->
+    gen_server_cluster:start(Name, ?SERVER, Args, []).
 
 send(Name, Text) ->
     gen_server:call({global, Name}, {send, {Name, node(), Text}}).
