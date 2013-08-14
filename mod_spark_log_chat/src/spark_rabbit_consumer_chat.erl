@@ -10,6 +10,8 @@
     stop/1,
     subscribe/0,
     unsubscribe/0,
+    subscribe/1,
+    unsubscribe/1,
     send/2,
     get_all_msg/1,
     get_users/1]).
@@ -50,12 +52,14 @@ get_users(Name) ->
     {GlobalNode, LocalNodeList} = gen_server_cluster:get_all_server_nodes(Name),
     [GlobalNode | LocalNodeList].
     
+subscribe()-> subscribe(?SERVER).
     
-subscribe()->
-    gen_server:call({global, ?SERVER}, subscribe).
-    
-unsubscribe()->
-  	gen_server:call({global, ?SERVER}, unsubscribe).
+subscribe(Name)->
+    gen_server:call({global, ?SERVER}, subscribe, [Name]).
+
+unsubscribe() -> unsubscribe(?SERVER).    
+unsubscribe(Name)->
+  	gen_server:call({global, ?SERVER}, unsubscribe, [Name]).
 
 stop()->
 	stop(?SERVER).
@@ -68,7 +72,7 @@ init([]) ->
 
 handle_call({send, {Name, Node, Text}}, _From, _State) ->
     F = fun(State) ->
-        io:format("[~p,~p]: ~p~n", [Name, Node, Text]),
+        error_logger:info_msg("[~p,~p]: ~p~n", [Name, Node, Text]),
         NewMsgList = [{Node, Text} | State#state.msgList],
         State#state{msgList = NewMsgList}
     end,

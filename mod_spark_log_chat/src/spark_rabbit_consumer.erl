@@ -27,11 +27,14 @@
 -export([start_link/1, start_link/0]).
 -export([start/0, stop/0]).
 -export([init/1, 
-	 handle_consume_ok/3, handle_consume/3, 		
-	 handle_cancel_ok/3,handle_cancel/2,
-	 handle_deliver/3,
-	 handle_info/2, handle_call/3,
-         terminate/2]).
+	 	handle_consume_ok/3,
+	 	handle_consume/3, 		
+	 	handle_cancel_ok/3,
+	 	handle_cancel/2,
+	 	handle_deliver/3,
+	 	handle_info/2, 
+	 	handle_call/3,
+        terminate/2]).
 
 -export([
          subscribe/0,
@@ -65,7 +68,6 @@ start_link(Args)->
 		 [?SERVER, Args]),
    R = amqp_gen_consumer:start_link(?SERVER, [Args]),
    error_logger:info_msg("amqp_gen_consumer start_link ~p",[R]), 
-   
    R.
 
 start()->
@@ -153,10 +155,6 @@ setup_rabbitmq__runtime_env(ConfList)->
 setup_amqp(ConfList)->
  %[AmqpCon, Exchange, Queue, App_Env] = ConfList,
   error_logger:info_msg("~p establishing amqp connection to server",[?SERVER]),
-
-%  {ok, Channel, AmqpParams} = channel_setup(ConfList),
-%  ExchangeDeclare = exchange_setup(Channel, ConfList),
-%  QueueDeclare = queue_setup(Channel, ConfList),
   {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare} =
 	setup_rabbitmq__runtime_env(ConfList),
   Queue = QueueDeclare#'queue.declare'.queue,

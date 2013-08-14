@@ -39,7 +39,7 @@ start(Name, TargetModule, TargetArgs, Options) ->
   %% try starting as the global server:
   case gen_server:start({global,Name}, ?MODULE, ArgsGlobalInit, Options) of
     {ok,_GlobalServerPid}=Result ->
-      io:format("~p started as global server.~n",[Name]), 
+      error_logger:info_msg("~p started as global server.~n",[Name]), 
       Result;
     {error,{already_started,_GlobalServerPid}} ->
       %% global server already started, start as local server:
@@ -56,7 +56,7 @@ start_local_server(Name) ->
       ArgsLocalInit = {initLocal, Name},
       case gen_server:start({local,Name}, ?MODULE, ArgsLocalInit, []) of
         {ok, _LocalPid}=Result ->
-          io:format("~p started as local server.~n",[Name]),
+          error_logger:info_msg("~p started as local server.~n",[Name]),
           Result;
         Else ->
           Else
