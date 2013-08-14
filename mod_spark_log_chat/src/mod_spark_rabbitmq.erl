@@ -221,10 +221,10 @@ populate_table({Tag, List}) when is_atom(Tag), is_list(List)->
 setup_rabbitmq__runtime_env(ConfList)->
   {ok, Channel, AmqpParams} = channel_setup(ConfList),
   AppEnv = get_app_env(ConfList),
-  {ok, Ret} = register_channel_confirm(AppEnv, Channel),
+%  {ok, Ret} = register_channel_confirm(AppEnv, Channel),
   ExchangeDeclare = exchange_setup(Channel, ConfList),
   QueueDeclare = queue_setup(Channel, ConfList),
-  ok = register_default_handler(Channel, self()),
+%  ok = register_default_handler(Channel, self()),
   {ok,  Channel, AmqpParams, ExchangeDeclare, QueueDeclare, AppEnv}.
 
 register_channel_confirm(#app_env{publisher_confirm = Confirm}
