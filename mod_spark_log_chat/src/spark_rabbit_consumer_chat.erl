@@ -17,6 +17,8 @@
     get_users/1]).
 
 %% gen_server callbacks
+
+-export([start_link/0, start_link/1, start_link/2]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
     terminate/2, code_change/3]).
 
@@ -28,14 +30,26 @@
 -define(CONF_AMQP, "spark_amqp.config").
 -define(CONF_REST, "spark_rest.config").
 
-
-start()->
+start_link()->
 	Args = [{?CONF_PATH, ?CONF_AMQP, ?CONF_REST}],
 	start(?SERVER, Args).
 	
-start(Name, Args) ->
-    gen_server_cluster:start(Name, ?SERVER, Args, []).
+start()-> start_link().
 
+start_link(Name, Args)->
+   start(Name, Args).
+   
+start_link(Args0)-> 
+    error_logger:info_msg("Starting *** ~p *** cluster ~p~n",
+    [?SERVER, Args0]),
+    [Name, Args] = Args0,
+    error_logger:info_msg("Register *** ~p *** cluster with name ~p~n",
+    [?SERVER, Name]),
+    gen_server_cluster:start(Name, ?SERVER, Args, []).
+  	
+start(Name, Args) ->
+    start_link([Name, Args]).
+   
 send(Name, Text) ->
     gen_server:call({global, Name}, {send, {Name, node(), Text}}).
 
@@ -67,8 +81,14 @@ stop()->
 stop(Name) ->
     gen_server:call({global, Name}, stop).
 
-init([]) ->
+init(Args) ->
+    error_logger:info_msg("Initialization of ~p with ~p~n",
+    	[?SERVER, Args]),
     {ok, #state{}}.
+    
+init() ->
+    error_logger:info_msg("Initialization of ~p~n",[?SERVER]),
+    init([]).
 
 handle_call({send, {Name, Node, Text}}, _From, _State) ->
     F = fun(State) ->

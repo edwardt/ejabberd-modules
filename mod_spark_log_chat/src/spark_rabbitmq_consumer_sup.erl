@@ -1,5 +1,5 @@
 -module(spark_rabbitmq_consumer_sup).
--behaviour(supervisor2).
+-behaviour(supervisor).
 
 %% API
 -export([start_link/0, start_link/1]).
@@ -29,7 +29,7 @@ start_link() ->
 	 
 start_link(Args) ->
     error_logger:info_msg("Starting ~p cluster ~n",[?SERVER]),
-    supervisor2:start_link({local, ?SERVER}, ?MODULE, Args).
+    supervisor:start_link({global, ?SERVER}, ?MODULE, Args).
 
 %% ===================================================================
 %% Supervisor callbacks
@@ -40,23 +40,30 @@ init()->
     ConfPath = app_config_util:app_get_env(?SERVER, conf_path,?CONFPATH),
     AmqpConf = app_config_util:app_get_env(?SERVER, amqp_conf,?AMQP_CONF),
     RestConf = app_config_util:app_get_env(?SERVER, rest_conf, ?REST_CONF),
-    ConsumerArgs = {ConfPath, AmqpConf, RestConf},
-    init([ConsumerArgs]).
+    ConsumerArgs = [{ConfPath, AmqpConf, RestConf}],
+    init(ConsumerArgs).
 
 
 init(ConsumerArgs) ->
-%    error_logger:info_msg("[~p] Starting with args ~p", [?SERVER, ConsumerArgs]),
+    error_logger:info_msg("[~p] Starting with args ~n", [?SERVER]),
 	ShouldCluster = 
-	     app_config_util:app_get_env(?SERVER, conf_path, true),	
+	     app_config_util:app_get_env(?SERVER, should_cluster, true),	
+	     
     {ok, {{one_for_one, 10, 10}, 
     	  child_specs(ShouldCluster, ConsumerArgs)}}.
 
 child_specs(true, ConsumerArgs)->
-    [{spark_rabbit_consumer_chat, {spark_rabbit_consumer_chat, start_link,
-	 ConsumerArgs},
-	 permanent, ?MAX_WAIT, supervisor, [spark_rabbit_consumer_chat]}
-	];  
+    error_logger:info_msg("[~p] Starting with cluster mode ~p ~n", [?SERVER, ConsumerArgs]),
+    Name = spark_chat_consumer_cluster,
+	[{spark_rabbit_consumer_chat,
+	 {spark_rabbit_consumer_chat, start_link, [Name, ConsumerArgs]},
+	 permanent, ?MAX_WAIT, worker, [spark_rabbit_consumer_chat]}
+	];
+	
+	
 child_specs(false, ConsumerArgs)->
+    error_logger:info_msg("[~p] Starting with simple app mode ~p ~n", [?SERVER, ConsumerArgs]),
+
     [{spark_rabbitmq_consumer, {spark_rabbit_consumer, start_link,
 	 ConsumerArgs},
 	 permanent, ?MAX_WAIT, worker, [spark_rabbit_consumer]}
