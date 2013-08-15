@@ -37,18 +37,15 @@ start_link()->
 start()-> start_link().
 
 start_link(Name, Args)->
-   start(Name, Args).
-   
-start_link(Args0)-> 
-    error_logger:info_msg("Starting *** ~p *** cluster ~p~n",
-    [?SERVER, Args0]),
-    [Name, Args] = Args0,
-    error_logger:info_msg("Register *** ~p *** cluster with name ~p~n",
+    error_logger:info_msg("Register ~p cluster with name ~p~n",
     [?SERVER, Name]),
     gen_server_cluster:start(Name, ?SERVER, Args, []).
+   
+start_link(Args)-> 
+    start_link(?SERVER, Args).
   	
 start(Name, Args) ->
-    start_link([Name, Args]).
+    start_link(Name, Args).
    
 send(Name, Text) ->
     gen_server:call({global, Name}, {send, {Name, node(), Text}}).
@@ -86,9 +83,6 @@ init(Args) ->
     	[?SERVER, Args]),
     {ok, #state{}}.
     
-init() ->
-    error_logger:info_msg("Initialization of ~p~n",[?SERVER]),
-    init([]).
 
 handle_call({send, {Name, Node, Text}}, _From, _State) ->
     F = fun(State) ->

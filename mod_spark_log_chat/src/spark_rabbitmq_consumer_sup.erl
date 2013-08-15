@@ -3,6 +3,7 @@
 
 %% API
 -export([start_link/0, start_link/1]).
+-export([stop_cluster/0, stop_server/0]).
 
 %% Supervisor callbacks
 -export([init/0,init/1]).
@@ -30,6 +31,17 @@ start_link() ->
 start_link(Args) ->
     error_logger:info_msg("Starting ~p cluster ~n",[?SERVER]),
     supervisor:start_link({global, ?SERVER}, ?MODULE, Args).
+
+stop_cluster()->
+    error_logger:info_msg("Stopping and unloading ~p cluster ~n",
+    		[?SERVER]),
+    supervisor:terminate_child(self(), spark_rabbit_consumer_chat).
+
+stop_server()->
+    error_logger:info_msg("Stopping and unloading ~p cluster ~n",
+    		[?SERVER]),
+    supervisor:terminate_child(self(),spark_rabbitmq_consumer).
+
 
 %% ===================================================================
 %% Supervisor callbacks
