@@ -24,10 +24,12 @@
 %% ===================================================================
 
 start_link() ->
-    supervisor2:start_link({local, ?SERVER}, ?MODULE, 
-	[{?CONFPATH, ?AMQP_CONF, ?REST_CONF}]).
+	Args = [{?CONFPATH, ?AMQP_CONF, ?REST_CONF}],
+	start_link(Args).
+	 
 start_link(Args) ->
-    supervisor2:start_link({local, ?SERVER}, ?MODULE, [Args]).
+    error_logger:info_msg("Starting ~p cluster ~n",[?SERVER]),
+    supervisor2:start_link({local, ?SERVER}, ?MODULE, Args).
 
 %% ===================================================================
 %% Supervisor callbacks
@@ -35,17 +37,26 @@ start_link(Args) ->
 
 init()->
     ensure_dependency_started(),
-    ConfPath = application:get_env(?SERVER, conf_path,?CONFPATH),
-    AmqpConf = application:get_env(?SERVER, amqp_conf,?AMQP_CONF),
-    RestConf = application:get_env(?SERVER, rest_conf, ?REST_CONF),
+    ConfPath = app_config_util:app_get_env(?SERVER, conf_path,?CONFPATH),
+    AmqpConf = app_config_util:app_get_env(?SERVER, amqp_conf,?AMQP_CONF),
+    RestConf = app_config_util:app_get_env(?SERVER, rest_conf, ?REST_CONF),
     ConsumerArgs = {ConfPath, AmqpConf, RestConf},
     init([ConsumerArgs]).
 
+
 init(ConsumerArgs) ->
 %    error_logger:info_msg("[~p] Starting with args ~p", [?SERVER, ConsumerArgs]),
-    {ok, {{one_for_one, 10, 10}, child_specs(ConsumerArgs)}}.
+	ShouldCluster = 
+	     app_config_util:app_get_env(?SERVER, conf_path, true),	
+    {ok, {{one_for_one, 10, 10}, 
+    	  child_specs(ShouldCluster, ConsumerArgs)}}.
 
-child_specs(ConsumerArgs)->
+child_specs(true, ConsumerArgs)->
+    [{spark_rabbit_consumer_chat, {spark_rabbit_consumer_chat, start_link,
+	 ConsumerArgs},
+	 permanent, ?MAX_WAIT, supervisor, [spark_rabbit_consumer_chat]}
+	];  
+child_specs(false, ConsumerArgs)->
     [{spark_rabbitmq_consumer, {spark_rabbit_consumer, start_link,
 	 ConsumerArgs},
 	 permanent, ?MAX_WAIT, worker, [spark_rabbit_consumer]}
