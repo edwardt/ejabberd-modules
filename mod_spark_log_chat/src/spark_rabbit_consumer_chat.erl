@@ -32,7 +32,7 @@
 
 start_link()->
 	Args = [{?CONF_PATH, ?CONF_AMQP, ?CONF_REST}],
-	start(?SERVER, Args).
+	start_link(?SERVER, Args).
 	
 start()-> start_link().
 
