@@ -15,7 +15,7 @@ builddeps:
 
 compile:
 	./rebar -vvv compile
-
+	
 generate:
 	./copy_all_deps_ebeam.sh
 	\rm -f ebeam.tar.gz

@@ -109,7 +109,9 @@ handle_cast(_Msg, State) ->
 handle_info(_Info, State) ->
     {noreply, State}.
 
-terminate(_Reason, _State) ->
+terminate(Reason, _State) ->
+	error_logger:info_msg("Termination of ~p with ~p~n",
+    	[?SERVER, Reason]),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->

@@ -21,7 +21,7 @@
                   inets,
                   crypto,
                   mochiweb,
-                  webmachine
+                  cowboy
                  ]},
   {mod, { presence_rest_api_app, []}},
   {env, []}

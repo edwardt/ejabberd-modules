@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script type="text/javascript">
+			function ready() {
+				if (!!window.Ejabberd Rest API) {
+					setupEjabberd Rest API();
+				} else {
+					document.getElementById('status').innerHTML =
+						"Sorry but your browser doesn't support the Ejabberd Rest API API";
+				}
+			}
+
+			function setupEjabberd Rest API() {
+				var source = new Ejabberd Rest API('/Ejabberd Rest API');
+
+				source.addEventListener('message', function(event) {
+					addStatus("server sent the following: '" + event.data + "'");
+					}, false);
+
+					source.addEventListener('open', function(event) {
+						addStatus('Ejabberd Rest API connected.')
+					}, false);
+
+					source.addEventListener('error', function(event) {
+						if (event.eventPhase == Ejabberd Rest API.CLOSED) {
+							addStatus('Ejabberd Rest API was closed.')
+						}
+					}, false);
+			}
+
+			function addStatus(text) {
+				var date = new Date();
+				document.getElementById('status').innerHTML
+				= document.getElementById('status').innerHTML
+				+ date + ": " + text + "<br/>";
+			}
+		</script>
+	</head>
+	<body onload="ready();">
+		Hi!
+		<div id="status"></div>
+	</body>
+</html>
