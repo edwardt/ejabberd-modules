@@ -22,13 +22,32 @@ get_connection_setting(ConfFList) ->
 	Host        = proplists:get_value(host, AmqpConfList, undefined),
 	Port        = proplists:get_value(port, AmqpConfList,5672),
 
+	UserName 	= rabbit_farm_util:ensure_binary(UserName),
+	VHost 		= rabbit_farm_util:ensure_binary(VirtualHost),
+	
+	case proplists:get_value(isnetworkconnect, AmqpConfList, true) of
+		 true -> network_connect(UserName, Password, VHost, Host, Port);	
+		 false -> direct_connect(UserName, Password, VHost, Host, Port)
+	end.
+
+network_connect(UserId, Password, Vhost, Host, Port)->
 	#amqp_params_network{
-				username     = rabbit_farm_util:ensure_binary(UserName),
+				username     = UserId,
 				password     = Password,
-				virtual_host = rabbit_farm_util:ensure_binary(VirtualHost),
+				virtual_host = Vhost,
 				host         = Host,
 				port         = Port
 	 }.
+	 		 
+direct_connect(UserId, Password, Vhost, Host, Port)->
+	#amqp_params_direct{
+				username     = UserId,
+				password     = Password,
+				virtual_host = Vhost,
+				node         = node(),
+				client_properties  = []
+	 }.		 
+	 
 -spec get_exchange_setting(list())-> #'exchange.declare'{}.
 get_exchange_setting(ConfList)->
   {ok, ExchangeConfList} = app_config_util:config_val(amqp_exchange, ConfList, []),
