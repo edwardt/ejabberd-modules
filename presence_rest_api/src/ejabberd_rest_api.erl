@@ -4,17 +4,26 @@
 
 %% API.
 -export([start/0,
-		 stop/0,
-		 start/2
+		 stop/0
 ]).
 
 %% API.
 
 start() ->
-    Apps = [crypto, ranch, cowboy, ejabberd_rest_api],
+    Apps = [
+    		crypto,
+    		ranch, 
+    		cowboy, 
+    		ejabberd_rest_api
+    	 ],
     app_util:start_apps(Apps).
     
     
 stop()->
-    Apps = [ejabberd_rest_api, cowboy, ranch, crypto],
+    Apps = [
+    		ejabberd_rest_api,
+    		cowboy, 
+    		ranch, 
+    		crypto
+    	 ],
     app_util:stop_apps(Apps).

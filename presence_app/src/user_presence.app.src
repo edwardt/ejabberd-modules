@@ -1,8 +1,8 @@
-{application, user_presence,
+{application, user_presence_app,
  [
-  {description, ""},
+  {description, "Users mangement and activity gateway"},
   {vsn, "1"},
-  {registered, []},
+  {registered, [spark_social_stream]},
   {applications, [
                   kernel,
                   stdlib
@@ -10,14 +10,22 @@
   {modules, [
   			app_util,
   			app_config_util,
-			  user_webpresence_model,
-        online_user_json_model,
+			user_webpresence_model,
+        	online_user_json_model,
   			user_presence_db,
-        user_presence_api_sup,
+        	user_presence_api_sup,
   			user_presence_app,
   			user_presence_sup,
   			user_presence_srv
   ]},              
   {mod, { user_presence_app, []}},
-  {env, []}
+  {env, [
+  	{conf_file, ".\priv\spark_social_stream.config"},
+  	{cluster_master, 'ejabberd@lastgejabberd302'},
+ 	{environment, 'chat.dev0.spark.net'},
+  	{refresh_interval, 5000},
+ 	{interface, "eth0"},
+ 	{ip, "127.0.0.1"},
+ 	{port, 8000}
+  ]}
  ]}.

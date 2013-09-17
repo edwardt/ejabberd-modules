@@ -95,7 +95,7 @@ ensure_dependency_started(Proc) ->
 
 -spec start(string(), list()) -> ok | {error, term()}.
 start(Host, Opts) ->
-    ?INFO_MSG(" ~p  ~p~n", [Host, Opts]),
+    ?INFO_MSG("Module ~p start with  ~p  ~p~n", [?SERVER, Host, Opts]),
     Proc = gen_mod:get_module_proc(Host, ?PROCNAME),
     ChildSpec = {?SERVER,
        {?MODULE, start_link, [Host, Opts]},

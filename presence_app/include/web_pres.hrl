@@ -6,4 +6,5 @@
 	token :: pos_integer()
 }).
 
+%-export_records([web_pres]).
 -endif.

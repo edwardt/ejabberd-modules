@@ -4,7 +4,7 @@
 -export([reach_node/1, get_cluster_head/0,
 		 join/1, join/2,
 		 join_as_slave/0,
-     join_as_master/1,
+     	 join_as_master/1,
 		 sync_node/1
 		]).
 
@@ -25,7 +25,7 @@
 -define(SERVER, ?MODULE).
 -define(COPY_TYPE, ram_copies).
 -define(TAB_TIMEOUT, 1000).
--define(ConfPath,"conf").
+-define(ConfPath,"priv").
 -define(ConfFile, "spark_ejabberd_cluster.config").
 
 -record(state,{

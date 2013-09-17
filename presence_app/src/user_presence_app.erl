@@ -22,9 +22,13 @@ stop()->
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    Args = {?ConfPath, ?ConfFile},
+    Args = get_configs(),
     user_presence_api_sup:start_link(Args),
     user_presence_sup:start_link(Args).
 
 stop(_State) ->
     ok.
+ 
+get_configs()->
+	application:get_all_env(?SERVER).
+	

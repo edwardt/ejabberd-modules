@@ -2,11 +2,11 @@
 -behaviour(gen_server).
 
 -export([list_online/1
-	 ,list_online_count/1
-	 ,list_online_count/2
-	 ,list_all_online/1
-	 ,list_all_online/2
-         ,generate_token/0]).
+	 	,list_online_count/1
+	 	,list_online_count/2
+	 	,list_all_online/1
+	 	,list_all_online/2
+     	,generate_token/0]).
 
 -export([ping/0]).
 
@@ -59,7 +59,7 @@ init({Path, File})->
   {ok, Interval} = app_config_util:config_val(refresh_interval, ConfList,-1),
   {ok, Cluster} = app_config_util:config_val(cluster_head, ConfList,undefined),
   {ok, Environment} = app_config_util:config_val(environment, ConfList,undefined),
-  ok = create_user_webpresence(),
+  %ok = create_user_webpresence(),
   erlang:send_after(Interval, self(), {query_all_online}),
   erlang:send_after(Interval, self(), {list_all_online, Start}),
 

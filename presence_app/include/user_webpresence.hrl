@@ -8,5 +8,12 @@
 	token :: pos_integer()
 }).
 
+%-record(social_presence, {
+%	memberId :: bitstring(),
+%	brandId :: bitstring(),
+%	presenceType :: bitstring(),
+%	since ::	bitstring(),
+%	lastseend :: bitstring()
+%}}.
 
 -endif.

@@ -6,20 +6,21 @@
   {applications, [
                   kernel,
                   stdlib,
-		  spark_app_config
+		  		  spark_app_config
                  ]},
   {modules, {
-		app_util,
-		app_config_util,
+			app_util,
+			app_config_util,
        		chat_message_model,
-		spark_im_mail_message_model,
-		xmerl_ucs,
+			spark_im_mail_message_model,
+			spark_jid,
+			xmerl_ucs,
 	       	date_util,
-		password,
-		mongreljson,
-		rabbit_farm_util,
-		mod_spark_log_chat, 
-		spark_amqp_session,
+			password,
+			mongreljson,
+			rabbit_farm_util,
+			mod_spark_log_chat, 
+			spark_amqp_session,
 	     	mod_spark_log_chat_app,
 	     	mod_spark_log_chat_sup
 	     }},

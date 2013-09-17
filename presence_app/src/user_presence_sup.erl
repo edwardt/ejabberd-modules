@@ -3,7 +3,7 @@
 -behaviour(supervisor).
 
 %% API
--export([start_link/0, start_link/1]).
+-export([start_link/1]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -18,7 +18,6 @@
 %% API functions
 %% ===================================================================
 
-start_link() -> start_link([{?ConfPath, ?ConfFile}]).
 start_link(Args) ->
     error_logger:info_msg("Starting ~p supervisor with args ~p", [?MODULE, Args]),
     supervisor:start_link({local, ?SERVER}, ?MODULE, [Args]).
@@ -39,11 +38,12 @@ init(Args) ->
 			parse_trans,
 			json_rec,
 			inets,
-			mochiweb,
-			webmachine,
+    		ranch, 
+    		cowboy, 
 			mnesia],
  	app_util:start_apps(Apps),
- 	
+ 	Opts1 = 
+ 	Opts2 = 
 	Children = lists:flatten([
     	?CHILD(user_presence_srv, worker, Args),
     	?CHILD(user_presence_db, worker, Args)
