@@ -197,7 +197,10 @@ log_packet_receive(_Jid, From, To, Packet) ->
 -spec log_packet(jid(), jid(), xmlelement(), string())-> ok | {error, term()}.
 log_packet(From, To, Packet = {xmlelement, "message", Attrs, _Els}, Host) ->
     ChatType = xml:get_attr_s("type", Attrs),
-    handle_chat_msg(ChatType, From, To, Packet, Host);
+    FromJid = get_jid(From),
+    ToJid = get_jid(To),
+        
+    handle_chat_msg(ChatType, FromJid, ToJid, Packet, Host);
 log_packet(_From, _To, _Packet, _Host) ->
     ok.
 -spec handle_chat_msg(atom(),jid(), jid(), xmlelement(), string()) -> ok | {error, term()}.
@@ -332,6 +335,18 @@ get_body(Format, Packet) ->
 get_thread(Format, Packet) ->
   R = parse_body(Format, xml:get_path_s(Packet, [{elem, "thread"}, cdata])),
   ensure_binary(R).
+  
+-spec get_jid(string()) -> string().
+get_jid(Jid) ->
+  case spark_jid:split_jid(Jid) of 
+  		[_, RealJid, _,CommunityId] -> 
+  			spark_jid:reconstruct_spark_jid(RealJid, CommunityId);
+  		[RealJid,_,CommunityId] -> 
+  		    spark_jid:reconstruct_spark_jid(RealJid, CommunityId);
+  		[A,B] -> [A,B];
+  		Else -> Else  
+  end.
+
 -spec parse_body(atom, false|xmlelement())->string().
 parse_body(_Format, false) -> "";
 parse_body(Format, Text) -> escape(Format, Text).
