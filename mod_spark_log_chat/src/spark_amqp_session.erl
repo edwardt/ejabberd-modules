@@ -288,8 +288,6 @@ handle_info(#'channel.flow'{active = Active}, State) ->
 	 end,
   {noreply, NewState};
 
-
-
 handle_info({'Down', _Ref, process, What, Why}, State)-> 
   {noreply, {connection_down, What, Why}, State};
 
@@ -304,8 +302,10 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
+-spec throttle_self(true|false) -> ok.
 throttle_self(Flag) -> rest_if_need(Flag).
 
+-spec rest_if_need(true|atom()) -> ok.
 rest_if_need(true)-> timer:sleep(?SLEEP);
 rest_if_need(_)-> ok.
 
@@ -354,6 +354,7 @@ amqp_channel(AmqpParams) ->
     Error -> Error
   end.
 
+-spec maybe_new_pid(atom(), atom()) -> {ok, pid()} | {error, term()}.
 maybe_new_pid(Group, StartFun) ->
   case pg2:get_closest_pid(Group) of
     {error, {no_such_group, _}} ->
@@ -376,16 +377,15 @@ publish_fun(CallType, Exchange,Routing_key, Message, ContentType, Mod) ->
   rabbit_farm_util:get_fun(CallType, 
       #'basic.publish'{ exchange   = Exchange,
                   routing_key = Routing_key},
-      
       #amqp_msg{props = #'P_basic'{content_type = ContentType,
-                  message_id=message_id()}, 
-              
+                  message_id=message_id()},          
       payload = Message}).
+      
 -spec message_id()-> binary().
 message_id()->
   uuid:uuid4().
 
--spec ensure_load(atom(), trye|false)-> {ok, loaded} | {error, term()}.
+-spec ensure_load(atom(), true|false)-> {ok, loaded} | {error, term()}.
 ensure_load(_, true) -> {ok, loaded};
 ensure_load(Mod, _) when is_atom(Mod)-> 
   app_util:ensure_loaded(Mod). 
