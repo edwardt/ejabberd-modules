@@ -115,41 +115,23 @@ start_vhs(Host, [{_VHost, _Opts}| Tail]) ->
     start_vhs(Host, Tail).
 start_vh(Host, Opts) ->
     Format = gen_mod:get_opt(format, Opts, ?DEFAULT_FORMAT),
-    IdMap = gen_mod:get_opt(idMap, Opts, []),
-    populate_table(?TableName, IdMap),    
+    IdMap = gen_mod:get_opt(idMap, Opts, []), 
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
     #state{
         format = Format,
    	    idMap = IdMap
     	}.
-populate_table(Name, IdMap) when is_atom(Name)->
-	Tables = ets:all(),
-	
-	case lists:member(Name) of 
-		false -> {ok, {Name, already_exist}};
-		true -> 
-				true = ets:delete(Name),
-				populate_table2(Name, IdMap)
-	end;
-populate_table(_, _)->
-   {error, badarg}.
-	
-populate_table2(Name, IdMap)->
-   ?INFO_MSG("Store idMap ~p into ets table", [IdMap]),
-   Tab = ets:new(Name, [set, named_table, public ]),
-   lists:map(fun(L)-> true = ets:insert(Tab, L) end, IdMap).
 
-lookup_brandid(Jid)->
+lookup_brandid(Jid, IdMap)->
    UserName = jlib:jid_to_string(Jid),
-   lookup_brandid_from_user(id_map, UserName). 
+   lookup_brandid_from_user(id_map, UserName, IdMap). 
 
-lookup_brandid_from_user(Name, UserName) when is_atom(Name) ->
+lookup_brandid_from_user(Name, UserName, IdMap) when is_atom(Name) ->
    [MemberId, CommunityId] = split_composite_id(UserName),
-   C = case ets:match_object(Name,{'$1',CommunityId,'$2'}) of
-    	[{_,_,B}] -> B;
-    	[] -> [];
-	R -> []
+   C = case list:keyfind(CommunityId, 1 , IdMap ) of
+   		false -> [];
+   	    { _, _, B} -> B
    end,
    ?INFO_MSG("Found BrandId ~p", [C]),
    C. 
@@ -167,7 +149,6 @@ split_composite_id(UserName) when is_list(UserName)->
 	[] -> [UserName, ""];	
 	R -> [R, ""]
    end.
-
 
 
 -spec init([any()]) -> {ok, pid()} | {error, tuple()}.
@@ -299,12 +280,12 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
    User = get_user_from_jid(FromJid),
    [From, _] = split_composite_id(User),
 %   FromBrandId = lookup_brandid(User),
-   FromBrandId = lookup_brandid_from_user(?TableName, User),
+   FromBrandId = lookup_brandid_from_user(?TableName, User, IdMap),
 %get_memberId(FromJid, IdMap),
    UserB = get_user_from_jid(ToJid),
    [To, _] = split_composite_id(UserB),
 %   ToBrandId= lookup_brandid(UserB),
-   ToBrandId = lookup_brandid_from_user(?TableName, UserB),
+   ToBrandId = lookup_brandid_from_user(?TableName, UserB, IdMap),
 %get_memberId(ToJid, IdMap),
     Format = ?DEFAULT_FORMAT,
     TimeStamp = app_util:get_printable_timestamp(),
@@ -321,8 +302,8 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
     }.
 
 -spec get_memberId(jid(), [tuple()]) ->[string()].
-get_memberId(Jid, _IdMap)->
-    lookup_brandid(Jid).
+get_memberId(Jid, IdMap)->
+    lookup_brandid(Jid,IdMap).
 %   UserName = jlib:jid_to_string(Jid),
 %   [MemberId, BrandId] = get_login_data(UserName, IdMap),
 %   [MemberId, BrandId].
