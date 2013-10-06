@@ -125,6 +125,7 @@ start_vh(Host, Opts) ->
     	}.
 populate_table(Name, IdMap) when is_atom(Name)->
 	Tables = ets:all(),
+	
 	case lists:member(Name) of 
 		false -> {ok, {Name, already_exist}};
 		true -> 

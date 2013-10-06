@@ -1,4 +1,4 @@
-{application, user_presence_app,
+{application, user_presence,
  [
   {description, "Users mangement and activity gateway"},
   {vsn, "1"},
