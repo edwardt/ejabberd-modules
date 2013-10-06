@@ -123,13 +123,21 @@ start_vh(Host, Opts) ->
         format = Format,
    	    idMap = IdMap
     	}.
-
 populate_table(Name, IdMap) when is_atom(Name)->
-   ?INFO_MSG("Store idMap ~p into ets table", [IdMap]),
-   Tab = ets:new(Name, [set, named_table]),
-   lists:map(fun(L)-> true = ets:insert(Tab, L) end, IdMap);
+	Tables = ets:all(),
+	case lists:member(Name) of 
+		false -> {ok, {Name, already_exist}};
+		true -> 
+				true = ets:delete(Name),
+				populate_table2(Name, IdMap)
+	end;
 populate_table(_, _)->
-   {error, badarg}.   
+   {error, badarg}.
+	
+populate_table2(Name, IdMap)->
+   ?INFO_MSG("Store idMap ~p into ets table", [IdMap]),
+   Tab = ets:new(Name, [set, named_table, public ]),
+   lists:map(fun(L)-> true = ets:insert(Tab, L) end, IdMap).
 
 lookup_brandid(Jid)->
    UserName = jlib:jid_to_string(Jid),
@@ -145,8 +153,14 @@ lookup_brandid_from_user(Name, UserName) when is_atom(Name) ->
    ?INFO_MSG("Found BrandId ~p", [C]),
    C. 
 
-
-split_composite_id(UserName)-> 
+split_composite_id(UserName) when is_binary(UserName) ->
+  UserNameStr = binary_to_list(UserName),
+  case split_composite_id(UserNameStr) of
+  		[A,B] -> [list_to_binary(A), list_to_binary(B)];
+  		Else -> [<<"">>,<<"">>]
+  end;
+  
+split_composite_id(UserName) when is_list(UserName)-> 
    case re:split(UserName,"-")	of
 	[MemberId, CommunityId]->  [MemberId, CommunityId];
 	[] -> [UserName, ""];	
