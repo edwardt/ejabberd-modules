@@ -12,6 +12,8 @@ Y = "spark_amqp.config".
 Z = lists:concat([X,"/",Y]).
 l(amqp_gen_consumer).
 l(supervisor2).
+code:add_path("ebin").
+
 l(spark_rabbitmq_consumer_sup).
 l(spark_rabbit_consumer).
 l(gen_server2).

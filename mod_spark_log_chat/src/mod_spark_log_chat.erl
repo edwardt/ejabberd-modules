@@ -259,7 +259,8 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
     Format = get_im_transform_format(Type),
     Subject = get_subject(Format, Packet),
     Body = get_body(Format, Packet),
-    Thread = get_thread(Format, Packet),
+   % Thread = get_thread(User, Server, Resource, Format, Packet),
+ 	Thread = get_thread(FromJid), 
     ?INFO_MSG("Type ~p Extracted Subject ~p Body ~p Thread ~p",[Type, Subject, Body, Thread]),
     case <<Subject/binary,Body/binary>> of
         <<>> -> %% don't log empty messages
@@ -288,17 +289,19 @@ parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap)->
    ToBrandId = lookup_brandid_from_user(?TableName, UserB, IdMap),
 %get_memberId(ToJid, IdMap),
     Format = ?DEFAULT_FORMAT,
-    TimeStamp = app_util:get_printable_timestamp(),
+    %TimeStamp = app_util:get_printable_timestamp(),
+    TimeStamp  = os:timestamp(),
+	TimeStamp0 = iso8601:format(TimeStamp),
     #chat_message{
-    	from = From,
-		to = To,
-    	brandId = ToBrandId,
-    	type = Type,
-    	format = Format,
-    	subject = Subject,
-    	body = Body,
-    	thread = Thread,
-    	time_stamp = TimeStamp
+    	from = ensure_binary(From),
+		to = ensure_binary(To),
+    	brandId = ensure_binary(ToBrandId),
+    	type = ensure_binary(Type),
+    	format = ensure_binary(Format),
+    	subject = ensure_binary(Subject),
+    	body = ensure_binary(Body),
+    	thread = ensure_binary(Thread),
+    	time_stamp = ensure_binary(TimeStamp0)
     }.
 
 -spec get_memberId(jid(), [tuple()]) ->[string()].
@@ -327,10 +330,17 @@ get_body(Format, Packet) ->
   R = parse_body(Format, xml:get_path_s(Packet, [{elem, "body"}, cdata])),
   ensure_binary(R).
 
--spec get_thread(atom, xmlelement())-> string().
+%-spec get_thread(atom, xmlelement())-> string().
 get_thread(Format, Packet) ->
   R = parse_body(Format, xml:get_path_s(Packet, [{elem, "thread"}, cdata])),
   ensure_binary(R).
+%-spec get_thread(tuple())-> string().
+get_thread(Jid) ->
+  {User, Server, Resource} = spark_jid:get_usr(Jid),
+  R = ejabberd_sm:get_session_pid(User, Server, Resource), 
+  ensure_binary(R).
+
+  
   
 -spec get_jid(string()) -> string().
 get_jid(Jid) ->
