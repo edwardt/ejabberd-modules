@@ -37,8 +37,12 @@
 -define(ConfPath,"conf").
 -define(ConfFile, "spark_amqp.config").
 -define(TableName, id_map).
+-define(PUBMOD, 'spark_rabbit_publisher').
+-define(FUNC, publish).
+-define(TIMEOUT, 2000).
 
 -record(state, {
+	publisher = [],
 	idMap =[],
 	format = ?DEFAULT_FORMAT
 }).
@@ -114,14 +118,28 @@ start_vhs(Host, [{_VHost, _Opts}| Tail]) ->
     ?INFO_MSG("start_vhs ~p  ~p~n", [Host, [{_VHost, _Opts}| Tail]]),
     start_vhs(Host, Tail).
 start_vh(Host, Opts) ->
+    Publisher = gen_mod:get_opt(publisher, Opts, ?DEFAULT_FORMAT),
     Format = gen_mod:get_opt(format, Opts, ?DEFAULT_FORMAT),
     IdMap = gen_mod:get_opt(idMap, Opts, []), 
     ejabberd_hooks:add(user_send_packet, Host, ?MODULE, log_packet_send, 55),
     ejabberd_hooks:add(user_receive_packet, Host, ?MODULE, log_packet_receive, 55),
+    ok = is_reachable(Publisher),
     #state{
+	    publisher = Publisher,
         format = Format,
    	    idMap = IdMap
     	}.
+
+is_reachable([]) -> ok;
+is_reachable([H|T]) ->
+  {ok, reachable} = is_node_reachable(H),  	
+  is_reachable(T).
+
+is_node_reachable('pong') -> {ok, reachable}; 
+is_node_reachable('pang') -> {error, unreachable};
+is_node_reachable(Name) when is_atom(Name) ->
+   error_logger:info_msg("Going to ping node ~p",[Name]),
+   is_node_reachable(net_adm:ping(Name)).  
 
 lookup_brandid(Jid, IdMap)->
    UserName = jlib:jid_to_string(Jid),
@@ -217,7 +235,8 @@ handle_call({write_packet, Type, FromJid, ToJid, Packet, Host}, _From, State) ->
   Start = os_now(),
   IdMap = State#state.idMap,
   ?INFO_MSG("Start publish message to rabbitmq: start ~p ", [Start]),
-  Reply = write_packet(Type, FromJid, ToJid, Packet, Host, IdMap),
+  Node = get_publisher_node(State),
+  Reply = write_packet(Type, FromJid, ToJid, Packet, Host, IdMap, Node),
   End = os_now(),
   ?INFO_MSG("Published packet to rabbitmq: start ~p end ~p", [Start, End]),
   {reply, Reply, State};
@@ -254,8 +273,8 @@ terminate(Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
--spec write_packet(jid(), jid(), string(), string(), string(),[tuple()]) -> ok | {error, term()}.  
-write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
+-spec write_packet(jid(), jid(), string(), string(), string(),[tuple()], atom()) -> ok | {error, term()}.  
+write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap, Node) ->
     Format = get_im_transform_format(Type),
     Subject = get_subject(Format, Packet),
     Body = get_body(Format, Packet),
@@ -269,7 +288,7 @@ write_packet(Type, FromJid, ToJid, Packet, _Host, IdMap) ->
         _ ->
         	MessageItem = parse_message(FromJid, ToJid, Type, Subject, Body, Thread, IdMap), 
         	?INFO_MSG("Will publish Message Payload ~p ", [MessageItem]),
-        	post_to_rabbitmq(MessageItem)
+        	post_to_rabbitmq(MessageItem, Node)
     end.
  
 get_user_from_jid(From)->
@@ -315,10 +334,24 @@ get_memberId(Jid, IdMap)->
 get_im_transform_format(_)->
    ?DEFAULT_FORMAT.
 
--spec post_to_rabbitmq(chat_message())-> ok | {error, term()}.
-post_to_rabbitmq(#chat_message{} = MessageItem) ->
+-spec post_to_rabbitmq(chat_message(), atom())-> ok | {error, term()}.
+post_to_rabbitmq(#chat_message{} = MessageItem, Node) ->
 	Payload = ensure_binary(MessageItem),
-	mod_spark_rabbitmq:publish(call, chat_message_model, Payload).
+	rpc:async_call(Node, ?PUBMOD, ?FUNC, [MessageItem]).
+	%mod_spark_rabbitmq:publish(call, chat_message_model, Payload).
+
+
+publish_cast(Node, MessageItem) ->
+	rpc:async_call(Node, ?PUBMOD, ?FUNC, [MessageItem]).
+
+publish_call(Node, MessageItem) ->
+	rpc:call(Node, ?PUBMOD, ?FUNC, [MessageItem], ?TIMEOUT).
+
+get_publisher_node(State)->
+	Nodes = State#state.publisher,
+	Length = length(Nodes),
+	Index = random:uniform(Length),
+	lists:nth(Index, Nodes).
 
 -spec get_subject(atom, xmlelement())-> string().
 get_subject(Format, Packet) ->
